@@ -1,0 +1,35 @@
+{
+  "name": "omb-accounting-system",
+  "version": "1.0.0",
+  "description": "Microservices-based accounting system with micro-frontend architecture",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run test:all",
+    "test:all": "npm run test:frontend && npm run test:backend",
+    "test:frontend": "cd frontend && npm test",
+    "test:backend": "cd backend && npm test",
+    "dev": "npm run dev:frontend & npm run dev:backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:backend": "npm run dev --prefix backend",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "npm run build --prefix frontend",
+    "build:backend": "npm run build --prefix backend"
+  },
+  "keywords": [
+    "accounting",
+    "microservices",
+    "micro-frontend",
+    "nodejs",
+    "tdd"
+  ],
+  "author": "OMB Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "lerna": "^7.1.0"
+  },
+  "workspaces": [
+    "frontend/*",
+    "backend/*"
+  ]
+}

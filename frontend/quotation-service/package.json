@@ -1,0 +1,53 @@
+{
+  "name": "@omb/quotation-service-frontend",
+  "version": "1.0.0",
+  "description": "Quotation management micro-frontend service",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "dev": "webpack serve --mode development",
+    "build": "webpack --mode production",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix"
+  },
+  "dependencies": {
+    "axios": "^1.4.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.22.0",
+    "@babel/preset-env": "^7.22.0",
+    "@testing-library/dom": "^9.3.0",
+    "@testing-library/jest-dom": "^5.16.0",
+    "babel-jest": "^29.5.0",
+    "babel-loader": "^9.1.0",
+    "css-loader": "^6.11.0",
+    "eslint": "^8.42.0",
+    "html-webpack-plugin": "^5.6.3",
+    "jest": "^29.5.0",
+    "jest-environment-jsdom": "^29.5.0",
+    "jest-fetch-mock": "^3.0.3",
+    "style-loader": "^3.3.4",
+    "webpack": "^5.88.0",
+    "webpack-cli": "^5.1.0",
+    "webpack-dev-server": "^4.15.2"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "setupFilesAfterEnv": [
+      "<rootDir>/src/tests/setup.js"
+    ],
+    "testMatch": [
+      "<rootDir>/src/**/*.test.js"
+    ],
+    "transform": {
+      "^.+\\.js$": "babel-jest"
+    },
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/tests/**",
+      "!src/mocks/**"
+    ]
+  }
+}
