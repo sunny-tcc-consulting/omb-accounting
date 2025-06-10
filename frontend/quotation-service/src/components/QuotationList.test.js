@@ -4,7 +4,8 @@ const QuotationList = require('./QuotationList');
 // Mock the quotation service
 jest.mock('../services/quotationService', () => ({
   quotationService: {
-    getQuotations: jest.fn()
+    getQuotations: jest.fn(),
+    createQuotation: jest.fn()
   }
 }));
 
@@ -269,6 +270,188 @@ describe('QuotationList Component', () => {
     await waitFor(() => {
       expect(screen.getByText('No quotations match your search')).toBeInTheDocument();
       expect(screen.queryByText('Customer: John Doe')).not.toBeInTheDocument();
+    });
+  });
+
+  // Create quotation functionality tests
+  test('should render "Create New Quotation" button', async () => {
+    // Arrange
+    quotationService.getQuotations.mockResolvedValue([]);
+    
+    // Act
+    const quotationList = new QuotationList();
+    quotationList.render(document.body);
+    
+    // Assert
+    await waitFor(() => {
+      expect(screen.getByText('Create New Quotation')).toBeInTheDocument();
+    });
+  });
+
+  test('should show create quotation form when button is clicked', async () => {
+    // Arrange
+    quotationService.getQuotations.mockResolvedValue([]);
+    
+    // Act
+    const quotationList = new QuotationList();
+    quotationList.render(document.body);
+    
+    await waitFor(() => {
+      expect(screen.getByText('Create New Quotation')).toBeInTheDocument();
+    });
+    
+    const createButton = screen.getByText('Create New Quotation');
+    createButton.click();
+    
+    // Assert
+    await waitFor(() => {
+      expect(screen.getByText('New Quotation')).toBeInTheDocument();
+      expect(screen.getByLabelText('Customer Name')).toBeInTheDocument();
+      expect(screen.getByText('Items')).toBeInTheDocument(); // Changed from getByLabelText to getByText
+      expect(screen.getByText('Save Quotation')).toBeInTheDocument();
+      expect(screen.getByText('Cancel')).toBeInTheDocument();
+    });
+  });
+
+  test('should validate required fields in create form', async () => {
+    // Arrange
+    quotationService.getQuotations.mockResolvedValue([]);
+    
+    // Act
+    const quotationList = new QuotationList();
+    quotationList.render(document.body);
+    
+    await waitFor(() => {
+      expect(screen.getByText('Create New Quotation')).toBeInTheDocument();
+    });
+    
+    const createButton = screen.getByText('Create New Quotation');
+    createButton.click();
+    
+    await waitFor(() => {
+      expect(screen.getByText('Save Quotation')).toBeInTheDocument();
+    });
+    
+    // Trigger form submission directly
+    const form = document.querySelector('#quotation-form');
+    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+    form.dispatchEvent(submitEvent);
+    
+    // Assert
+    await waitFor(() => {
+      expect(screen.getByText('Customer name is required')).toBeInTheDocument();
+      expect(screen.getByText('At least one item is required')).toBeInTheDocument();
+    });
+  });
+
+  test('should create new quotation successfully', async () => {
+    // Arrange
+    const newQuotationData = {
+      customerName: 'New Customer',
+      items: [
+        { description: 'Item 1', quantity: 2, price: 100.00 }
+      ]
+    };
+    
+    const createdQuotation = {
+      id: 'Q005',
+      customerName: 'New Customer',
+      quotationDate: '2025-06-10',
+      expiryDate: '2025-07-10',
+      total: 200.00,
+      status: 'draft',
+      items: [
+        { description: 'Item 1', quantity: 2, price: 100.00, total: 200.00 }
+      ]
+    };
+    
+    quotationService.getQuotations.mockResolvedValue([]);
+    quotationService.createQuotation = jest.fn().mockResolvedValue(createdQuotation);
+    
+    // Act
+    const quotationList = new QuotationList();
+    quotationList.render(document.body);
+    
+    await waitFor(() => {
+      expect(screen.getByText('Create New Quotation')).toBeInTheDocument();
+    });
+    
+    const createButton = screen.getByText('Create New Quotation');
+    createButton.click();
+    
+    await waitFor(() => {
+      expect(screen.getByLabelText('Customer Name')).toBeInTheDocument();
+    });
+    
+    // Fill form
+    const customerNameInput = screen.getByLabelText('Customer Name');
+    customerNameInput.value = 'New Customer';
+    customerNameInput.dispatchEvent(new Event('input', { bubbles: true }));
+    
+    const itemDescInput = screen.getByLabelText('Item Description');
+    itemDescInput.value = 'Item 1';
+    itemDescInput.dispatchEvent(new Event('input', { bubbles: true }));
+    
+    const itemQtyInput = screen.getByLabelText('Quantity');
+    itemQtyInput.value = '2';
+    itemQtyInput.dispatchEvent(new Event('input', { bubbles: true }));
+    
+    const itemPriceInput = screen.getByLabelText('Price');
+    itemPriceInput.value = '100.00';
+    itemPriceInput.dispatchEvent(new Event('input', { bubbles: true }));
+    
+    const saveButton = screen.getByText('Save Quotation');
+    saveButton.click();
+    
+    // Assert
+    await waitFor(() => {
+      expect(quotationService.createQuotation).toHaveBeenCalledWith(
+        expect.objectContaining({
+          customerName: 'New Customer',
+          items: expect.arrayContaining([
+            expect.objectContaining({
+              description: 'Item 1',
+              quantity: 2,
+              price: 100.00
+            })
+          ])
+        })
+      );
+    });
+    
+    // Should return to list view and show new quotation
+    await waitFor(() => {
+      expect(screen.getByText('Customer: New Customer')).toBeInTheDocument();
+      expect(screen.getByText('$200.00')).toBeInTheDocument();
+    });
+  });
+
+  test('should cancel create quotation and return to list', async () => {
+    // Arrange
+    quotationService.getQuotations.mockResolvedValue([]);
+    
+    // Act
+    const quotationList = new QuotationList();
+    quotationList.render(document.body);
+    
+    await waitFor(() => {
+      expect(screen.getByText('Create New Quotation')).toBeInTheDocument();
+    });
+    
+    const createButton = screen.getByText('Create New Quotation');
+    createButton.click();
+    
+    await waitFor(() => {
+      expect(screen.getByText('Cancel')).toBeInTheDocument();
+    });
+    
+    const cancelButton = screen.getByText('Cancel');
+    cancelButton.click();
+    
+    // Assert
+    await waitFor(() => {
+      expect(screen.getByText('Create New Quotation')).toBeInTheDocument();
+      expect(screen.queryByText('New Quotation')).not.toBeInTheDocument();
     });
   });
 });

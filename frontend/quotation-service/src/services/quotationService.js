@@ -80,18 +80,44 @@ class QuotationService {
   }
 
   async createQuotation(quotationData) {
-    // Mock implementation
+    // Mock implementation - will be replaced with real API calls later
     return new Promise((resolve) => {
       setTimeout(() => {
+        // Generate new ID
+        const newId = 'Q' + String(Date.now()).slice(-3).padStart(3, '0');
+        
+        // Calculate totals for items
+        const itemsWithTotals = quotationData.items.map(item => ({
+          ...item,
+          total: item.quantity * item.price
+        }));
+        
+        // Calculate total amount
+        const total = itemsWithTotals.reduce((sum, item) => sum + item.total, 0);
+        
+        // Create new quotation
         const newQuotation = {
-          id: Date.now().toString(),
-          ...quotationData,
-          quotationDate: new Date().toISOString().split('T')[0],
-          expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          status: 'pending'
+          id: newId,
+          customerName: quotationData.customerName,
+          customerAddress: quotationData.customerAddress || '',
+          customerEmail: quotationData.customerEmail || '',
+          customerPhone: quotationData.customerPhone || '',
+          quotationDate: new Date().toISOString().split('T')[0], // Today's date
+          expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
+          items: itemsWithTotals,
+          subtotal: total,
+          taxRate: 0.08, // 8% tax
+          taxAmount: total * 0.08,
+          total: total * 1.08,
+          status: 'draft',
+          notes: quotationData.notes || '',
+          terms: quotationData.terms || 'Net 30',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         };
+        
         resolve(newQuotation);
-      }, 200);
+      }, 500); // Simulate API delay
     });
   }
 
