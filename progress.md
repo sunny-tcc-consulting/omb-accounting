@@ -21,18 +21,18 @@ This project implements a GUI frontend for a quotation management service with s
 ### 2. Feature Development Status
 - [x] Basic UI components and data display (Completed)
 - [x] Implement Quotation Creation Form (Completed)
-- [x] Develop Quotation Editing functionality (In Progress)
+- [x] Develop Quotation Editing functionality (Completed)
 - [x] Add Quotation Search and Filtering capabilities (Completed)
 - [x] Create Quotation Detail View (Completed)
 - [x] Implement Quotation Deletion confirmation (Completed)
-- [ ] Add Quotation Splitting functionality (In Progress)
+- [x] Add Quotation Splitting functionality (Completed)
 - [x] Enable Quotation to Invoice conversion (Completed)
 
 ### 3. Enhance Testing Coverage
 - [x] Unit tests for QuotationList component (Basic functionality)
 - [x] Integration tests for service interactions (Completed)
 - [x] End-to-end tests for complete workflow (Completed)
-- [x] Component testing with various data scenarios (Completed)(Completed)
+- [x] Component testing with various data scenarios (Completed)
 
 ## Issues Identified
 
@@ -173,6 +173,7 @@ This ensures all dependencies are correctly loaded.
 - [x] **New Feature**: Added integration tests for `quotationService.js`
 - [x] **New Feature**: Added E2E workflow test `QuotationWorkflow.test.js`
 - [x] **New Feature**: Added data scenario tests `QuotationList.scenarios.test.js`
+- [x] **Refactor**: Updated `quotationService.js` to stateful mock with Split support
 
 ## Notes
 - Following frontend-first approach with mocked backend APIs
