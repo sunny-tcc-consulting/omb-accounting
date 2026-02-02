@@ -98,8 +98,8 @@ class QuotationList {
   getCreateButtonHTML() {
     return `
       <div class="create-button-container">
-        <button class="create-quotation-btn" id="create-quotation-btn">
-          <span class="btn-icon">+</span>
+        <button class="create-quotation-btn" id="create-quotation-btn" aria-label="Create New Quotation">
+          <span class="btn-icon" aria-hidden="true">+</span>
           Create New Quotation
         </button>
       </div>
@@ -120,6 +120,7 @@ class QuotationList {
         <input 
           type="text" 
           placeholder="Search quotations..." 
+          aria-label="Search quotations"
           value="${this.searchTerm}"
           class="search-input"
           id="quotation-search"
@@ -175,7 +176,7 @@ class QuotationList {
       <div class="detail-item-row">
         ${this.splitMode ? `
           <div class="detail-item-select">
-            <input type="checkbox" class="split-checkbox" data-index="${index}" ${this.selectedSplitItems.has(index) ? 'checked' : ''}>
+            <input type="checkbox" class="split-checkbox" data-index="${index}" ${this.selectedSplitItems.has(index) ? 'checked' : ''} aria-label="Select item ${item.description || item.itemDescription || 'Item'}">
           </div>
         ` : ''}
         <div class="detail-item-desc">${item.description || item.itemDescription || 'Item'}</div>
@@ -246,11 +247,18 @@ class QuotationList {
     return `$${amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
   }
 
+  /**
+   * Handles switching back to the list view
+   */
   handleBackToList() {
     this.selectedQuotation = null;
     this.updateDisplay();
   }
 
+  /**
+   * Handles the deletion of a quotation
+   * Shows confirmation dialog and updates list on success
+   */
   async handleDeleteQuotation() {
     if (!this.selectedQuotation) return;
 
@@ -316,7 +324,7 @@ class QuotationList {
             />
           </div>
           <div class="form-group">
-            <button type="button" class="remove-item-btn" data-item-index="${index}">Remove</button>
+            <button type="button" class="remove-item-btn" data-item-index="${index}" aria-label="Remove item ${index + 1}">Remove</button>
           </div>
         </div>
       </div>
@@ -386,6 +394,23 @@ class QuotationList {
   }
 
   attachEventListeners() {
+    this.attachGlobalListeners();
+
+    // Create form event listeners
+    if (this.showCreateForm) {
+      this.attachCreateFormListeners();
+    } 
+    // Detail view event listeners
+    else if (this.selectedQuotation) {
+      this.attachDetailViewListeners();
+    } 
+    // List view event listeners
+    else {
+      this.attachListViewListeners();
+    }
+  }
+
+  attachGlobalListeners() {
     // Search functionality
     const searchInput = this.container?.querySelector('#quotation-search');
     if (searchInput) {
@@ -401,80 +426,79 @@ class QuotationList {
         this.showCreateQuotationForm();
       });
     }
+  }
 
-    // Create form event listeners
-    if (this.showCreateForm) {
-      this.attachCreateFormListeners();
-    }
+  attachListViewListeners() {
+    const quotationItems = this.container?.querySelectorAll('.quotation-item');
+    quotationItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const id = item.dataset.id;
+        this.handleViewQuotation(id);
+      });
+    });
+  }
 
-    // Detail view event listeners
-    if (this.selectedQuotation) {
-      const backBtn = this.container?.querySelector('#back-to-list-btn');
-      if (backBtn) {
-        backBtn.addEventListener('click', () => {
-          this.handleBackToList();
-        });
-      }
-
-      const splitBtn = this.container?.querySelector('#split-quotation-btn');
-      if (splitBtn) {
-        splitBtn.addEventListener('click', () => {
-          this.handleSplitQuotation();
-        });
-      }
-
-      const convertBtn = this.container?.querySelector('#convert-quotation-btn');
-      if (convertBtn) {
-        convertBtn.addEventListener('click', () => {
-          this.handleConvertToInvoice();
-        });
-      }
-
-      const deleteBtn = this.container?.querySelector('#delete-quotation-btn');
-      if (deleteBtn) {
-        deleteBtn.addEventListener('click', () => {
-          this.handleDeleteQuotation();
-        });
-      }
-
-      // Split mode listeners
-      if (this.splitMode) {
-        const cancelSplitBtn = this.container?.querySelector('#cancel-split-btn');
-        if (cancelSplitBtn) {
-          cancelSplitBtn.addEventListener('click', () => {
-            this.handleCancelSplit();
-          });
-        }
-
-        const confirmSplitBtn = this.container?.querySelector('#confirm-split-btn');
-        if (confirmSplitBtn) {
-          confirmSplitBtn.addEventListener('click', () => {
-            this.handleConfirmSplit();
-          });
-        }
-
-        const checkboxes = this.container?.querySelectorAll('.split-checkbox');
-        checkboxes.forEach(checkbox => {
-          checkbox.addEventListener('change', (e) => {
-            const index = parseInt(e.target.dataset.index);
-            if (e.target.checked) {
-              this.selectedSplitItems.add(index);
-            } else {
-              this.selectedSplitItems.delete(index);
-            }
-          });
-        });
-      }
-    } else {
-      // List view event listeners
-      const quotationItems = this.container?.querySelectorAll('.quotation-item');
-      quotationItems.forEach(item => {
-        item.addEventListener('click', () => {
-          const id = item.dataset.id;
-          this.handleViewQuotation(id);
-        });
+  attachDetailViewListeners() {
+    const backBtn = this.container?.querySelector('#back-to-list-btn');
+    if (backBtn) {
+      backBtn.addEventListener('click', () => {
+        this.handleBackToList();
       });
     }
+
+    const splitBtn = this.container?.querySelector('#split-quotation-btn');
+    if (splitBtn) {
+      splitBtn.addEventListener('click', () => {
+        this.handleSplitQuotation();
+      });
+    }
+
+    const convertBtn = this.container?.querySelector('#convert-quotation-btn');
+    if (convertBtn) {
+      convertBtn.addEventListener('click', () => {
+        this.handleConvertToInvoice();
+      });
+    }
+
+    const deleteBtn = this.container?.querySelector('#delete-quotation-btn');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', () => {
+        this.handleDeleteQuotation();
+      });
+    }
+
+    // Split mode listeners
+    if (this.splitMode) {
+      this.attachSplitModeListeners();
+    }
+  }
+
+  attachSplitModeListeners() {
+    const cancelSplitBtn = this.container?.querySelector('#cancel-split-btn');
+    if (cancelSplitBtn) {
+      cancelSplitBtn.addEventListener('click', () => {
+        this.handleCancelSplit();
+      });
+    }
+
+    const confirmSplitBtn = this.container?.querySelector('#confirm-split-btn');
+    if (confirmSplitBtn) {
+      confirmSplitBtn.addEventListener('click', () => {
+        this.handleConfirmSplit();
+      });
+    }
+
+    const checkboxes = this.container?.querySelectorAll('.split-checkbox');
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', (e) => {
+        const index = parseInt(e.target.dataset.index);
+        if (e.target.checked) {
+          this.selectedSplitItems.add(index);
+        } else {
+          this.selectedSplitItems.delete(index);
+        }
+      });
+    });
   }
 
   attachCreateFormListeners() {
@@ -581,6 +605,10 @@ class QuotationList {
     return searchFields.some(field => field.includes(this.searchTerm));
   }
 
+  /**
+   * Handles viewing a specific quotation details
+   * @param {string} id - The ID of the quotation to view
+   */
   async handleViewQuotation(id) {
     try {
       this.loading = true;
@@ -598,18 +626,28 @@ class QuotationList {
     }
   }
 
+  /**
+   * Enters the split quotation mode
+   */
   handleSplitQuotation() {
     this.splitMode = true;
     this.selectedSplitItems = new Set();
     this.updateDisplay();
   }
 
+  /**
+   * Cancels the split mode and returns to normal detail view
+   */
   handleCancelSplit() {
     this.splitMode = false;
     this.selectedSplitItems = new Set();
     this.updateDisplay();
   }
 
+  /**
+   * Confirms the split operation
+   * Validates selection and calls service to split quotation
+   */
   async handleConfirmSplit() {
     if (this.selectedSplitItems.size === 0) {
       alert('Please select at least one item to split');
@@ -639,6 +677,9 @@ class QuotationList {
     }
   }
 
+  /**
+   * Handles converting the current quotation to an invoice
+   */
   async handleConvertToInvoice() {
     if (!this.selectedQuotation) return;
 
@@ -669,18 +710,27 @@ class QuotationList {
   }
 
   // Create quotation methods
+  /**
+   * Shows the create quotation form
+   */
   showCreateQuotationForm() {
     this.showCreateForm = true;
     this.resetCreateForm();
     this.updateDisplay();
   }
 
+  /**
+   * Cancels quotation creation and returns to list
+   */
   cancelCreateQuotation() {
     this.showCreateForm = false;
     this.resetCreateForm();
     this.updateDisplay();
   }
 
+  /**
+   * Resets the create form state
+   */
   resetCreateForm() {
     this.createFormData = {
       customerName: '',
@@ -730,6 +780,10 @@ class QuotationList {
     return Object.keys(this.createFormErrors).length === 0;
   }
 
+  /**
+   * Handles the submission of the create quotation form
+   * Validates input and calls service to create quotation
+   */
   async handleCreateQuotation() {
     // Sync form data from DOM before validation
     this.syncFormDataFromDOM();

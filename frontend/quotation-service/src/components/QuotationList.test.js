@@ -785,4 +785,141 @@ describe('QuotationList Component', () => {
       expect(screen.getByText('Quotations List')).toBeInTheDocument();
     });
   });
+
+  test('should handle error when splitting quotation fails', async () => {
+    // Arrange
+    const mockQuotations = [
+      {
+        id: '1',
+        customerName: 'John Doe',
+        quotationDate: '2025-06-01',
+        total: 1500.00,
+        status: 'pending',
+        items: [
+          { description: 'Item 1', quantity: 1, price: 1000.00, total: 1000.00 },
+          { description: 'Item 2', quantity: 1, price: 500.00, total: 500.00 }
+        ]
+      }
+    ];
+    
+    quotationService.getQuotations.mockResolvedValue(mockQuotations);
+    quotationService.getQuotation = jest.fn().mockResolvedValue(mockQuotations[0]);
+    quotationService.splitQuotation = jest.fn().mockRejectedValue(new Error('Split failed'));
+    
+    // Act
+    const quotationList = new QuotationList(quotationService);
+    quotationList.render(document.body);
+    
+    // Go to detail view
+    await waitFor(() => {
+      const quotationItem = screen.getByText('Customer: John Doe').closest('.quotation-item');
+      fireEvent.click(quotationItem);
+    });
+    
+    // Click split button
+    await waitFor(() => {
+      const splitBtn = screen.getByText('Split Quotation');
+      fireEvent.click(splitBtn);
+    });
+    
+    // Select item and confirm
+    const checkboxes = document.querySelectorAll('.split-checkbox');
+    fireEvent.click(checkboxes[1]);
+    
+    const confirmBtn = screen.getByText('Confirm Split');
+    fireEvent.click(confirmBtn);
+    
+    // Assert
+    await waitFor(() => {
+      expect(screen.getByText('Split failed')).toBeInTheDocument();
+    });
+  });
+
+  test('should handle error when converting to invoice fails', async () => {
+    // Arrange
+    const mockQuotations = [
+      {
+        id: '1',
+        customerName: 'John Doe',
+        quotationDate: '2025-06-01',
+        total: 1000.00,
+        status: 'approved',
+        items: []
+      }
+    ];
+    
+    quotationService.getQuotations.mockResolvedValue(mockQuotations);
+    quotationService.getQuotation = jest.fn().mockResolvedValue(mockQuotations[0]);
+    quotationService.convertToInvoice = jest.fn().mockRejectedValue(new Error('Conversion failed'));
+    
+    // Mock window.confirm
+    jest.spyOn(window, 'confirm').mockReturnValue(true);
+
+    // Act
+    const quotationList = new QuotationList(quotationService);
+    quotationList.render(document.body);
+    
+    // Go to detail view
+    await waitFor(() => {
+      const quotationItem = screen.getByText('Customer: John Doe').closest('.quotation-item');
+      fireEvent.click(quotationItem);
+    });
+    
+    // Click convert button
+    await waitFor(() => {
+      const convertBtn = screen.getByText('Convert to Invoice');
+      fireEvent.click(convertBtn);
+    });
+    
+    // Assert
+    await waitFor(() => {
+      expect(screen.getByText('Conversion failed')).toBeInTheDocument();
+    });
+  });
+
+  test('should handle error when deleting quotation fails', async () => {
+    // Arrange
+    const mockQuotations = [
+      {
+        id: '1',
+        customerName: 'John Doe',
+        quotationDate: '2025-06-01',
+        total: 1000.00,
+        status: 'pending',
+        items: []
+      }
+    ];
+    
+    quotationService.getQuotations.mockResolvedValue(mockQuotations);
+    quotationService.getQuotation.mockResolvedValue(mockQuotations[0]);
+    quotationService.deleteQuotation = jest.fn().mockRejectedValue(new Error('Delete failed'));
+    
+    // Mock window.confirm
+    jest.spyOn(window, 'confirm').mockReturnValue(true);
+
+    // Act
+    const quotationList = new QuotationList(quotationService);
+    quotationList.render(document.body);
+    
+    await waitFor(() => {
+      expect(screen.getByText('Customer: John Doe')).toBeInTheDocument();
+    });
+    
+    // Go to detail view
+    const quotationItem = screen.getByText('Customer: John Doe').closest('.quotation-item');
+    fireEvent.click(quotationItem);
+    
+    await waitFor(() => {
+      expect(screen.getByText('Delete Quotation')).toBeInTheDocument();
+    });
+    
+    // Click delete button
+    const deleteButton = screen.getByText('Delete Quotation');
+    fireEvent.click(deleteButton);
+    
+    // Assert
+    await waitFor(() => {
+      expect(screen.getByText('Delete failed')).toBeInTheDocument();
+    });
+  });
 });
