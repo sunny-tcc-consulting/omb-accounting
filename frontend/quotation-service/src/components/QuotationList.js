@@ -36,6 +36,8 @@ class QuotationList {
 
     // Detail view state
     this.selectedQuotation = null;
+    this.splitMode = false;
+    this.selectedSplitItems = new Set();
   }
 
   render(parentElement) {
@@ -169,8 +171,13 @@ class QuotationList {
   getQuotationDetailHTML() {
     const quotation = this.selectedQuotation;
     
-    const itemsHTML = quotation.items.map(item => `
+    const itemsHTML = quotation.items.map((item, index) => `
       <div class="detail-item-row">
+        ${this.splitMode ? `
+          <div class="detail-item-select">
+            <input type="checkbox" class="split-checkbox" data-index="${index}" ${this.selectedSplitItems.has(index) ? 'checked' : ''}>
+          </div>
+        ` : ''}
         <div class="detail-item-desc">${item.description || item.itemDescription || 'Item'}</div>
         <div class="detail-item-qty">${item.quantity}</div>
         <div class="detail-item-price">${this.formatCurrency(item.price || item.unitPrice || 0)}</div>
@@ -179,13 +186,24 @@ class QuotationList {
     `).join('');
 
     return `
-      <div class="quotation-header">Quotation Details #${quotation.id}</div>
+      <div class="quotation-header">
+        ${this.splitMode ? 'Split Quotation' : `Quotation Details #${quotation.id}`}
+      </div>
       <div class="detail-view-container">
-        <div class="detail-actions">
-          <button class="back-btn" id="back-to-list-btn">Back to List</button>
-          <button class="split-btn" id="split-quotation-btn">Split Quotation</button>
-          <button class="delete-btn" id="delete-quotation-btn">Delete Quotation</button>
-        </div>
+        ${this.splitMode ? `
+          <div class="split-instruction">Select items to move to new quotation</div>
+          <div class="detail-actions">
+            <button class="cancel-btn" id="cancel-split-btn">Cancel Split</button>
+            <button class="save-btn" id="confirm-split-btn">Confirm Split</button>
+          </div>
+        ` : `
+          <div class="detail-actions">
+            <button class="back-btn" id="back-to-list-btn">Back to List</button>
+            <button class="split-btn" id="split-quotation-btn">Split Quotation</button>
+            <button class="convert-btn" id="convert-quotation-btn">Convert to Invoice</button>
+            <button class="delete-btn" id="delete-quotation-btn">Delete Quotation</button>
+          </div>
+        `}
         
         <div class="detail-section">
           <h3>Customer Information</h3>
@@ -206,6 +224,7 @@ class QuotationList {
         <div class="detail-section">
           <h3>Items</h3>
           <div class="detail-items-header">
+            ${this.splitMode ? '<div class="detail-item-select">Select</div>' : ''}
             <div class="detail-item-desc">Description</div>
             <div class="detail-item-qty">Qty</div>
             <div class="detail-item-price">Price</div>
@@ -230,10 +249,6 @@ class QuotationList {
   handleBackToList() {
     this.selectedQuotation = null;
     this.updateDisplay();
-  }
-
-  handleSplitQuotation() {
-    alert('Split functionality coming soon!');
   }
 
   async handleDeleteQuotation() {
@@ -408,10 +423,46 @@ class QuotationList {
         });
       }
 
+      const convertBtn = this.container?.querySelector('#convert-quotation-btn');
+      if (convertBtn) {
+        convertBtn.addEventListener('click', () => {
+          this.handleConvertToInvoice();
+        });
+      }
+
       const deleteBtn = this.container?.querySelector('#delete-quotation-btn');
       if (deleteBtn) {
         deleteBtn.addEventListener('click', () => {
           this.handleDeleteQuotation();
+        });
+      }
+
+      // Split mode listeners
+      if (this.splitMode) {
+        const cancelSplitBtn = this.container?.querySelector('#cancel-split-btn');
+        if (cancelSplitBtn) {
+          cancelSplitBtn.addEventListener('click', () => {
+            this.handleCancelSplit();
+          });
+        }
+
+        const confirmSplitBtn = this.container?.querySelector('#confirm-split-btn');
+        if (confirmSplitBtn) {
+          confirmSplitBtn.addEventListener('click', () => {
+            this.handleConfirmSplit();
+          });
+        }
+
+        const checkboxes = this.container?.querySelectorAll('.split-checkbox');
+        checkboxes.forEach(checkbox => {
+          checkbox.addEventListener('change', (e) => {
+            const index = parseInt(e.target.dataset.index);
+            if (e.target.checked) {
+              this.selectedSplitItems.add(index);
+            } else {
+              this.selectedSplitItems.delete(index);
+            }
+          });
         });
       }
     } else {
@@ -544,6 +595,76 @@ class QuotationList {
       this.loading = false;
       this.error = error;
       this.updateDisplay();
+    }
+  }
+
+  handleSplitQuotation() {
+    this.splitMode = true;
+    this.selectedSplitItems = new Set();
+    this.updateDisplay();
+  }
+
+  handleCancelSplit() {
+    this.splitMode = false;
+    this.selectedSplitItems = new Set();
+    this.updateDisplay();
+  }
+
+  async handleConfirmSplit() {
+    if (this.selectedSplitItems.size === 0) {
+      alert('Please select at least one item to split');
+      return;
+    }
+
+    try {
+      this.loading = true;
+      this.updateDisplay();
+
+      const quotationService = await this.getService();
+      await quotationService.splitQuotation(this.selectedQuotation.id, Array.from(this.selectedSplitItems));
+      
+      // Refresh list
+      this.quotations = await quotationService.getQuotations();
+      this.filteredQuotations = [...this.quotations];
+      
+      // Return to list view
+      this.splitMode = false;
+      this.selectedQuotation = null;
+      this.loading = false;
+      this.updateDisplay();
+    } catch (error) {
+      this.loading = false;
+      this.error = error;
+      this.updateDisplay();
+    }
+  }
+
+  async handleConvertToInvoice() {
+    if (!this.selectedQuotation) return;
+
+    if (confirm('Are you sure you want to convert this quotation to an invoice?')) {
+      try {
+        this.loading = true;
+        this.updateDisplay();
+
+        const quotationService = await this.getService();
+        await quotationService.convertToInvoice(this.selectedQuotation.id);
+        
+        // Refresh list
+        this.quotations = await quotationService.getQuotations();
+        this.filteredQuotations = [...this.quotations];
+        
+        // Update selected quotation to reflect new status
+        this.selectedQuotation = await quotationService.getQuotation(this.selectedQuotation.id);
+        
+        this.loading = false;
+        this.updateDisplay();
+        alert('Quotation converted to invoice successfully!');
+      } catch (error) {
+        this.loading = false;
+        this.error = error;
+        this.updateDisplay();
+      }
     }
   }
 

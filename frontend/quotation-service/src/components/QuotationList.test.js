@@ -9,7 +9,9 @@ jest.mock('../services/quotationService', () => ({
     getQuotation: jest.fn(),
     deleteQuotation: jest.fn(),
     updateQuotation: jest.fn(),
-    searchQuotations: jest.fn()
+    searchQuotations: jest.fn(),
+    splitQuotation: jest.fn(),
+    convertToInvoice: jest.fn()
   }
 }));
 
@@ -25,6 +27,9 @@ describe('QuotationList Component', () => {
     
     // Use fake timers to control debounce and other timeouts
     jest.useFakeTimers();
+
+    // Mock window.alert globally for all tests
+    jest.spyOn(window, 'alert').mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -621,6 +626,113 @@ describe('QuotationList Component', () => {
     });
   });
 
+  test('should split quotation when items are selected and confirmed', async () => {
+    // Arrange
+    const mockQuotations = [
+      {
+        id: '1',
+        customerName: 'John Doe',
+        quotationDate: '2025-06-01',
+        total: 1500.00,
+        status: 'pending',
+        items: [
+          { description: 'Item 1', quantity: 1, price: 1000.00, total: 1000.00 },
+          { description: 'Item 2', quantity: 1, price: 500.00, total: 500.00 }
+        ]
+      }
+    ];
+    
+    quotationService.getQuotations.mockResolvedValue(mockQuotations);
+    quotationService.getQuotation = jest.fn().mockResolvedValue(mockQuotations[0]);
+    quotationService.splitQuotation = jest.fn().mockResolvedValue({
+      original: { ...mockQuotations[0], items: [mockQuotations[0].items[0]], total: 1000.00 },
+      new: { ...mockQuotations[0], id: '2', items: [mockQuotations[0].items[1]], total: 500.00 }
+    });
+    
+    // Act
+    const quotationList = new QuotationList(quotationService);
+    quotationList.render(document.body);
+    
+    // Go to detail view
+    await waitFor(() => {
+      const quotationItem = screen.getByText('Customer: John Doe').closest('.quotation-item');
+      fireEvent.click(quotationItem);
+    });
+    
+    // Click split button
+    await waitFor(() => {
+      const splitBtn = screen.getByText('Split Quotation');
+      fireEvent.click(splitBtn);
+    });
+    
+    // Verify split mode UI
+    await waitFor(() => {
+      expect(screen.getByText('Select items to move to new quotation')).toBeInTheDocument();
+      expect(screen.getByText('Confirm Split')).toBeInTheDocument();
+      expect(screen.getByText('Cancel Split')).toBeInTheDocument();
+      expect(document.querySelectorAll('.split-checkbox').length).toBe(2);
+    });
+    
+    // Select second item
+    const checkboxes = document.querySelectorAll('.split-checkbox');
+    fireEvent.click(checkboxes[1]); // Select Item 2
+    
+    // Confirm split
+    const confirmBtn = screen.getByText('Confirm Split');
+    fireEvent.click(confirmBtn);
+    
+    // Assert
+    await waitFor(() => {
+      expect(quotationService.splitQuotation).toHaveBeenCalledWith('1', [1]); // Passing index 1
+      expect(screen.getByText('Quotations List')).toBeInTheDocument();
+    });
+  });
+
+  test('should convert quotation to invoice when convert button is clicked', async () => {
+    // Arrange
+    const mockQuotations = [
+      {
+        id: '1',
+        customerName: 'John Doe',
+        quotationDate: '2025-06-01',
+        total: 1000.00,
+        status: 'approved',
+        items: []
+      }
+    ];
+    
+    quotationService.getQuotations.mockResolvedValue(mockQuotations);
+    quotationService.getQuotation = jest.fn().mockResolvedValue(mockQuotations[0]);
+    quotationService.convertToInvoice = jest.fn().mockResolvedValue({
+      success: true,
+      message: 'Quotation converted to invoice successfully'
+    });
+    
+    // Mock window.confirm
+    jest.spyOn(window, 'confirm').mockReturnValue(true);
+
+    // Act
+    const quotationList = new QuotationList(quotationService);
+    quotationList.render(document.body);
+    
+    // Go to detail view
+    await waitFor(() => {
+      const quotationItem = screen.getByText('Customer: John Doe').closest('.quotation-item');
+      fireEvent.click(quotationItem);
+    });
+    
+    // Click convert button
+    await waitFor(() => {
+      const convertBtn = screen.getByText('Convert to Invoice');
+      fireEvent.click(convertBtn);
+    });
+    
+    // Assert
+    await waitFor(() => {
+      expect(quotationService.convertToInvoice).toHaveBeenCalledWith('1');
+    });
+  });
+
   test('should delete quotation when delete button is clicked and confirmed', async () => {
     // Arrange
     const mockQuotations = [
@@ -640,7 +752,7 @@ describe('QuotationList Component', () => {
     
     // Mock window.confirm
     jest.spyOn(window, 'confirm').mockReturnValue(true);
-    
+
     // Act
     const quotationList = new QuotationList(quotationService);
     quotationList.render(document.body);
