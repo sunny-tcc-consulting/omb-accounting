@@ -16,7 +16,8 @@ class QuotationList {
     AT_LEAST_ONE_ITEM_REQUIRED: 'At least one item is required'
   };
 
-  constructor() {
+  constructor(service = null) {
+    this.service = service;
     this.quotations = [];
     this.filteredQuotations = [];
     this.searchTerm = '';
@@ -32,6 +33,9 @@ class QuotationList {
       items: [{ description: '', quantity: 1, price: 0 }]
     };
     this.createFormErrors = {};
+
+    // Detail view state
+    this.selectedQuotation = null;
   }
 
   render(parentElement) {
@@ -61,6 +65,11 @@ class QuotationList {
     // Show create form if in create mode
     if (this.showCreateForm) {
       return this.getCreateFormHTML();
+    }
+
+    // Show detail view if a quotation is selected
+    if (this.selectedQuotation) {
+      return this.getQuotationDetailHTML();
     }
 
     // Show list view
@@ -100,7 +109,7 @@ class QuotationList {
   }
 
   getErrorHTML() {
-    return '<div class="error">Error loading quotations</div>';
+    return `<div class="error">${this.error?.message || 'Error loading quotations'}</div>`;
   }
 
   getSearchHTML() {
@@ -145,7 +154,7 @@ class QuotationList {
 
   getQuotationItemHTML(quotation) {
     return `
-      <div class="quotation-item">
+      <div class="quotation-item" data-id="${quotation.id}">
         <div class="quotation-id">Quotation #${quotation.id}</div>
         <div class="quotation-customer">Customer: ${quotation.customerName}</div>
         <div class="quotation-details">
@@ -157,8 +166,100 @@ class QuotationList {
     `;
   }
 
+  getQuotationDetailHTML() {
+    const quotation = this.selectedQuotation;
+    
+    const itemsHTML = quotation.items.map(item => `
+      <div class="detail-item-row">
+        <div class="detail-item-desc">${item.description || item.itemDescription || 'Item'}</div>
+        <div class="detail-item-qty">${item.quantity}</div>
+        <div class="detail-item-price">${this.formatCurrency(item.price || item.unitPrice || 0)}</div>
+        <div class="detail-item-total">${this.formatCurrency((item.price || item.unitPrice || 0) * item.quantity)}</div>
+      </div>
+    `).join('');
+
+    return `
+      <div class="quotation-header">Quotation Details #${quotation.id}</div>
+      <div class="detail-view-container">
+        <div class="detail-actions">
+          <button class="back-btn" id="back-to-list-btn">Back to List</button>
+          <button class="split-btn" id="split-quotation-btn">Split Quotation</button>
+          <button class="delete-btn" id="delete-quotation-btn">Delete Quotation</button>
+        </div>
+        
+        <div class="detail-section">
+          <h3>Customer Information</h3>
+          <div class="detail-row">
+            <span class="detail-label">Name:</span>
+            <span class="detail-value">${quotation.customerName}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Date:</span>
+            <span class="detail-value">${quotation.quotationDate}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Status:</span>
+            <span class="detail-value status-${quotation.status.toLowerCase()}">${quotation.status}</span>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3>Items</h3>
+          <div class="detail-items-header">
+            <div class="detail-item-desc">Description</div>
+            <div class="detail-item-qty">Qty</div>
+            <div class="detail-item-price">Price</div>
+            <div class="detail-item-total">Total</div>
+          </div>
+          <div class="detail-items-list">
+            ${itemsHTML}
+          </div>
+          <div class="detail-total-row">
+            <span class="detail-total-label">Total:</span>
+            <span class="detail-total-value">${this.formatCurrency(quotation.total)}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   formatCurrency(amount) {
     return `$${amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+  }
+
+  handleBackToList() {
+    this.selectedQuotation = null;
+    this.updateDisplay();
+  }
+
+  handleSplitQuotation() {
+    alert('Split functionality coming soon!');
+  }
+
+  async handleDeleteQuotation() {
+    if (!this.selectedQuotation) return;
+
+    if (confirm('Are you sure you want to delete this quotation? This action cannot be undone.')) {
+      try {
+        this.loading = true;
+        this.updateDisplay();
+
+        const quotationService = await this.getService();
+        await quotationService.deleteQuotation(this.selectedQuotation.id);
+        
+        // Return to list and reload
+        this.selectedQuotation = null;
+        this.quotations = await quotationService.getQuotations();
+        this.filteredQuotations = [...this.quotations];
+        
+        this.loading = false;
+        this.updateDisplay();
+      } catch (error) {
+        this.loading = false;
+        this.error = error;
+        this.updateDisplay();
+      }
+    }
   }
 
   getCreateFormHTML() {
@@ -249,8 +350,7 @@ class QuotationList {
       this.error = null;
       this.updateDisplay();
 
-      // Import the service dynamically to avoid import issues during testing
-      const { quotationService } = await import('../services/quotationService');
+      const quotationService = await this.getService();
       this.quotations = await quotationService.getQuotations();
       this.filteredQuotations = [...this.quotations]; // Initialize filtered quotations
       
@@ -290,6 +390,39 @@ class QuotationList {
     // Create form event listeners
     if (this.showCreateForm) {
       this.attachCreateFormListeners();
+    }
+
+    // Detail view event listeners
+    if (this.selectedQuotation) {
+      const backBtn = this.container?.querySelector('#back-to-list-btn');
+      if (backBtn) {
+        backBtn.addEventListener('click', () => {
+          this.handleBackToList();
+        });
+      }
+
+      const splitBtn = this.container?.querySelector('#split-quotation-btn');
+      if (splitBtn) {
+        splitBtn.addEventListener('click', () => {
+          this.handleSplitQuotation();
+        });
+      }
+
+      const deleteBtn = this.container?.querySelector('#delete-quotation-btn');
+      if (deleteBtn) {
+        deleteBtn.addEventListener('click', () => {
+          this.handleDeleteQuotation();
+        });
+      }
+    } else {
+      // List view event listeners
+      const quotationItems = this.container?.querySelectorAll('.quotation-item');
+      quotationItems.forEach(item => {
+        item.addEventListener('click', () => {
+          const id = item.dataset.id;
+          this.handleViewQuotation(id);
+        });
+      });
     }
   }
 
@@ -397,6 +530,23 @@ class QuotationList {
     return searchFields.some(field => field.includes(this.searchTerm));
   }
 
+  async handleViewQuotation(id) {
+    try {
+      this.loading = true;
+      this.updateDisplay();
+
+      const quotationService = await this.getService();
+      this.selectedQuotation = await quotationService.getQuotation(id);
+      
+      this.loading = false;
+      this.updateDisplay();
+    } catch (error) {
+      this.loading = false;
+      this.error = error;
+      this.updateDisplay();
+    }
+  }
+
   // Create quotation methods
   showCreateQuotationForm() {
     this.showCreateForm = true;
@@ -416,6 +566,7 @@ class QuotationList {
       items: [{ description: '', quantity: 1, price: 0 }]
     };
     this.createFormErrors = {};
+    this.selectedQuotation = null;
   }
 
   addFormItem() {
@@ -471,8 +622,7 @@ class QuotationList {
       this.loading = true;
       this.updateDisplay();
 
-      // Import the service dynamically
-      const { quotationService } = await import('../services/quotationService');
+      const quotationService = await this.getService();
       
       // Filter out empty items
       const validItems = this.createFormData.items.filter(item => 
@@ -534,6 +684,15 @@ class QuotationList {
     });
   }
 
+  async getService() {
+    if (this.service) {
+      return this.service;
+    }
+    const { quotationService } = await import('../services/quotationService');
+    this.service = quotationService;
+    return quotationService;
+  }
+
   // Cleanup method to prevent memory leaks
   destroy() {
     if (this.searchDebounceTimer) {
@@ -548,3 +707,4 @@ class QuotationList {
 }
 
 module.exports = QuotationList;
+
