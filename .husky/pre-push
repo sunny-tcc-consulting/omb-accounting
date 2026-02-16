@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Run tests before pushing
+npm test
+
+# Exit with error if tests fail
+if [ $? -ne 0 ]; then
+  echo "Tests failed. Please fix the issues above before pushing."
+  exit 1
+fi
