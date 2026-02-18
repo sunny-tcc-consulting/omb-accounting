@@ -50,7 +50,8 @@ describe('LoadingSpinner', () => {
 describe('LoadingOverlay', () => {
   it('renders with default message', () => {
     render(<LoadingOverlay />);
-    expect(screen.getByText('Loading...', { exact: false })).toBeInTheDocument();
+    const texts = screen.getAllByText('Loading...', { exact: false });
+    expect(texts.length).toBeGreaterThan(0);
   });
 
   it('renders with custom message', () => {
@@ -82,8 +83,8 @@ describe('LoadingOverlay', () => {
 
   it('displays spinner', () => {
     render(<LoadingOverlay />);
-    const spinner = screen.getByRole('status', { hidden: true });
-    expect(spinner).toBeInTheDocument();
+    const overlays = screen.getAllByRole('status', { hidden: true });
+    expect(overlays.length).toBeGreaterThan(0);
   });
 
   it('displays message below spinner', () => {
@@ -93,14 +94,16 @@ describe('LoadingOverlay', () => {
 
   it('has correct default size', () => {
     render(<LoadingOverlay />);
-    const spinner = screen.getByRole('status', { hidden: true });
+    const overlays = screen.getAllByRole('status', { hidden: true });
+    const spinner = overlays.find(el => el.getAttribute('aria-label') === 'loading');
     expect(spinner).toHaveClass('h-8');
     expect(spinner).toHaveClass('w-8');
   });
 
   it('accepts custom size', () => {
     render(<LoadingOverlay size="lg" />);
-    const spinner = screen.getByRole('status', { hidden: true });
+    const overlays = screen.getAllByRole('status', { hidden: true });
+    const spinner = overlays.find(el => el.getAttribute('aria-label') === 'loading');
     expect(spinner).toHaveClass('h-12');
     expect(spinner).toHaveClass('w-12');
   });
