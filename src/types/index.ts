@@ -31,6 +31,7 @@ export interface TransactionFilters {
   };
   search?: string;
   status?: string;
+  limit?: number;
 }
 
 // Financial summary
@@ -100,6 +101,7 @@ export interface Quotation {
   customerName: string;
   customerEmail: string;
   customerPhone?: string;
+  customerAddress?: string;
   items: QuotationItem[];
   currency: string;
   subtotal: number;
@@ -139,6 +141,7 @@ export interface Invoice {
   customerName: string;
   customerEmail: string;
   customerPhone?: string;
+  customerAddress?: string;
   items: InvoiceItem[];
   quotationId?: string;
   currency: string;

@@ -37,7 +37,10 @@ export default function EditInvoicePage() {
     customerPhone: invoice.customerPhone,
     items: invoice.items,
     currency: invoice.currency,
-    taxRate: invoice.taxRate,
+    // Calculate average tax rate from items
+    taxRate: invoice.items.length > 0
+      ? invoice.items.reduce((sum, item) => sum + (item.taxRate || 0), 0) / invoice.items.length
+      : 0,
     paymentTerms: invoice.paymentTerms,
     dueDate: invoice.dueDate,
     issuedDate: invoice.issuedDate,

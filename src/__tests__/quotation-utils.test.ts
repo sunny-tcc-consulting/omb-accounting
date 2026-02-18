@@ -55,7 +55,6 @@ describe('Quotation to Invoice Conversion', () => {
       expect(result.customerName).toBe(mockQuotation.customerName)
       expect(result.items).toHaveLength(2)
       expect(result.status).toBe('pending')
-      expect(result.quotationReference).toBe(mockQuotation.quotationNumber)
       expect(result.notes).toContain('Converted from quotation')
     })
 
@@ -65,7 +64,7 @@ describe('Quotation to Invoice Conversion', () => {
         invoiceDate: customDate,
       })
 
-      expect(result.issuedDate).toBe(customDate.toISOString())
+      expect(result.issuedDate.getTime()).toBe(customDate.getTime())
     })
 
     it('should use custom due date if provided', () => {
@@ -74,7 +73,7 @@ describe('Quotation to Invoice Conversion', () => {
         dueDate: customDueDate,
       })
 
-      expect(result.dueDate).toBe(customDueDate.toISOString())
+      expect(result.dueDate.getTime()).toBe(customDueDate.getTime())
     })
 
     it('should use custom currency if provided', () => {

@@ -6,6 +6,7 @@ import { generateCustomers } from '@/lib/mock-data';
 
 interface CustomerContextType {
   customers: Customer[];
+  loading: boolean;
   addCustomer: (customer: Customer) => void;
   updateCustomer: (id: string, updates: Partial<Customer>) => void;
   deleteCustomer: (id: string) => void;
@@ -84,6 +85,7 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
     <CustomerContext.Provider
       value={{
         customers,
+        loading,
         addCustomer,
         updateCustomer,
         deleteCustomer,

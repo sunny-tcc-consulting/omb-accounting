@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { Transaction, Category, FinancialSummary, Customer } from '@/types';
+import { Transaction, Category, FinancialSummary, Customer, TransactionFilters, Quotation, QuotationItem, Invoice, InvoiceItem } from '@/types';
 
 // Pre-defined income categories
 export const INCOME_CATEGORIES: Category[] = [
@@ -143,7 +143,7 @@ export function generateTransactions(count: number = 100): Transaction[] {
       id: faker.string.uuid(),
       type: isIncome ? 'income' : 'expense',
       date: faker.date.recent({ days: 365 }),
-      amount: Math.abs(faker.number.float({ min: 100, max: 100000, precision: 0.01 })),
+      amount: Math.abs(faker.number.float({ min: 100, max: 100000, multipleOf: 0.01 })),
       category: category.name,
       description: faker.commerce.productDescription(),
       reference: faker.finance.accountNumber(),
@@ -188,7 +188,7 @@ export function getFilteredTransactions(
   if (filters?.dateRange) {
     filtered = filtered.filter((t) => {
       const date = new Date(t.date);
-      return date >= filters.dateRange.start && date <= filters.dateRange.end;
+      return date >= (filters.dateRange as any).start && date <= (filters.dateRange as any).end;
     });
   }
 
@@ -328,7 +328,7 @@ export function generateCustomers(count: number = 15): Customer[] {
     customers.push({
       id: faker.string.uuid(),
       name: isCompany
-        ? `${faker.company.name()} ${faker.company.suffix()}`
+        ? `${faker.company.name()} Ltd.`
         : faker.person.fullName(),
       email: faker.internet.email(),
       phone: faker.phone.number(),
@@ -360,9 +360,9 @@ export function generateQuotations(count: number = 20): Quotation[] {
         id: faker.string.uuid(),
         description: faker.commerce.productDescription(),
         quantity: Math.floor(Math.random() * 10) + 1,
-        unitPrice: Math.abs(faker.number.float({ min: 100, max: 10000, precision: 0.01 })),
+        unitPrice: Math.abs(faker.number.float({ min: 100, max: 10000, multipleOf: 0.01 })),
         taxRate: Math.random() > 0.5 ? 10 : undefined,
-        discount: Math.random() > 0.7 ? faker.number.float({ min: 100, max: 1000, precision: 0.01 }) : undefined,
+        discount: Math.random() > 0.7 ? faker.number.float({ min: 100, max: 1000, multipleOf: 0.01 }) : undefined,
         total: 0,
       };
 
@@ -383,6 +383,7 @@ export function generateQuotations(count: number = 20): Quotation[] {
       customerName: customer.name,
       customerEmail: customer.email,
       customerPhone: customer.phone,
+      customerAddress: customer.address,
       items,
       currency: 'CNY',
       subtotal,
@@ -401,7 +402,7 @@ export function generateQuotations(count: number = 20): Quotation[] {
 
 // Generate mock invoices
 export function generateInvoices(count: number = 30): Invoice[] {
-  invoices = [];
+  const invoices: Invoice[] = [];
   const customers = generateCustomers(15);
   const statuses: Invoice['status'][] = ['draft', 'pending', 'partial', 'paid', 'overdue'];
 
@@ -416,9 +417,9 @@ export function generateInvoices(count: number = 30): Invoice[] {
         id: faker.string.uuid(),
         description: faker.commerce.productDescription(),
         quantity: Math.floor(Math.random() * 10) + 1,
-        unitPrice: Math.abs(faker.number.float({ min: 100, max: 10000, precision: 0.01 })),
+        unitPrice: Math.abs(faker.number.float({ min: 100, max: 10000, multipleOf: 0.01 })),
         taxRate: Math.random() > 0.5 ? 10 : undefined,
-        discount: Math.random() > 0.7 ? faker.number.float({ min: 100, max: 1000, precision: 0.01 }) : undefined,
+        discount: Math.random() > 0.7 ? faker.number.float({ min: 100, max: 1000, multipleOf: 0.01 }) : undefined,
         total: 0,
       };
 
@@ -447,6 +448,7 @@ export function generateInvoices(count: number = 30): Invoice[] {
       customerName: customer.name,
       customerEmail: customer.email,
       customerPhone: customer.phone,
+      customerAddress: customer.address,
       items,
       currency: 'CNY',
       subtotal,
@@ -454,9 +456,9 @@ export function generateInvoices(count: number = 30): Invoice[] {
       discount,
       total,
       paymentTerms: 'Payment due within 30 days',
-      dueDate: faker.date.future({ days: 30 }),
+      dueDate: faker.date.future({ refDate: new Date(), days: 30 } as any),
       status: statuses[Math.floor(Math.random() * statuses.length)],
-      issuedDate: faker.date.recent({ days: 30 }),
+      issuedDate: faker.date.recent({ refDate: new Date(), days: 30 } as any),
       amountPaid: paidAmount,
       amountRemaining: remainingAmount,
     });

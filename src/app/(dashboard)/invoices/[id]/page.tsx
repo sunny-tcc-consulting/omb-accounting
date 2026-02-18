@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useInvoices } from '@/contexts/InvoiceContext';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { InvoicePreview } from '@/components/invoices/InvoicePreview';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Printer } from 'lucide-react';
@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 
 export default function InvoiceDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const invoiceId = params.id as string;
   const { getInvoiceById, updatePaymentStatus } = useInvoices();
 

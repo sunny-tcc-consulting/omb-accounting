@@ -7,7 +7,7 @@ const __dirname = dirname(__filename);
 
 async function takeScreenshot() {
   const browser = await puppeteer.launch({
-    headless: 'new',
+    headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
 
@@ -21,7 +21,7 @@ async function takeScreenshot() {
   });
 
   // Navigate to the dashboard
-  await page.goto('http://localhost:3001', {
+  await page.goto('http://localhost:3000', {
     waitUntil: 'networkidle0',
     timeout: 30000,
   });

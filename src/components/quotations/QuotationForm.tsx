@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { Quotation, Customer } from '@/types';
 import { useQuotations } from '@/contexts/QuotationContext';
 import { useCustomers } from '@/contexts/CustomerContext';
+import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,7 +27,7 @@ const quotationSchema = z.object({
       discount: z.number().min(0).default(0),
     })
   ).min(1, 'At least one item is required'),
-  validityPeriod: z.date({ required_error: 'Please select validity period' }),
+  validityPeriod: z.date(),
   notes: z.string().optional(),
   termsAndConditions: z.string().optional(),
 });
@@ -51,9 +52,9 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
   } = useForm<QuotationFormData>({
     resolver: zodResolver(quotationSchema),
     defaultValues: {
-      items: [{ description: '', quantity: 1, unitPrice: 0, taxRate: undefined, discount: 0 }],
+      items: [{ id: '', description: '', quantity: 1, unitPrice: 0, taxRate: 0, discount: 0 }],
     },
-  });
+  } as any);
 
   const onSubmitHandler = async (data: QuotationFormData) => {
     setIsSubmitting(true);

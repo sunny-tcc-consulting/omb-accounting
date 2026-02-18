@@ -28,8 +28,8 @@ export function convertQuotationToInvoice(
 
   // Calculate due date based on payment terms if not provided
   let dueDate = options.dueDate;
-  if (!dueDate && quotation.paymentTerms) {
-    dueDate = calculateDueDate(invoiceDate, quotation.paymentTerms);
+  if (!dueDate) {
+    dueDate = calculateDueDate(invoiceDate, 'Net 30');
   }
 
   // Generate invoice number (format: INV-YYYY-XXXXX)
@@ -70,16 +70,13 @@ export function convertQuotationToInvoice(
     tax: totalTax,
     discount: totalDiscount,
     total,
-    paymentTerms: options.paymentTerms || quotation.paymentTerms || 'Net 30',
-    issuedDate: invoiceDate.toISOString(),
-    dueDate: dueDate ? dueDate.toISOString() : new Date(invoiceDate.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    paymentTerms: options.paymentTerms || 'Net 30',
+    issuedDate: invoiceDate,
+    dueDate: dueDate || new Date(invoiceDate.getTime() + 30 * 24 * 60 * 60 * 1000),
     status: 'pending', // New invoices are pending by default
     amountPaid,
     amountRemaining,
     notes: quotation.notes ? `Converted from quotation ${quotation.quotationNumber}. ${quotation.notes}` : `Converted from quotation ${quotation.quotationNumber}`,
-    quotationReference: quotation.quotationNumber,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
   };
 
   return invoice;

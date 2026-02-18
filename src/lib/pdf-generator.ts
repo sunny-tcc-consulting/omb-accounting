@@ -172,13 +172,13 @@ export function generateQuotationPDF(quotation: Quotation): jsPDF {
   addCustomerDetails(
     doc,
     quotation.customerName,
-    quotation.customerAddress,
+    quotation.customerAddress || '',
     quotation.customerEmail,
     quotation.customerPhone
   );
 
   // Add date information
-  addDateInformation(doc, quotation.issuedDate, quotation.validityPeriod);
+  addDateInformation(doc, quotation.issuedDate.toISOString().split('T')[0], quotation.validityPeriod.toISOString().split('T')[0]);
 
   // Add line items table
   const tableData = quotation.items.map((item) => [
@@ -211,10 +211,10 @@ export function generateQuotationPDF(quotation: Quotation): jsPDF {
   });
 
   // Add totals section
-  const finalY = (doc as any).lastAutoTable.finalY || 120;
+  const finalY = (doc as any).lastAutoTable?.finalY || 120;
   const subtotal = quotation.items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
-  const tax = subtotal * (quotation.taxRate || 0);
-  const total = subtotal + tax;
+  const totalTax = quotation.items.reduce((sum, item) => sum + ((item.quantity * item.unitPrice) * (item.taxRate || 0) / 100), 0);
+  const total = subtotal + totalTax;
 
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
@@ -223,7 +223,7 @@ export function generateQuotationPDF(quotation: Quotation): jsPDF {
 
   doc.setFont('helvetica', 'bold');
   doc.text('Tax:', 140, finalY + 15);
-  doc.text(`${tax.toFixed(2)}`, 180, finalY + 15);
+  doc.text(`${totalTax.toFixed(2)}`, 180, finalY + 15);
 
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
@@ -235,7 +235,7 @@ export function generateQuotationPDF(quotation: Quotation): jsPDF {
   doc.setFont('helvetica', 'bold');
   doc.text('Payment Terms:', 14, finalY + 40);
   doc.setFont('helvetica', 'normal');
-  doc.text(quotation.paymentTerms || 'Net 30', 14, finalY + 45);
+  doc.text('Payment due within 30 days', 14, finalY + 45);
 
   // Add notes
   if (quotation.notes) {
@@ -247,7 +247,7 @@ export function generateQuotationPDF(quotation: Quotation): jsPDF {
   }
 
   // Add page numbers
-  const pageCount = doc.internal.getNumberOfPages();
+  const pageCount = doc.internal.pageSize.getWidth() / 2;
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     doc.setFontSize(8);
@@ -286,7 +286,7 @@ export function generateInvoicePDF(invoice: Invoice): jsPDF {
   );
 
   // Add date information
-  addDateInformation(doc, invoice.issuedDate, invoice.dueDate);
+  addDateInformation(doc, invoice.issuedDate.toISOString().split('T')[0], invoice.dueDate.toISOString().split('T')[0]);
 
   // Add line items table
   const tableData = invoice.items.map((item) => [
@@ -319,10 +319,10 @@ export function generateInvoicePDF(invoice: Invoice): jsPDF {
   });
 
   // Add totals section
-  const finalY = (doc as any).lastAutoTable.finalY || 120;
+  const finalY = (doc as any).lastAutoTable?.finalY || 120;
   const subtotal = invoice.items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
-  const tax = invoice.items.reduce((sum, item) => sum + (item.taxRate * item.quantity * item.unitPrice), 0);
-  const discount = invoice.items.reduce((sum, item) => sum + item.discount, 0);
+  const tax = invoice.items.reduce((sum, item) => sum + ((item.taxRate || 0) * item.quantity * item.unitPrice), 0);
+  const discount = invoice.items.reduce((sum, item) => sum + (item.discount || 0), 0);
   const total = subtotal + tax - discount;
 
   doc.setFontSize(10);
@@ -352,14 +352,14 @@ export function generateInvoicePDF(invoice: Invoice): jsPDF {
   doc.text('Payment Status:', 14, paymentStatusY);
 
   doc.setFont('helvetica', 'normal');
-  const statusText = invoice.amountPaid >= invoice.total ? 'PAID' : invoice.amountPaid > 0 ? 'PARTIAL' : 'PENDING';
+  const statusText = (invoice.amountPaid || 0) >= invoice.total ? 'PAID' : (invoice.amountPaid || 0) > 0 ? 'PARTIAL' : 'PENDING';
   doc.text(statusText, 14, paymentStatusY + 5);
 
-  if (invoice.amountPaid > 0) {
+  if (invoice.amountPaid && invoice.amountPaid > 0) {
     doc.setFont('helvetica', 'bold');
     doc.text(`Amount Paid: ${invoice.amountPaid.toFixed(2)}`, 14, paymentStatusY + 10);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Amount Remaining: ${invoice.amountRemaining.toFixed(2)}`, 14, paymentStatusY + 15);
+    doc.text(`Amount Remaining: ${invoice.amountRemaining?.toFixed(2) || '0.00'}`, 14, paymentStatusY + 15);
   }
 
   // Add payment terms
@@ -378,13 +378,13 @@ export function generateInvoicePDF(invoice: Invoice): jsPDF {
   }
 
   // Add quotation reference
-  if (invoice.quotationReference) {
+  if (invoice.quotationId) {
     doc.setFont('helvetica', 'bold');
-    doc.text(`Quotation Reference: ${invoice.quotationReference}`, 14, finalY + 100);
+    doc.text(`Quotation Reference: ${invoice.quotationId}`, 14, finalY + 100);
   }
 
   // Add page numbers
-  const pageCount = doc.internal.getNumberOfPages();
+  const pageCount = doc.internal.pageSize.getWidth() / 2;
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     doc.setFontSize(8);

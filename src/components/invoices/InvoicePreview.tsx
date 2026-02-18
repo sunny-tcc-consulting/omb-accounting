@@ -4,6 +4,7 @@ import React from 'react';
 import { Invoice as InvoiceType } from '@/types';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Printer, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { generateInvoicePDF, downloadPDF } from '@/lib/pdf-generator';

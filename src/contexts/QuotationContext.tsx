@@ -7,10 +7,12 @@ import { convertQuotationToInvoice, validateQuotationForConversion } from '@/lib
 
 interface QuotationContextType {
   quotations: Quotation[];
+  loading: boolean;
   addQuotation: (quotation: Quotation) => void;
   updateQuotation: (id: string, updates: Partial<Quotation>) => void;
   deleteQuotation: (id: string) => void;
   getFilteredQuotations: (filters?: QuotationFilters) => Quotation[];
+  getFilteredCustomers: () => any[];
   getQuotationById: (id: string) => Quotation | undefined;
   generateQuotationNumber: () => string;
   convertToInvoice: (quotationId: string) => Invoice | undefined;
@@ -111,6 +113,12 @@ export function QuotationProvider({ children }: { children: React.ReactNode }) {
     return invoice;
   };
 
+  const getFilteredCustomers = () => {
+    // Get all customers for dropdown selection
+    // This function will be implemented when CustomerContext is integrated
+    return [];
+  };
+
   const refreshQuotations = () => {
     loadInitialData();
   };
@@ -119,10 +127,12 @@ export function QuotationProvider({ children }: { children: React.ReactNode }) {
     <QuotationContext.Provider
       value={{
         quotations,
+        loading,
         addQuotation,
         updateQuotation,
         deleteQuotation,
         getFilteredQuotations,
+        getFilteredCustomers,
         getQuotationById,
         generateQuotationNumber,
         convertToInvoice,

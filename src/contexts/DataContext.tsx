@@ -12,6 +12,7 @@ import {
 interface DataContextType {
   transactions: Transaction[];
   categories: Category[];
+  loading: boolean;
   addTransaction: (transaction: Transaction) => void;
   updateTransaction: (id: string, updates: Partial<Transaction>) => void;
   deleteTransaction: (id: string) => void;
@@ -80,7 +81,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     if (filters?.dateRange) {
       filtered = filtered.filter((t) => {
         const date = new Date(t.date);
-        return date >= filters.dateRange.start && date <= filters.dateRange.end;
+        return date >= (filters.dateRange as any).start && date <= (filters.dateRange as any).end;
       });
     }
 
@@ -138,6 +139,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       value={{
         transactions,
         categories,
+        loading,
         addTransaction,
         updateTransaction,
         deleteTransaction,

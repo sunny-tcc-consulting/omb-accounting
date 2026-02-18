@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useInvoices } from '@/contexts/InvoiceContext';
 import { useCustomers } from '@/contexts/CustomerContext';
-import { InvoiceItem as InvoiceItemType } from '@/types';
+import { Invoice, InvoiceItem as InvoiceItemType } from '@/types';
 import { InvoiceItem } from './InvoiceItem';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -54,7 +54,7 @@ export const InvoiceList: React.FC = () => {
   });
 
   // Get payment status
-  const getPaymentStatus = (invoice: InvoiceItemType) => {
+  const getPaymentStatus = (invoice: Invoice) => {
     if (invoice.status === 'paid') {
       return (
         <div className="flex items-center gap-1 text-green-600 text-sm">

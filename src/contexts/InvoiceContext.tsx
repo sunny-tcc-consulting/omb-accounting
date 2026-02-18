@@ -36,7 +36,7 @@ const generateMockInvoices = (): Invoice[] => {
   for (let i = 1; i <= 30; i++) {
     const id = `inv-${Date.now()}-${i}`;
     const customerId = `cust-${Math.floor(Math.random() * 15) + 1}`;
-    const status: Invoice['status'] = ['draft', 'pending', 'partial', 'paid', 'overdue'][Math.floor(Math.random() * 5)];
+    const status = ['draft', 'pending', 'partial', 'paid', 'overdue'][Math.floor(Math.random() * 5)] as 'draft' | 'pending' | 'partial' | 'paid' | 'overdue';
     const isPaid = status === 'paid' || status === 'partial';
     const amountPaid = isPaid ? Math.floor(Math.random() * 1000) + 500 : 0;
     const amountRemaining = isPaid ? 0 : Math.floor(Math.random() * 1000) + 500;

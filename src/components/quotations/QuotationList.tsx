@@ -29,14 +29,14 @@ export function QuotationList() {
   };
 
   const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      draft: { label: 'Draft', variant: 'secondary' as const },
-      sent: { label: 'Sent', variant: 'default' as const },
-      accepted: { label: 'Accepted', variant: 'success' as const },
-      rejected: { label: 'Rejected', variant: 'destructive' as const },
+    const statusConfig: Record<string, { label: string; variant: any }> = {
+      draft: { label: 'Draft', variant: 'secondary' },
+      sent: { label: 'Sent', variant: 'default' },
+      accepted: { label: 'Accepted', variant: 'outline' },
+      rejected: { label: 'Rejected', variant: 'destructive' },
     };
 
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.draft;
+    const config = statusConfig[status] || statusConfig.draft;
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
@@ -120,7 +120,7 @@ export function QuotationList() {
                         {formatCurrency(quotation.total)}
                       </div>
                       <div className="text-xs text-gray-500">
-                        {formatCurrency(quotation.subtotal)} + {formatCurrency(quotation.tax)}
+                        {formatCurrency(quotation.subtotal)} + {formatCurrency(quotation.tax || 0)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

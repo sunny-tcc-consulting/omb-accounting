@@ -20,7 +20,7 @@ import { toast } from 'sonner';
 const invoiceFormSchema = z.object({
   customerId: z.string().min(1, 'Please select a customer'),
   customerName: z.string().min(1, 'Customer name is required'),
-  customerEmail: z.string().email('Invalid email address'),
+  customerEmail: z.string().min(1, 'Customer email is required').email('Invalid email address'),
   customerPhone: z.string().optional(),
   items: z.array(
     z.object({
@@ -51,7 +51,15 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ initialData, onSuccess
   const { addInvoice } = useInvoices();
   const { customers } = useCustomers();
 
-  const [items, setItems] = useState<InvoiceItem[]>(initialData?.items || [{ id: '', description: '', quantity: 1, unitPrice: 0, taxRate: 0, discount: 0 }]);
+  const [items, setItems] = useState<InvoiceItem[]>(initialData?.items || [{
+    id: '',
+    description: '',
+    quantity: 1,
+    unitPrice: 0,
+    taxRate: 0,
+    discount: 0,
+    total: 0
+  }]);
 
   const {
     register,
@@ -61,15 +69,19 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ initialData, onSuccess
   } = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceFormSchema),
     defaultValues: {
-      ...initialData,
-      items: initialData?.items || [{ id: '', description: '', quantity: 1, unitPrice: 0, taxRate: 0, discount: 0 }],
+      customerId: initialData?.customerId || '',
+      customerName: initialData?.customerName || '',
+      customerEmail: initialData?.customerEmail || '',
+      customerPhone: initialData?.customerPhone || '',
+      items: initialData?.items || [{ id: '', description: '', quantity: 1, unitPrice: 0, taxRate: 0, discount: 0, total: 0 }],
       currency: initialData?.currency || 'HKD',
       taxRate: initialData?.taxRate || 0,
       paymentTerms: initialData?.paymentTerms || 'Due within 30 days',
       issuedDate: initialData?.issuedDate || new Date(),
       dueDate: initialData?.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      notes: initialData?.notes || '',
     },
-  });
+  } as any);
 
   // Watch for changes to recalculate totals
   const currency = watch('currency');
@@ -270,7 +282,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ initialData, onSuccess
                   min="0"
                   max="100"
                   step="0.1"
-                  value={item.taxRate * 100 || 0}
+                  value={(item.taxRate || 0) * 100}
                   onChange={(e) => handleUpdateItem(index, 'taxRate', parseFloat(e.target.value) / 100 || 0)}
                   disabled={isSubmitting}
                 />

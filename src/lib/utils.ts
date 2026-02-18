@@ -60,7 +60,7 @@ export function formatPercentage(value: number, decimals: number = 1): string {
 // Calculate percentage
 export function calculatePercentage(part: number, total: number, decimals: number = 1): number {
   if (total === 0) return 0;
-  return ((part / total) * 100).toFixed(decimals);
+  return parseFloat(((part / total) * 100).toFixed(decimals));
 }
 
 // Calculate difference

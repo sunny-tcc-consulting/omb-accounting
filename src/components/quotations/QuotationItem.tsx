@@ -11,14 +11,14 @@ export function QuotationItem({ quotation }: { quotation: any }) {
   const customers = getFilteredCustomers();
 
   const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      draft: { label: '草稿', variant: 'secondary' as const },
-      sent: { label: '已發送', variant: 'default' as const },
-      accepted: { label: '已接受', variant: 'success' as const },
-      rejected: { label: '已拒絕', variant: 'destructive' as const },
+    const statusConfig: Record<string, { label: string; variant: any }> = {
+      draft: { label: '草稿', variant: 'secondary' },
+      sent: { label: '已發送', variant: 'default' },
+      accepted: { label: '已接受', variant: 'outline' },
+      rejected: { label: '已拒絕', variant: 'destructive' },
     };
 
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.draft;
+    const config = statusConfig[status] || statusConfig.draft;
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
