@@ -10,7 +10,6 @@ import { FormLoadingIndicator } from "./form-status";
 import { FormResetButton } from "./form-reset";
 import { Button } from "./button";
 import { cn } from "@/lib/utils";
-import { z as zod } from "zod";
 
 export interface AdvancedFormProps<T extends z.ZodType<any, any, any>, V extends z.infer<T>>
   extends React.HTMLAttributes<HTMLFormElement> {
@@ -27,7 +26,7 @@ export interface AdvancedFormProps<T extends z.ZodType<any, any, any>, V extends
   children: React.ReactNode;
 }
 
-export const AdvancedForm = forwardRef<HTMLFormElement, AdvancedFormProps<any, any>>(
+export const AdvancedForm = forwardRef<HTMLFormElement, AdvancedFormProps<z.ZodType<any, any, any>, z.infer<z.ZodType<any, any, any>>>>(
   (
     {
       schema,
@@ -46,7 +45,8 @@ export const AdvancedForm = forwardRef<HTMLFormElement, AdvancedFormProps<any, a
     },
     ref
   ) => {
-    const { reset, formState } = useFormContext();
+    const context = useFormContext();
+    const { reset, formState } = context || { reset: () => {}, formState: { isSubmitting: false } };
     const [isSubmitting, setIsSubmitting] = React.useState(false);
     const [isSuccess, setIsSuccess] = React.useState(false);
     const [error, setError] = React.useState<Error | null>(null);
@@ -59,7 +59,7 @@ export const AdvancedForm = forwardRef<HTMLFormElement, AdvancedFormProps<any, a
 
       try {
         const formData = new FormData(e.currentTarget);
-        const data = Object.fromEntries(formData.entries()) as any;
+        const data = Object.fromEntries(formData.entries()) as Record<string, unknown>;
 
         // Validate with schema
         const validatedData = schema.parse(data);
@@ -70,25 +70,25 @@ export const AdvancedForm = forwardRef<HTMLFormElement, AdvancedFormProps<any, a
         if (resetAfter) {
           setTimeout(() => {
             setIsSuccess(false);
-            reset();
+            reset?.();
           }, resetAfter);
         }
       } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
+        const errObj = err instanceof Error ? err : new Error(String(err));
+        setError(errObj);
       } finally {
         setIsSubmitting(false);
       }
     };
 
     const handleCancel = () => {
-      reset();
+      reset?.();
       setIsSuccess(false);
       setError(null);
     };
 
     const handleReset = () => {
-      reset();
+      reset?.();
       setIsSuccess(false);
       setError(null);
     };

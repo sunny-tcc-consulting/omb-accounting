@@ -4,9 +4,8 @@ import { useState, useCallback } from "react";
 import { useFormContext } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
-import { useFormStatus } from "@/components/ui/form-status";
 
-export interface UseFormSubmitOptions<T extends z.ZodType<any, any, any>> {
+interface UseFormSubmitOptions<T extends z.ZodType<any, any, any>> {
   schema: T;
   onSuccess?: (data: z.infer<T>) => void;
   onError?: (error: Error) => void;
@@ -18,7 +17,6 @@ export interface UseFormSubmitOptions<T extends z.ZodType<any, any, any>> {
 }
 
 export function useFormSubmit<T extends z.ZodType<any, any, any>>({
-  schema,
   onSuccess,
   onError,
   successMessage,
@@ -28,13 +26,9 @@ export function useFormSubmit<T extends z.ZodType<any, any, any>>({
   showLoadingIndicator = true,
 }: UseFormSubmitOptions<T>) {
   const { trigger, reset } = useFormContext();
-  const formStatus = useFormStatus({
-    onSuccess,
-    onError,
-    successMessage,
-    errorMessage,
-    resetAfter,
-  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
   const handleSubmit = useCallback(
     async (data: z.infer<T>) => {
@@ -43,87 +37,103 @@ export function useFormSubmit<T extends z.ZodType<any, any, any>>({
         await trigger(data);
 
         // If validation passes, proceed with submission
-        return await formStatus.submit(
-          async () => {
-            return data;
-          },
-          (submittedData) => {
-            if (onSuccess) {
-              onSuccess(submittedData);
-            }
-            if (showSuccessIndicator) {
-              toast.success(successMessage || "Operation successful!");
-            }
-            return submittedData;
+        setIsSubmitting(true);
+        setIsSuccess(false);
+        setError(null);
+
+        try {
+          // Simulate or perform the actual submission
+          if (onSuccess) {
+            await onSuccess(data);
           }
-        );
-      } catch (error) {
-        if (error instanceof Error) {
+          if (showSuccessIndicator) {
+            toast.success(successMessage || "Operation successful!");
+          }
+          setIsSuccess(true);
+
+          // Reset after delay if specified
+          if (resetAfter) {
+            setTimeout(() => {
+              setIsSuccess(false);
+            }, resetAfter);
+          }
+
+          return data;
+        } catch (submitError) {
+          const err = submitError instanceof Error ? submitError : new Error(String(submitError));
+          setError(err);
           if (onError) {
-            onError(error);
+            onError(err);
+          }
+          throw err;
+        }
+      } catch (validationError) {
+        if (validationError instanceof Error) {
+          if (onError) {
+            onError(validationError);
           }
         }
-        throw error;
+        throw validationError;
+      } finally {
+        setIsSubmitting(false);
       }
     },
-    [trigger, formStatus, onSuccess, onError, successMessage, showSuccessIndicator]
+    [trigger, onSuccess, onError, successMessage, showSuccessIndicator, resetAfter]
   );
 
   const resetForm = useCallback(() => {
     reset();
-    formStatus.reset();
-  }, [reset, formStatus]);
+    setIsSuccess(false);
+    setError(null);
+  }, [reset]);
 
   return {
-    ...formStatus,
+    isSubmitting,
+    isSuccess,
+    error,
     handleSubmit,
     resetForm,
+    submit: handleSubmit,
   };
 }
 
 export function useFormWithValidation<T extends z.ZodType<any, any, any>>({
-  schema,
   onSuccess,
   onError,
   successMessage,
   errorMessage,
   resetAfter,
 }: UseFormSubmitOptions<T>) {
+  const { trigger, clearErrors, reset } = useFormContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [isValid, setIsValid] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const { trigger, clearErrors, reset } = useFormContext();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const validateForm = useCallback(async (data: z.infer<T>): Promise<boolean> => {
+    setIsValidating(true);
+    try {
+      await trigger(data);
+      setIsValid(true);
+      return true;
+    } catch {
+      setIsValid(false);
+      return false;
+    } finally {
+      setIsValidating(false);
+    }
+  }, [trigger]);
 
-  const validateForm = useCallback(
-    async (data: z.infer<T>) => {
-      setIsValidating(true);
-      try {
-        await trigger(data);
-        setIsValid(true);
-        return true;
-      } catch {
-        setIsValid(false);
-        return false;
-      } finally {
-        setIsValidating(false);
-      }
-    },
-    [trigger]
-  );
-
-  const handleBlur = useCallback(
-    async (fieldName: string) => {
-      try {
-        await trigger(fieldName as any);
-      } catch {
-        // Error will be caught by react-hook-form's formState.errors
-      }
-    },
-    [trigger]
-  );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleBlur = useCallback(async (fieldName: string) => {
+    try {
+      await trigger(fieldName as any);
+    } catch {
+      // Error will be caught by react-hook-form's formState.errors
+    }
+  }, [trigger]);
 
   const handleChange = useCallback(
     async (fieldName: string) => {
@@ -155,7 +165,7 @@ export function useFormWithValidation<T extends z.ZodType<any, any, any>>({
           toast.success(successMessage);
         }
         if (onSuccess) {
-          onSuccess(data);
+          await onSuccess(data);
         }
 
         // Reset after delay
@@ -167,16 +177,16 @@ export function useFormWithValidation<T extends z.ZodType<any, any, any>>({
 
         return data;
       } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
+        const errObj = err instanceof Error ? err : new Error(String(err));
+        setError(errObj);
         if (errorMessage) {
           toast.error(errorMessage);
         }
         if (onError) {
-          onError(error);
+          onError(errObj);
         }
-        console.error("Form submission error:", error);
-        throw error;
+        console.error("Form submission error:", errObj);
+        throw errObj;
       } finally {
         setIsSubmitting(false);
       }

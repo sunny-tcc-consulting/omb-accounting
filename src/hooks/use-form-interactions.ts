@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from "react";
 import { useFormContext } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 export interface UseFormInteractionsOptions<T extends z.ZodType<any, any, any>> {
@@ -23,31 +22,28 @@ export function useFormInteractions<T extends z.ZodType<any, any, any>>({
     clearErrors,
     getValues,
     setValue,
-    watch,
   } = useFormContext();
 
   const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
   const [isValidating, setIsValidating] = useState<Record<string, boolean>>({});
   const [isValidatedFields, setIsValidatedFields] = useState<Record<string, boolean>>({});
 
-  const validateField = useCallback(
-    async (fieldName: string) => {
-      setIsValidating((prev) => ({ ...prev, [fieldName]: true }));
-      try {
-        await trigger(fieldName as any);
-        setIsValidatedFields((prev) => ({ ...prev, [fieldName]: true }));
-        return true;
-      } catch {
-        setIsValidatedFields((prev) => ({ ...prev, [fieldName]: false }));
-        return false;
-      } finally {
-        setIsValidating((prev) => ({ ...prev, [fieldName]: false }));
-      }
-    },
-    [trigger]
-  );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const validateField = useCallback(async (fieldName: string): Promise<boolean> => {
+    setIsValidating((prev) => ({ ...prev, [fieldName]: true }));
+    try {
+      await trigger(fieldName as any);
+      setIsValidatedFields((prev) => ({ ...prev, [fieldName]: true }));
+      return true;
+    } catch {
+      setIsValidatedFields((prev) => ({ ...prev, [fieldName]: false }));
+      return false;
+    } finally {
+      setIsValidating((prev) => ({ ...prev, [fieldName]: false }));
+    }
+  }, [trigger]);
 
-  const validateAll = useCallback(async () => {
+  const validateAll = useCallback(async (): Promise<boolean> => {
     try {
       await trigger();
       setIsValidatedFields((prev) => {
@@ -64,7 +60,7 @@ export function useFormInteractions<T extends z.ZodType<any, any, any>>({
   }, [trigger, getValues]);
 
   const handleBlur = useCallback(
-    async (fieldName: string) => {
+    async (fieldName: string): Promise<boolean> => {
       setTouchedFields((prev) => ({ ...prev, [fieldName]: true }));
 
       if (autoValidate || validateOnBlur) {
@@ -78,7 +74,7 @@ export function useFormInteractions<T extends z.ZodType<any, any, any>>({
   );
 
   const handleChange = useCallback(
-    async (fieldName: string) => {
+    async (fieldName: string): Promise<boolean> => {
       if (validateOnChange) {
         return await validateField(fieldName);
       }
@@ -137,12 +133,12 @@ export function useFieldValidation<T extends z.ZodType<any, any, any>>(
   schema: T,
   fieldName: string
 ) {
-  const { trigger, clearErrors, getValues } = useFormContext();
+  const { trigger, clearErrors } = useFormContext();
   const [isTouched, setIsTouched] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [isValid, setIsValid] = useState(false);
 
-  const validate = useCallback(async () => {
+  const validate = useCallback(async (): Promise<boolean> => {
     setIsValidating(true);
     try {
       await trigger(fieldName as any);
