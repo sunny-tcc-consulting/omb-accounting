@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 
 interface SkeletonScreenProps {
-  type: 'customer' | 'quotation' | 'invoice' | 'dashboard';
+  type: "customer" | "quotation" | "invoice" | "dashboard";
   count?: number;
 }
 
@@ -15,7 +15,7 @@ export function SkeletonScreen({ type, count = 1 }: SkeletonScreenProps) {
   const skeletons = Array.from({ length: count }).map((_, index) => (
     <div
       key={index}
-      className={cn('animate-pulse', getSkeletonClasses(type))}
+      className={cn("animate-pulse", getSkeletonClasses(type))}
       role="status"
       aria-label="loading"
     >
@@ -26,15 +26,21 @@ export function SkeletonScreen({ type, count = 1 }: SkeletonScreenProps) {
   return <div className="skeleton-container">{skeletons}</div>;
 }
 
+export function Skeleton({ className }: { className?: string }) {
+  return (
+    <div className={`animate-pulse bg-gray-200 rounded ${className || ""}`} />
+  );
+}
+
 /**
  * Gets CSS classes for skeleton based on type
  */
 function getSkeletonClasses(type: string): string {
   const classes: Record<string, string> = {
-    customer: 'space-y-3 p-4 bg-gray-100 rounded-lg',
-    quotation: 'space-y-2 p-4 bg-gray-100 rounded-lg',
-    invoice: 'space-y-2 p-4 bg-gray-100 rounded-lg',
-    dashboard: 'grid gap-4',
+    customer: "space-y-3 p-4 bg-gray-100 rounded-lg",
+    quotation: "space-y-2 p-4 bg-gray-100 rounded-lg",
+    invoice: "space-y-2 p-4 bg-gray-100 rounded-lg",
+    dashboard: "grid gap-4",
   };
   return classes[type] || classes.dashboard;
 }
@@ -44,7 +50,7 @@ function getSkeletonClasses(type: string): string {
  */
 function getSkeletonContent(type: string): React.ReactNode {
   switch (type) {
-    case 'customer':
+    case "customer":
       return (
         <>
           <div className="h-6 bg-gray-300 rounded w-1/3" />
@@ -55,7 +61,7 @@ function getSkeletonContent(type: string): React.ReactNode {
         </>
       );
 
-    case 'quotation':
+    case "quotation":
       return (
         <>
           <div className="h-6 bg-gray-300 rounded w-1/4" />
@@ -65,7 +71,7 @@ function getSkeletonContent(type: string): React.ReactNode {
         </>
       );
 
-    case 'invoice':
+    case "invoice":
       return (
         <>
           <div className="h-6 bg-gray-300 rounded w-1/3" />
@@ -75,7 +81,7 @@ function getSkeletonContent(type: string): React.ReactNode {
         </>
       );
 
-    case 'dashboard':
+    case "dashboard":
       return (
         <>
           <div className="h-24 bg-gray-300 rounded-lg" />

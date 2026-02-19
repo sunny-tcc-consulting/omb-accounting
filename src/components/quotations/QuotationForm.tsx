@@ -1,32 +1,49 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Quotation, Customer } from '@/types';
-import { useQuotations } from '@/contexts/QuotationContext';
-import { useCustomers } from '@/contexts/CustomerContext';
-import { formatCurrency } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from 'sonner';
-import { FileText, Plus, Trash2 } from 'lucide-react';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Quotation, QuotationItem } from "@/types";
+import { useQuotations } from "@/contexts/QuotationContext";
+import { useCustomers } from "@/contexts/CustomerContext";
+import { formatCurrency } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
+import { FileText, Plus, Trash2 } from "lucide-react";
 
 const quotationSchema = z.object({
-  customerId: z.string().min(1, 'Please select a customer'),
-  items: z.array(
-    z.object({
-      description: z.string().min(1, 'Please enter description').max(200, 'Description cannot exceed 200 characters'),
-      quantity: z.number().min(1, 'Quantity must be greater than 0').default(1),
-      unitPrice: z.number().min(0.01, 'Unit price must be greater than 0').default(0),
-      taxRate: z.number().optional(),
-      discount: z.number().min(0).default(0),
-    })
-  ).min(1, 'At least one item is required'),
+  customerId: z.string().min(1, "Please select a customer"),
+  items: z
+    .array(
+      z.object({
+        description: z
+          .string()
+          .min(1, "Please enter description")
+          .max(200, "Description cannot exceed 200 characters"),
+        quantity: z
+          .number()
+          .min(1, "Quantity must be greater than 0")
+          .default(1),
+        unitPrice: z
+          .number()
+          .min(0.01, "Unit price must be greater than 0")
+          .default(0),
+        taxRate: z.number().optional(),
+        discount: z.number().min(0).default(0),
+      }),
+    )
+    .min(1, "At least one item is required"),
   validityPeriod: z.date(),
   notes: z.string().optional(),
   termsAndConditions: z.string().optional(),
@@ -43,18 +60,56 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
   const { addQuotation, generateQuotationNumber } = useQuotations();
   const { getFilteredCustomers } = useCustomers();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [items, setItems] = useState<any[]>([{ description: '', quantity: 1, unitPrice: 0, taxRate: undefined, discount: 0 }]);
+  const [items, setItems] = useState<QuotationItem[]>([
+    {
+      id: "",
+      description: "",
+      quantity: 1,
+      unitPrice: 0,
+      taxRate: undefined,
+      discount: 0,
+      total: 0,
+    },
+  ]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<QuotationFormData>({
-    resolver: zodResolver(quotationSchema),
-    defaultValues: {
-      items: [{ id: '', description: '', quantity: 1, unitPrice: 0, taxRate: 0, discount: 0 }],
-    },
-  } as any);
+    clearErrors,
+    trigger,
+  } = useForm<QuotationFormData>(
+    {
+      resolver: zodResolver(quotationSchema),
+      defaultValues: {
+        items: [
+          {
+            id: "",
+            description: "",
+            quantity: 1,
+            unitPrice: 0,
+            taxRate: 0,
+            discount: 0,
+          },
+        ],
+      },
+    } as any /* eslint-disable-line @typescript-eslint/no-explicit-any */,
+  );
+
+  // Debounce validation
+  const debouncedValidate = debounce((fieldName: string) => {
+    trigger(
+      fieldName as unknown as any /* eslint-disable-line @typescript-eslint/no-explicit-any */,
+    );
+  }, 300);
+
+  const handleBlur = (fieldName: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    clearErrors(fieldName as unknown as any);
+    debouncedValidate(fieldName);
+  };
 
   const onSubmitHandler = async (data: QuotationFormData) => {
     setIsSubmitting(true);
@@ -63,13 +118,14 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
       const customer = customers.find((c) => c.id === data.customerId);
 
       if (!customer) {
-        toast.error('Customer does not exist');
+        toast.error("Customer does not exist");
         return;
       }
 
       // Calculate totals
       const subtotal = items.reduce((sum, item) => {
-        const total = item.quantity * item.unitPrice * (1 - item.discount / 100);
+        const total =
+          item.quantity * item.unitPrice * (1 - (item.discount || 0) / 100);
         return sum + total;
       }, 0);
 
@@ -84,21 +140,23 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
         customerEmail: customer.email,
         customerPhone: customer.phone,
         items,
-        currency: 'CNY',
+        currency: "CNY",
         subtotal,
         tax,
         total,
         validityPeriod: data.validityPeriod,
-        status: 'draft',
+        status: "draft",
         issuedDate: new Date(),
-        termsAndConditions: data.termsAndConditions || 'Payment due within 30 days. All prices are in CNY.',
+        termsAndConditions:
+          data.termsAndConditions ||
+          "Payment due within 30 days. All prices are in CNY.",
       };
 
       await addQuotation(newQuotation);
       onSubmit(newQuotation);
-      toast.success('Quotation created successfully!');
+      toast.success("Quotation created successfully!");
     } catch (error) {
-      toast.error('Failed to create quotation, please try again');
+      toast.error("Failed to create quotation, please try again");
       console.error(error);
     } finally {
       setIsSubmitting(false);
@@ -106,7 +164,18 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
   };
 
   const addItem = () => {
-    setItems([...items, { description: '', quantity: 1, unitPrice: 0, taxRate: undefined, discount: 0 }]);
+    setItems([
+      ...items,
+      {
+        id: "",
+        description: "",
+        quantity: 1,
+        unitPrice: 0,
+        taxRate: undefined,
+        discount: 0,
+        total: 0,
+      },
+    ]);
   };
 
   const removeItem = (index: number) => {
@@ -115,18 +184,21 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
     }
   };
 
-  const updateItem = (index: number, field: string, value: any) => {
+  const updateItem = (index: number, field: string, value: number) => {
     const newItems = [...items];
     newItems[index] = { ...newItems[index], [field]: value };
     setItems(newItems);
   };
 
-  const calculateItemTotal = (item: any) => {
-    return (item.quantity * item.unitPrice) * (1 - item.discount / 100);
+  const calculateItemTotal = (item: QuotationItem) => {
+    return item.quantity * item.unitPrice * (1 - (item.discount || 0) / 100);
   };
 
   const calculateTotal = () => {
-    const subtotal = items.reduce((sum, item) => sum + calculateItemTotal(item), 0);
+    const subtotal = items.reduce(
+      (sum, item) => sum + calculateItemTotal(item),
+      0,
+    );
     const tax = subtotal * 0.1;
     return subtotal + tax;
   };
@@ -139,7 +211,12 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
           Customer <span className="text-red-500">*</span>
         </Label>
         <Select>
-          <SelectTrigger>
+          <SelectTrigger
+            onBlur={() => handleBlur("customerId")}
+            className={
+              errors.customerId ? "border-red-500 focus:ring-red-500" : ""
+            }
+          >
             <SelectValue placeholder="Please select a customer" />
           </SelectTrigger>
           <SelectContent>
@@ -151,7 +228,11 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
             ))}
           </SelectContent>
         </Select>
-        {errors.customerId && <p className="text-sm text-red-500">{errors.customerId.message}</p>}
+        {errors.customerId && (
+          <p className="text-sm text-red-500 flex items-center gap-1">
+            <span className="font-bold">{errors.customerId.message}</span>
+          </p>
+        )}
       </div>
 
       {/* Line Items */}
@@ -169,15 +250,33 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
             <div className="flex items-center justify-between">
               <div className="flex-1 space-y-4">
                 <div>
-                  <Label htmlFor={`description-${index}`}>Description <span className="text-red-500">*</span></Label>
+                  <Label htmlFor={`description-${index}`}>
+                    Description <span className="text-red-500">*</span>
+                  </Label>
                   <Input
                     id={`description-${index}`}
                     placeholder="Enter item description"
                     value={item.description}
-                    onChange={(e) => updateItem(index, 'description', e.target.value)}
+                    onChange={(e) =>
+                      updateItem(
+                        index,
+                        "description",
+                        e.target.value as unknown as number,
+                      )
+                    }
+                    onBlur={() => handleBlur(`items.${index}.description`)}
+                    className={
+                      errors.items && errors.items[index]?.description
+                        ? "border-red-500 focus:ring-red-500"
+                        : ""
+                    }
                   />
                   {errors.items && errors.items[index]?.description && (
-                    <p className="text-sm text-red-500">{errors.items[index].description.message}</p>
+                    <p className="text-sm text-red-500 flex items-center gap-1">
+                      <span className="font-bold">
+                        {errors.items[index].description.message}
+                      </span>
+                    </p>
                   )}
                 </div>
 
@@ -189,7 +288,19 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
                       type="number"
                       min="1"
                       value={item.quantity}
-                      onChange={(e) => updateItem(index, 'quantity', parseFloat(e.target.value) || 0)}
+                      onChange={(e) =>
+                        updateItem(
+                          index,
+                          "quantity",
+                          parseFloat(e.target.value) || 0,
+                        )
+                      }
+                      onBlur={() => handleBlur(`items.${index}.quantity`)}
+                      className={
+                        errors.items && errors.items[index]?.quantity
+                          ? "border-red-500 focus:ring-red-500"
+                          : ""
+                      }
                     />
                   </div>
 
@@ -201,7 +312,19 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
                       min="0"
                       step="0.01"
                       value={item.unitPrice}
-                      onChange={(e) => updateItem(index, 'unitPrice', parseFloat(e.target.value) || 0)}
+                      onChange={(e) =>
+                        updateItem(
+                          index,
+                          "unitPrice",
+                          parseFloat(e.target.value) || 0,
+                        )
+                      }
+                      onBlur={() => handleBlur(`items.${index}.unitPrice`)}
+                      className={
+                        errors.items && errors.items[index]?.unitPrice
+                          ? "border-red-500 focus:ring-red-500"
+                          : ""
+                      }
                     />
                   </div>
 
@@ -213,7 +336,19 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
                       min="0"
                       step="0.01"
                       value={item.discount}
-                      onChange={(e) => updateItem(index, 'discount', parseFloat(e.target.value) || 0)}
+                      onChange={(e) =>
+                        updateItem(
+                          index,
+                          "discount",
+                          parseFloat(e.target.value) || 0,
+                        )
+                      }
+                      onBlur={() => handleBlur(`items.${index}.discount`)}
+                      className={
+                        errors.items && errors.items[index]?.discount
+                          ? "border-red-500 focus:ring-red-500"
+                          : ""
+                      }
                     />
                   </div>
                 </div>
@@ -249,7 +384,9 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
       <div className="border-t pt-4 space-y-2">
         <div className="flex justify-between">
           <span>Subtotal:</span>
-          <span>{formatCurrency(calculateTotal() - calculateTotal() * 0.1)}</span>
+          <span>
+            {formatCurrency(calculateTotal() - calculateTotal() * 0.1)}
+          </span>
         </div>
         <div className="flex justify-between">
           <span>Tax (10%):</span>
@@ -257,7 +394,9 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
         </div>
         <div className="flex justify-between text-xl font-bold">
           <span>Total:</span>
-          <span className="text-green-600">{formatCurrency(calculateTotal())}</span>
+          <span className="text-green-600">
+            {formatCurrency(calculateTotal())}
+          </span>
         </div>
       </div>
 
@@ -270,9 +409,17 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
           <Input
             id="validityPeriod"
             type="date"
-            {...register('validityPeriod', { valueAsDate: true })}
+            {...register("validityPeriod", { valueAsDate: true })}
+            onBlur={() => handleBlur("validityPeriod")}
+            className={
+              errors.validityPeriod ? "border-red-500 focus:ring-red-500" : ""
+            }
           />
-          {errors.validityPeriod && <p className="text-sm text-red-500">{errors.validityPeriod.message}</p>}
+          {errors.validityPeriod && (
+            <p className="text-sm text-red-500 flex items-center gap-1">
+              <span className="font-bold">{errors.validityPeriod.message}</span>
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -290,8 +437,9 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
         <Textarea
           id="notes"
           placeholder="Enter notes"
-          {...register('notes')}
+          {...register("notes")}
           className="min-h-[80px]"
+          onBlur={() => handleBlur("notes")}
         />
       </div>
 
@@ -301,14 +449,15 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
         <Textarea
           id="termsAndConditions"
           placeholder="Enter payment terms and conditions"
-          {...register('termsAndConditions')}
+          {...register("termsAndConditions")}
           className="min-h-[80px]"
+          onBlur={() => handleBlur("termsAndConditions")}
         />
       </div>
 
       <div className="flex gap-3 pt-4">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Creating...' : 'Create Quotation'}
+          {isSubmitting ? "Creating..." : "Create Quotation"}
         </Button>
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
@@ -316,4 +465,24 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
       </div>
     </form>
   );
+}
+
+// Debounce utility function
+function debounce<T extends (...args: unknown[]) => void>(
+  func: T,
+  wait: number,
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout | null = null;
+
+  return function executedFunction(...args: Parameters<T>) {
+    const later = () => {
+      timeout = null;
+      func(...args);
+    };
+
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+    timeout = setTimeout(later, wait);
+  };
 }

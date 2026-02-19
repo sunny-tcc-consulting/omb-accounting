@@ -41,6 +41,11 @@ global.ResizeObserver = class ResizeObserver {
   unobserve() {}
 }
 
+// Mock navigator.clipboard
+global.navigator.clipboard = {
+  writeText: jest.fn(),
+};
+
 // Mock jsPDF
 jest.mock('jspdf', () => {
   const jsPDFMock = jest.fn(() => {

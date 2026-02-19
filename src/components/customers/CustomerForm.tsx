@@ -1,22 +1,27 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Customer } from '@/types';
-import { useCustomers } from '@/contexts/CustomerContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from 'sonner';
-import { User, Mail, Phone, Building, MapPin, FileText } from 'lucide-react';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useCustomers } from "@/contexts/CustomerContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
+import { User, Mail, Phone, Building, MapPin, FileText } from "lucide-react";
+import { Customer } from "@/types";
 
 const customerSchema = z.object({
-  name: z.string().min(1, 'Name is required').max(100, 'Name cannot exceed 100 characters'),
-  email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .max(100, "Name cannot exceed 100 characters"),
+  email: z
+    .string()
+    .min(1, "Email is required")
+    .email("Please enter a valid email address"),
   phone: z.string().optional(),
   address: z.string().optional(),
   company: z.string().optional(),
@@ -39,9 +44,17 @@ export function CustomerForm({ onSubmit, onCancel }: CustomerFormProps) {
     register,
     handleSubmit,
     formState: { errors },
+    clearErrors,
+    trigger,
   } = useForm<CustomerFormData>({
     resolver: zodResolver(customerSchema),
   });
+
+  const handleBlur = (fieldName: keyof CustomerFormData) => {
+    clearErrors(fieldName);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    trigger({ [fieldName]: true } as any);
+  };
 
   const onSubmitHandler = async (data: CustomerFormData) => {
     setIsSubmitting(true);
@@ -54,9 +67,9 @@ export function CustomerForm({ onSubmit, onCancel }: CustomerFormProps) {
 
       await addCustomer(newCustomer);
       onSubmit(newCustomer);
-      toast.success('Customer created successfully!');
+      toast.success("Customer created successfully!");
     } catch (error) {
-      toast.error('Failed to create customer, please try again');
+      toast.error("Failed to create customer, please try again");
       console.error(error);
     } finally {
       setIsSubmitting(false);
@@ -75,11 +88,16 @@ export function CustomerForm({ onSubmit, onCancel }: CustomerFormProps) {
             <Input
               id="name"
               placeholder="Enter name or company name"
-              {...register('name')}
-              className="pl-10"
+              {...register("name")}
+              className={`pl-10 ${errors.name ? "border-red-500 focus:ring-red-500" : ""}`}
+              onBlur={() => handleBlur("name")}
             />
           </div>
-          {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
+          {errors.name && (
+            <p className="text-sm text-red-500 flex items-center gap-1">
+              <span className="font-bold">{errors.name.message}</span>
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -92,11 +110,16 @@ export function CustomerForm({ onSubmit, onCancel }: CustomerFormProps) {
               id="email"
               type="email"
               placeholder="customer@example.com"
-              {...register('email')}
-              className="pl-10"
+              {...register("email")}
+              className={`pl-10 ${errors.email ? "border-red-500 focus:ring-red-500" : ""}`}
+              onBlur={() => handleBlur("email")}
             />
           </div>
-          {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
+          {errors.email && (
+            <p className="text-sm text-red-500 flex items-center gap-1">
+              <span className="font-bold">{errors.email.message}</span>
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -106,11 +129,16 @@ export function CustomerForm({ onSubmit, onCancel }: CustomerFormProps) {
             <Input
               id="phone"
               placeholder="13800138000"
-              {...register('phone')}
-              className="pl-10"
+              {...register("phone")}
+              className={`pl-10 ${errors.phone ? "border-red-500 focus:ring-red-500" : ""}`}
+              onBlur={() => handleBlur("phone")}
             />
           </div>
-          {errors.phone && <p className="text-sm text-red-500">{errors.phone.message}</p>}
+          {errors.phone && (
+            <p className="text-sm text-red-500 flex items-center gap-1">
+              <span className="font-bold">{errors.phone.message}</span>
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -120,11 +148,16 @@ export function CustomerForm({ onSubmit, onCancel }: CustomerFormProps) {
             <Input
               id="company"
               placeholder="Enter company name"
-              {...register('company')}
-              className="pl-10"
+              {...register("company")}
+              className={`pl-10 ${errors.company ? "border-red-500 focus:ring-red-500" : ""}`}
+              onBlur={() => handleBlur("company")}
             />
           </div>
-          {errors.company && <p className="text-sm text-red-500">{errors.company.message}</p>}
+          {errors.company && (
+            <p className="text-sm text-red-500 flex items-center gap-1">
+              <span className="font-bold">{errors.company.message}</span>
+            </p>
+          )}
         </div>
 
         <div className="space-y-2 md:col-span-2">
@@ -134,11 +167,16 @@ export function CustomerForm({ onSubmit, onCancel }: CustomerFormProps) {
             <Textarea
               id="address"
               placeholder="Enter address"
-              {...register('address')}
-              className="min-h-[100px] pl-10"
+              {...register("address")}
+              className={`min-h-[100px] pl-10 ${errors.address ? "border-red-500 focus:ring-red-500" : ""}`}
+              onBlur={() => handleBlur("address")}
             />
           </div>
-          {errors.address && <p className="text-sm text-red-500">{errors.address.message}</p>}
+          {errors.address && (
+            <p className="text-sm text-red-500 flex items-center gap-1">
+              <span className="font-bold">{errors.address.message}</span>
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -148,11 +186,16 @@ export function CustomerForm({ onSubmit, onCancel }: CustomerFormProps) {
             <Input
               id="taxId"
               placeholder="Enter tax ID"
-              {...register('taxId')}
-              className="pl-10"
+              {...register("taxId")}
+              className={`pl-10 ${errors.taxId ? "border-red-500 focus:ring-red-500" : ""}`}
+              onBlur={() => handleBlur("taxId")}
             />
           </div>
-          {errors.taxId && <p className="text-sm text-red-500">{errors.taxId.message}</p>}
+          {errors.taxId && (
+            <p className="text-sm text-red-500 flex items-center gap-1">
+              <span className="font-bold">{errors.taxId.message}</span>
+            </p>
+          )}
         </div>
 
         <div className="space-y-2 md:col-span-2">
@@ -160,7 +203,7 @@ export function CustomerForm({ onSubmit, onCancel }: CustomerFormProps) {
           <Textarea
             id="notes"
             placeholder="Enter notes"
-            {...register('notes')}
+            {...register("notes")}
             className="min-h-[80px]"
           />
         </div>
@@ -168,7 +211,7 @@ export function CustomerForm({ onSubmit, onCancel }: CustomerFormProps) {
 
       <div className="flex gap-3 pt-4">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Creating...' : 'Create Customer'}
+          {isSubmitting ? "Creating..." : "Create Customer"}
         </Button>
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
