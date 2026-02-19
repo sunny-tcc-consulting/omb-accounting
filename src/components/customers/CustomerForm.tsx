@@ -6,9 +6,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useCustomers } from "@/contexts/CustomerContext";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { FormInput, FormTextarea } from "@/components/ui/form-input";
+import { FormSuccessIndicator } from "@/components/ui/form-status";
+import { FormErrorIndicator } from "@/components/ui/form-status";
+import { FormResetButton } from "@/components/ui/form-reset";
+import { FormFieldWrapper } from "@/components/ui/advanced-form";
 import { toast } from "sonner";
 import { User, Mail, Phone, Building, MapPin, FileText } from "lucide-react";
 import { Customer } from "@/types";
@@ -39,25 +41,31 @@ interface CustomerFormProps {
 export function CustomerForm({ onSubmit, onCancel }: CustomerFormProps) {
   const { addCustomer } = useCustomers();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    clearErrors,
     trigger,
+    clearErrors,
   } = useForm<CustomerFormData>({
     resolver: zodResolver(customerSchema),
   });
 
-  const handleBlur = (fieldName: keyof CustomerFormData) => {
+  const handleBlur = async (fieldName: keyof CustomerFormData) => {
     clearErrors(fieldName);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    trigger({ [fieldName]: true } as any);
+    try {
+      await trigger(fieldName as unknown as never);
+    } catch {
+      // Validation error will be shown by react-hook-form
+    }
   };
 
   const onSubmitHandler = async (data: CustomerFormData) => {
     setIsSubmitting(true);
+    setError(null);
+
     try {
       const newCustomer: Customer = {
         id: crypto.randomUUID(),
@@ -68,155 +76,111 @@ export function CustomerForm({ onSubmit, onCancel }: CustomerFormProps) {
       await addCustomer(newCustomer);
       onSubmit(newCustomer);
       toast.success("Customer created successfully!");
-    } catch (error) {
-      toast.error("Failed to create customer, please try again");
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error("Failed to create customer");
+      setError(error);
+      toast.error(error.message);
       console.error(error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleReset = () => {
+    // Form reset will be handled by the form component
+  };
+
   return (
     <form onSubmit={handleSubmit(onSubmitHandler)} className="space-y-6">
+      <FormSuccessIndicator message="Customer created successfully!" />
+
       <div className="grid gap-6 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="name">
-            Name <span className="text-red-500">*</span>
-          </Label>
-          <div className="relative">
-            <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-            <Input
-              id="name"
-              placeholder="Enter name or company name"
-              {...register("name")}
-              className={`pl-10 ${errors.name ? "border-red-500 focus:ring-red-500" : ""}`}
-              onBlur={() => handleBlur("name")}
-            />
-          </div>
-          {errors.name && (
-            <p className="text-sm text-red-500 flex items-center gap-1">
-              <span className="font-bold">{errors.name.message}</span>
-            </p>
-          )}
+        <FormFieldWrapper
+          label="Name"
+          required
+          error={errors.name?.message}
+          icon={<User className="h-4 w-4" />}
+          placeholder="Enter name or company name"
+          {...register("name")}
+          onBlur={() => handleBlur("name")}
+        />
+
+        <FormFieldWrapper
+          label="Email"
+          required
+          error={errors.email?.message}
+          icon={<Mail className="h-4 w-4" />}
+          type="email"
+          placeholder="customer@example.com"
+          {...register("email")}
+          onBlur={() => handleBlur("email")}
+        />
+
+        <FormFieldWrapper
+          label="Phone"
+          error={errors.phone?.message}
+          icon={<Phone className="h-4 w-4" />}
+          placeholder="13800138000"
+          {...register("phone")}
+          onBlur={() => handleBlur("phone")}
+        />
+
+        <FormFieldWrapper
+          label="Company Name"
+          error={errors.company?.message}
+          icon={<Building className="h-4 w-4" />}
+          placeholder="Enter company name"
+          {...register("company")}
+          onBlur={() => handleBlur("company")}
+        />
+
+        <div className="md:col-span-2">
+          <FormFieldWrapper
+            label="Address"
+            error={errors.address?.message}
+            icon={<MapPin className="h-4 w-4" />}
+            placeholder="Enter address"
+            {...register("address")}
+            onBlur={() => handleBlur("address")}
+          />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="email">
-            Email <span className="text-red-500">*</span>
-          </Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-            <Input
-              id="email"
-              type="email"
-              placeholder="customer@example.com"
-              {...register("email")}
-              className={`pl-10 ${errors.email ? "border-red-500 focus:ring-red-500" : ""}`}
-              onBlur={() => handleBlur("email")}
-            />
-          </div>
-          {errors.email && (
-            <p className="text-sm text-red-500 flex items-center gap-1">
-              <span className="font-bold">{errors.email.message}</span>
-            </p>
-          )}
-        </div>
+        <FormFieldWrapper
+          label="Tax ID"
+          error={errors.taxId?.message}
+          icon={<FileText className="h-4 w-4" />}
+          placeholder="Enter tax ID"
+          {...register("taxId")}
+          onBlur={() => handleBlur("taxId")}
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="phone">Phone</Label>
-          <div className="relative">
-            <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-            <Input
-              id="phone"
-              placeholder="13800138000"
-              {...register("phone")}
-              className={`pl-10 ${errors.phone ? "border-red-500 focus:ring-red-500" : ""}`}
-              onBlur={() => handleBlur("phone")}
-            />
-          </div>
-          {errors.phone && (
-            <p className="text-sm text-red-500 flex items-center gap-1">
-              <span className="font-bold">{errors.phone.message}</span>
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="company">Company Name</Label>
-          <div className="relative">
-            <Building className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-            <Input
-              id="company"
-              placeholder="Enter company name"
-              {...register("company")}
-              className={`pl-10 ${errors.company ? "border-red-500 focus:ring-red-500" : ""}`}
-              onBlur={() => handleBlur("company")}
-            />
-          </div>
-          {errors.company && (
-            <p className="text-sm text-red-500 flex items-center gap-1">
-              <span className="font-bold">{errors.company.message}</span>
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="address">Address</Label>
-          <div className="relative">
-            <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-            <Textarea
-              id="address"
-              placeholder="Enter address"
-              {...register("address")}
-              className={`min-h-[100px] pl-10 ${errors.address ? "border-red-500 focus:ring-red-500" : ""}`}
-              onBlur={() => handleBlur("address")}
-            />
-          </div>
-          {errors.address && (
-            <p className="text-sm text-red-500 flex items-center gap-1">
-              <span className="font-bold">{errors.address.message}</span>
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="taxId">Tax ID</Label>
-          <div className="relative">
-            <FileText className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-            <Input
-              id="taxId"
-              placeholder="Enter tax ID"
-              {...register("taxId")}
-              className={`pl-10 ${errors.taxId ? "border-red-500 focus:ring-red-500" : ""}`}
-              onBlur={() => handleBlur("taxId")}
-            />
-          </div>
-          {errors.taxId && (
-            <p className="text-sm text-red-500 flex items-center gap-1">
-              <span className="font-bold">{errors.taxId.message}</span>
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="notes">Notes</Label>
-          <Textarea
-            id="notes"
+        <div className="md:col-span-2">
+          <FormTextarea
+            label="Notes"
             placeholder="Enter notes"
             {...register("notes")}
-            className="min-h-[80px]"
           />
         </div>
       </div>
 
-      <div className="flex gap-3 pt-4">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Creating..." : "Create Customer"}
+      <div className="flex items-center gap-3 pt-4 border-t border-gray-200 dark:border-gray-800">
+        <FormResetButton onClick={handleReset} variant="outline" size="sm" />
+        <Button type="submit" disabled={isSubmitting} className="flex-1">
+          {isSubmitting ? (
+            <span className="flex items-center gap-2">
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              Creating...
+            </span>
+          ) : (
+            "Create Customer"
+          )}
         </Button>
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
           Cancel
         </Button>
       </div>
+
+      <FormErrorIndicator error={error || new Error("Unknown error")} />
     </form>
   );
 }
