@@ -3,10 +3,18 @@
 import { OverviewCard } from "@/components/dashboard/OverviewCard";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
 import { FinancialHealth } from "@/components/dashboard/FinancialHealth";
+import {
+  RevenueChart,
+  ExpenseBreakdown,
+  TransactionTrend,
+  RecentTransactionsChart,
+  FinancialHealthChart,
+} from "@/components/dashboard/charts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { RefreshCw, Search, Filter, TrendingUp, TrendingDown, Wallet, Activity } from "lucide-react";
-import { useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { RefreshCw, Search, Filter, TrendingUp, TrendingDown, Wallet, Activity, Calendar } from "lucide-react";
+import { useState, useMemo } from "react";
 import { useData } from "@/contexts/DataContext";
 
 export default function DashboardPage() {
@@ -14,6 +22,15 @@ export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const { refreshTransactions } = useData();
+
+  // Memoize dashboard data to prevent unnecessary re-renders
+  const dashboardData = useMemo(() => ({
+    totalRevenue: 125430,
+    totalExpenses: 75680,
+    netIncome: 49750,
+    profitMargin: 39.7,
+    lastUpdated: new Date(),
+  }), []);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -128,7 +145,9 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Revenue</p>
-                <p className="text-2xl font-bold text-green-600 dark:text-green-400">$125,430</p>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  ${dashboardData.totalRevenue.toLocaleString()}
+                </p>
               </div>
               <div className="w-12 h-12 bg-green-100 dark:bg-green-950/30 rounded-lg flex items-center justify-center">
                 <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
@@ -142,7 +161,9 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Expenses</p>
-                <p className="text-2xl font-bold text-red-600 dark:text-red-400">$75,680</p>
+                <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                  ${dashboardData.totalExpenses.toLocaleString()}
+                </p>
               </div>
               <div className="w-12 h-12 bg-red-100 dark:bg-red-950/30 rounded-lg flex items-center justify-center">
                 <TrendingDown className="h-6 w-6 text-red-600 dark:text-red-400" />
@@ -156,13 +177,17 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Net Income</p>
-                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">$49,750</p>
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  ${dashboardData.netIncome.toLocaleString()}
+                </p>
               </div>
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-950/30 rounded-lg flex items-center justify-center">
                 <Wallet className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
-            <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">39.7% profit margin</p>
+            <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
+              {dashboardData.profitMargin}% profit margin
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -183,9 +208,12 @@ export default function DashboardPage() {
 
       {/* Main Dashboard Widgets Grid - Responsive with improved layout */}
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 auto-rows-min">
+        <RevenueChart />
+        <ExpenseBreakdown />
+        <TransactionTrend />
+        <RecentTransactionsChart />
+        <FinancialHealthChart />
         <OverviewCard />
-        <RecentTransactions />
-        <FinancialHealth />
       </div>
 
       {/* Additional Dashboard Widget Row (could add more here later) */}
