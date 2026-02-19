@@ -12,7 +12,14 @@ export function FormResetButton({
   className,
   ...props
 }: React.ComponentProps<typeof Button> & { label?: string }) {
-  const { reset } = useFormContext();
+  const context = useFormContext();
+
+  // If not inside a FormProvider, return null (no-op)
+  if (!context) {
+    return null;
+  }
+
+  const { reset } = context;
 
   const handleReset = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -41,7 +48,14 @@ export function FormResetAllButton({
   className,
   ...props
 }: React.ComponentProps<typeof Button> & { label?: string }) {
-  const { reset } = useFormContext();
+  const context = useFormContext();
+
+  // If not inside a FormProvider, return null (no-op)
+  if (!context) {
+    return null;
+  }
+
+  const { reset } = context;
 
   const handleReset = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
