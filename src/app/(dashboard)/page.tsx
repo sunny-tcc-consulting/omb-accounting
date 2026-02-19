@@ -13,11 +13,11 @@ export default function DashboardPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilters, setShowFilters] = useState(false);
-  const { refreshData } = useData();
+  const { refreshTransactions } = useData();
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await refreshData();
+    await refreshTransactions();
     setRefreshing(false);
   };
 

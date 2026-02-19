@@ -203,8 +203,10 @@ export function monitorCoreWebVitals(): void {
         const entries = list.getEntries();
 
         entries.forEach((entry: PerformanceEntry) => {
-          if (!entry.hadRecentInput) {
-            clsValue += entry.value;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const e = entry as any;
+          if (!e.hadRecentInput) {
+            clsValue += e.value;
           }
         });
 

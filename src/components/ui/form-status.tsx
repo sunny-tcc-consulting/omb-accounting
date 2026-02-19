@@ -34,7 +34,7 @@ export function useFormStatus<T = unknown>(options: FormStatusOptions<T> = {}) {
         onSuccess(data);
       }
       if (options.onSuccess) {
-        options.onSuccess(data);
+        options.onSuccess(data as T);
       }
       return data;
     } catch (err) {
