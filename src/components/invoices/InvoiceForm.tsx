@@ -117,22 +117,14 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
     } as any /* eslint-disable-line @typescript-eslint/no-explicit-any */,
   );
 
-  // Debounce validation
-  const debouncedValidate = debounce((fieldName: string) => {
-    trigger(
-      fieldName as unknown as any /* eslint-disable-line @typescript-eslint/no-explicit-any */,
-    );
-  }, 300);
-
   const handleBlur = (fieldName: string) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     clearErrors(fieldName as unknown as any);
-    debouncedValidate(fieldName);
   };
 
   // Watch for changes to recalculate totals
-  watch("currency");
-  watch("taxRate");
+  const currency = watch("currency", initialData?.currency || "HKD");
+  const taxRate = watch("taxRate", initialData?.taxRate || 0) || 0;
 
   // Calculate line item totals
   const calculateItemTotal = (item: InvoiceItem) => {

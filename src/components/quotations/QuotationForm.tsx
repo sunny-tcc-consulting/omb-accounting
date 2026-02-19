@@ -98,17 +98,9 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
     } as any /* eslint-disable-line @typescript-eslint/no-explicit-any */,
   );
 
-  // Debounce validation
-  const debouncedValidate = debounce((fieldName: string) => {
-    trigger(
-      fieldName as unknown as any /* eslint-disable-line @typescript-eslint/no-explicit-any */,
-    );
-  }, 300);
-
   const handleBlur = (fieldName: string) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     clearErrors(fieldName as unknown as any);
-    debouncedValidate(fieldName);
   };
 
   const onSubmitHandler = async (data: QuotationFormData) => {
