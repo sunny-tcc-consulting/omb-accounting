@@ -205,7 +205,16 @@ export function useDebouncedResize<T extends (...args: Parameters<T>) => void>(
     timeoutRef.current = window.setTimeout(() => {
       callbackRef.current();
     }, delay);
-  }, [delay]);
+  }, [delay, callbackRef]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   return debouncedCallback as T;
 }
