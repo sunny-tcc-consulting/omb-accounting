@@ -5,20 +5,27 @@ import { RotateCcw } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 import { cn } from "@/lib/utils";
 
+interface FormResetButtonProps extends React.ComponentProps<typeof Button> {
+  label?: string;
+}
+
 export function FormResetButton({
   label = "Reset",
   variant = "outline",
   size = "sm",
   className,
+  onClick,
   ...props
-}: React.ComponentProps<typeof Button> & { label?: string }) {
+}: FormResetButtonProps) {
   const context = useFormContext();
-  const { reset } = context || {};
 
+  // Safe check - only use reset if context exists and has reset function
   const handleReset = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (reset) {
-      reset();
+    // Call onClick if provided, then try to reset form if context exists
+    onClick?.(e);
+    if (context?.reset) {
+      context.reset();
     }
   };
 
@@ -29,6 +36,7 @@ export function FormResetButton({
       size={size}
       onClick={handleReset}
       className={cn("gap-2", className)}
+      disabled={!context}
       {...props}
     >
       <RotateCcw className="h-4 w-4" />
@@ -42,15 +50,16 @@ export function FormResetAllButton({
   variant = "outline",
   size = "default",
   className,
+  onClick,
   ...props
-}: React.ComponentProps<typeof Button> & { label?: string }) {
+}: FormResetButtonProps) {
   const context = useFormContext();
-  const { reset } = context || {};
 
   const handleReset = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (reset) {
-      reset();
+    onClick?.(e);
+    if (context?.reset) {
+      context.reset();
     }
   };
 
@@ -61,6 +70,7 @@ export function FormResetAllButton({
       size={size}
       onClick={handleReset}
       className={cn("gap-2", className)}
+      disabled={!context}
       {...props}
     >
       <RotateCcw className="h-4 w-4" />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useId } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -38,6 +38,15 @@ interface CustomerFormProps {
   onCancel: () => void;
 }
 
+// Safe ID generator for SSR compatibility
+const generateId = (): string => {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for environments without crypto.randomUUID
+  return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+};
+
 export function CustomerForm({ onSubmit, onCancel }: CustomerFormProps) {
   const { addCustomer } = useCustomers();
   const [localError, setLocalError] = useState<Error | null>(null);
@@ -69,7 +78,7 @@ export function CustomerForm({ onSubmit, onCancel }: CustomerFormProps) {
 
     try {
       const newCustomer: Customer = {
-        id: crypto.randomUUID(),
+        id: generateId(),
         ...data,
         createdAt: new Date(),
       };
