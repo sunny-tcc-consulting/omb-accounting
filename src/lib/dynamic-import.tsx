@@ -5,28 +5,7 @@
  * to improve initial bundle size and page load performance.
  */
 
-import { lazy, Suspense, ReactNode, ComponentPropsWithoutRef } from "react";
-
-type ComponentType<T> =
-  T extends React.ComponentType<infer Props> ? Props : never;
-
-/**
- * Create a lazy-loaded component with Suspense fallback
- */
-export function lazyLoad<T extends React.ComponentType<unknown>>(
-  importFn: () => Promise<{ default: T }>,
-  fallback?: ReactNode,
-) {
-  const LazyComponent = lazy(importFn);
-
-  return function WithSuspense(props: ComponentType<T>) {
-    return (
-      <Suspense fallback={fallback || <DefaultLoadingSkeleton />}>
-        <LazyComponent {...(props as ComponentPropsWithoutRef<T>)} />
-      </Suspense>
-    );
-  };
-}
+import { lazy, Suspense, ReactNode } from "react";
 
 /**
  * Default loading skeleton for lazy loaded components
@@ -86,4 +65,17 @@ export function ChartSkeleton() {
       <div className="h-48 bg-muted rounded" />
     </div>
   );
+}
+
+/**
+ * Lazy load a component with Suspense
+ * Usage: const HeavyComponent = lazyLoad(() => import('./HeavyComponent'))
+ */
+export function lazyLoad<T extends React.ComponentType<unknown>>(
+  importFn: () => Promise<{ default: T }>,
+) {
+  const LazyComponent = lazy(importFn);
+
+  // Return the lazy component directly - use Suspense in parent
+  return LazyComponent;
 }
