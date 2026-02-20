@@ -25,20 +25,38 @@ function SortableHeader({
 }: SortableHeaderProps) {
   const isActive = currentSort === column;
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onSort(column);
+    }
+  };
+
   return (
     <th
       className={cn(
-        "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none transition-colors hover:bg-gray-100",
+        "px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none transition-colors hover:bg-gray-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         isActive && "bg-gray-100 text-blue-600",
         className,
       )}
       style={style}
       onClick={() => onSort(column)}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      role="columnheader"
+      aria-sort={
+        isActive
+          ? sortDirection === "asc"
+            ? "ascending"
+            : "descending"
+          : undefined
+      }
+      aria-controls={`data-table`}
     >
       <div className="flex items-center gap-1">
         {children}
         {isActive && (
-          <span className="text-blue-600">
+          <span className="text-blue-600" aria-hidden="true">
             {sortDirection === "asc" ? "↑" : "↓"}
           </span>
         )}
@@ -97,9 +115,13 @@ function ColumnResizer({
 
   return (
     <div
-      className="w-1 cursor-col-resize hover:bg-blue-500 bg-gray-300"
+      className="w-1 cursor-col-resize hover:bg-blue-500 bg-gray-300 focus:bg-blue-500 focus:outline-none"
       onMouseDown={handleMouseDown}
       onClick={(e) => e.stopPropagation()}
+      role="separator"
+      aria-orientation="vertical"
+      aria-label="Column resizer"
+      tabIndex={0}
     />
   );
 }
@@ -118,15 +140,27 @@ function DataTableRow({
   className,
   isSelected,
 }: DataTableRowProps) {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (onClick && (e.key === "Enter" || e.key === " ")) {
+      e.preventDefault();
+      onClick();
+    }
+  };
+
   return (
     <tr
       className={cn(
         "transition-colors duration-150",
         onClick && "cursor-pointer",
         isSelected ? "bg-blue-50" : "hover:bg-gray-50",
+        onClick &&
+          "focus-within:bg-gray-50 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
         className,
       )}
       onClick={onClick}
+      onKeyDown={handleKeyDown}
+      tabIndex={onClick ? 0 : undefined}
+      role={onClick ? "button" : undefined}
     >
       {children}
     </tr>
@@ -166,6 +200,8 @@ interface DataTableProps<T = unknown> {
   maxHeight?: number;
   onSelectionChange?: (selectedKeys: string[]) => void;
   selectable?: boolean;
+  /** Accessible label for the table */
+  ariaLabel?: string;
 }
 
 export function DataTable<T = unknown>({
@@ -183,10 +219,10 @@ export function DataTable<T = unknown>({
   containerClassName,
   stickyHeader = true,
   virtualScroll = false,
-  itemHeight = 56,
   maxHeight = 400,
   onSelectionChange,
   selectable = false,
+  ariaLabel = "Data table",
 }: DataTableProps<T>) {
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
@@ -266,14 +302,21 @@ export function DataTable<T = unknown>({
   // Render loading state
   if (loading) {
     return (
-      <div className="border rounded-lg overflow-hidden">
-        <table className={cn("w-full", className)}>
+      <div
+        className="border rounded-lg overflow-hidden"
+        role="status"
+        aria-live="polite"
+      >
+        <table
+          className={cn("w-full", className)}
+          aria-label={`${ariaLabel} - Loading`}
+        >
           <thead className="bg-gray-50">
             <tr>
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   style={{ width: columnWidths[col.key] || col.width }}
                 >
                   {col.header}
@@ -285,7 +328,7 @@ export function DataTable<T = unknown>({
             {[...Array(5)].map((_, i) => (
               <tr key={i}>
                 {columns.map((col) => (
-                  <td key={col.key} className="px-6 py-4">
+                  <td key={col.key} className="px-4 sm:px-6 py-4">
                     <div className="h-4 bg-gray-200 rounded animate-pulse" />
                   </td>
                 ))}
@@ -300,8 +343,9 @@ export function DataTable<T = unknown>({
   // Render empty state
   if (data.length === 0) {
     return (
-      <div className="text-center py-12 border rounded-lg">
+      <div className="text-center py-12 border rounded-lg" role="status">
         <p className="text-gray-500">{emptyMessage}</p>
+        <p className="sr-only">No data available in table</p>
       </div>
     );
   }
@@ -309,18 +353,22 @@ export function DataTable<T = unknown>({
   return (
     <div
       className={cn("border rounded-lg overflow-hidden", containerClassName)}
+      role="region"
+      aria-label={ariaLabel}
+      tabIndex={-1}
     >
       <div
         className={cn("overflow-x-auto", virtualScroll && `overflow-y-auto`)}
         style={virtualScroll ? { maxHeight } : undefined}
+        id="data-table"
       >
-        <table className={cn("w-full", className)}>
+        <table className={cn("w-full", className)} aria-label={ariaLabel}>
           <thead
             className={cn("bg-gray-50", stickyHeader && "sticky top-0 z-10")}
           >
             <tr>
               {selectable && (
-                <th className="px-6 py-3 text-left w-12">
+                <th className="px-4 sm:px-6 py-3 text-left w-12">
                   <input
                     type="checkbox"
                     checked={
@@ -328,6 +376,7 @@ export function DataTable<T = unknown>({
                     }
                     onChange={handleSelectAll}
                     className="rounded border-gray-300"
+                    aria-label="Select all rows"
                   />
                 </th>
               )}
@@ -347,10 +396,11 @@ export function DataTable<T = unknown>({
                   ) : (
                     <th
                       className={cn(
-                        "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider",
+                        "px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider",
                         col.className,
                       )}
                       style={{ width: columnWidths[col.key] || col.width }}
+                      scope="col"
                     >
                       {col.header}
                       {col.width !== undefined && (
@@ -366,80 +416,47 @@ export function DataTable<T = unknown>({
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {virtualScroll
-              ? // Virtual scrolling implementation placeholder
-                sortedData.map((item, index) => (
-                  <DataTableRow
-                    key={keyExtractor(item)}
-                    onClick={() => onRowClick?.(item)}
-                    isSelected={selectedRows.has(keyExtractor(item))}
-                    className={rowClassName}
-                  >
-                    {selectable && (
-                      <td className="px-6 py-4 w-12">
-                        <input
-                          type="checkbox"
-                          checked={selectedRows.has(keyExtractor(item))}
-                          onChange={() => handleRowSelect(keyExtractor(item))}
-                          className="rounded border-gray-300"
-                        />
-                      </td>
+          <tbody
+            className="bg-white divide-y divide-gray-200"
+            aria-live="polite"
+          >
+            {sortedData.map((item, index) => (
+              <DataTableRow
+                key={keyExtractor(item)}
+                onClick={onRowClick ? () => onRowClick(item) : undefined}
+                isSelected={selectedRows.has(keyExtractor(item))}
+                className={rowClassName}
+              >
+                {selectable && (
+                  <td className="px-4 sm:px-6 py-4 w-12">
+                    <input
+                      type="checkbox"
+                      checked={selectedRows.has(keyExtractor(item))}
+                      onChange={() => handleRowSelect(keyExtractor(item))}
+                      onClick={(e) => e.stopPropagation()}
+                      className="rounded border-gray-300"
+                      aria-label={`Select row ${index + 1}`}
+                    />
+                  </td>
+                )}
+                {columns.map((col) => (
+                  <td
+                    key={col.key}
+                    className={cn(
+                      "px-4 sm:px-6 py-4 whitespace-nowrap text-sm",
+                      col.cellClassName,
                     )}
-                    {columns.map((col) => (
-                      <td
-                        key={col.key}
-                        className={cn(
-                          "px-6 py-4 whitespace-nowrap",
-                          col.cellClassName,
-                        )}
-                        style={{ width: columnWidths[col.key] || col.width }}
-                      >
-                        {col.render
-                          ? col.render(item, index)
-                          : String(
-                              (item as Record<string, unknown>)[col.key] ?? "",
-                            )}
-                      </td>
-                    ))}
-                  </DataTableRow>
-                ))
-              : sortedData.map((item, index) => (
-                  <DataTableRow
-                    key={keyExtractor(item)}
-                    onClick={() => onRowClick?.(item)}
-                    isSelected={selectedRows.has(keyExtractor(item))}
-                    className={rowClassName}
+                    style={{ width: columnWidths[col.key] || col.width }}
                   >
-                    {selectable && (
-                      <td className="px-6 py-4 w-12">
-                        <input
-                          type="checkbox"
-                          checked={selectedRows.has(keyExtractor(item))}
-                          onChange={() => handleRowSelect(keyExtractor(item))}
-                          onClick={(e) => e.stopPropagation()}
-                          className="rounded border-gray-300"
-                        />
-                      </td>
-                    )}
-                    {columns.map((col) => (
-                      <td
-                        key={col.key}
-                        className={cn(
-                          "px-6 py-4 whitespace-nowrap",
-                          col.cellClassName,
+                    {col.render
+                      ? col.render(item, index)
+                      : String(
+                          (item as Record<string, unknown>)[col.key] ?? "",
                         )}
-                        style={{ width: columnWidths[col.key] || col.width }}
-                      >
-                        {col.render
-                          ? col.render(item, index)
-                          : String(
-                              (item as Record<string, unknown>)[col.key] ?? "",
-                            )}
-                      </td>
-                    ))}
-                  </DataTableRow>
+                  </td>
                 ))}
+              </DataTableRow>
+            ))}
           </tbody>
         </table>
       </div>
