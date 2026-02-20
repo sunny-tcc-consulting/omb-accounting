@@ -1,219 +1,222 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+
 /**
- * Cache utilities for performance optimization
+ * Caching utilities for Phase 2.8 performance optimization
  */
 
-// Cache keys prefix
-const CACHE_PREFIX = "omb-accounting";
-
-// Cache duration in milliseconds
-const CACHE_DURATIONS = {
-  short: 5 * 60 * 1000, // 5 minutes
-  medium: 30 * 60 * 1000, // 30 minutes
-  long: 24 * 60 * 60 * 1000, // 24 hours
-  veryLong: 7 * 24 * 60 * 60 * 1000, // 7 days
+// In-memory cache with TTL
+type CacheItem<T> = {
+  data: T;
+  timestamp: number;
+  ttl: number;
 };
 
-/**
- * Get data from cache
- */
-export function getCachedData<T>(key: string): T | null {
-  if (typeof window === "undefined") return null;
+export class Cache<T = unknown> {
+  private cache: Map<string, CacheItem<T>> = new Map();
 
-  try {
-    const cacheKey = `${CACHE_PREFIX}:${key}`;
-    const cached = localStorage.getItem(cacheKey);
+  set(key: string, data: T, ttl: number = 300000): void {
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now(),
+      ttl,
+    });
+  }
 
-    if (!cached) return null;
+  get(key: string): T | null {
+    const item = this.cache.get(key);
+    if (!item) return null;
 
-    const { data, timestamp, expiry } = JSON.parse(cached);
-
-    // Check if cache has expired
-    if (Date.now() > timestamp + expiry) {
-      localStorage.removeItem(cacheKey);
+    if (Date.now() - item.timestamp > item.ttl) {
+      this.cache.delete(key);
       return null;
     }
 
-    return data as T;
-  } catch {
-    return null;
+    return item.data;
+  }
+
+  has(key: string): boolean {
+    return this.get(key) !== null;
+  }
+
+  delete(key: string): void {
+    this.cache.delete(key);
+  }
+
+  deleteByPattern(pattern: RegExp): void {
+    this.cache.forEach((_, key) => {
+      if (pattern.test(key)) {
+        this.cache.delete(key);
+      }
+    });
+  }
+
+  keys(): IterableIterator<string> {
+    return this.cache.keys();
+  }
+
+  clear(): void {
+    this.cache.clear();
+  }
+
+  size(): number {
+    return this.cache.size;
   }
 }
 
-/**
- * Set data in cache
- */
-export function setCacheData<T>(
-  key: string,
-  data: T,
-  duration: keyof typeof CACHE_DURATIONS = "medium",
-): void {
-  if (typeof window === "undefined") return;
+// Singleton cache instance
+export const appCache = new Cache();
 
-  try {
-    const cacheKey = `${CACHE_PREFIX}:${key}`;
-    const cacheData = {
+// Hook to check if component is still mounted
+function useIsMounted(): { current: boolean } {
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  return isMounted;
+}
+
+// HTTP caching utilities
+export class HttpCache {
+  private static cache: Map<
+    string,
+    {
+      response: Response;
+      timestamp: number;
+      ttl: number;
+    }
+  > = new Map();
+
+  static async fetchWithCache(
+    url: string,
+    options?: RequestInit,
+    ttl: number = 300000,
+  ): Promise<Response> {
+    const cacheKey = JSON.stringify({ url, options });
+    const cached = this.cache.get(cacheKey);
+
+    if (cached && Date.now() - cached.timestamp < cached.ttl) {
+      return cached.response.clone();
+    }
+
+    const response = await fetch(url, options);
+    const clonedResponse = response.clone();
+
+    this.cache.set(cacheKey, {
+      response: clonedResponse,
+      timestamp: Date.now(),
+      ttl,
+    });
+
+    return response;
+  }
+
+  static clear(): void {
+    this.cache.clear();
+  }
+
+  static size(): number {
+    return this.cache.size;
+  }
+}
+
+// Local storage caching
+export class LocalStorageCache {
+  private static prefix = "omb-accounting-cache-";
+
+  static set(key: string, data: unknown, ttl: number = 300000): void {
+    const item = {
       data,
       timestamp: Date.now(),
-      expiry: CACHE_DURATIONS[duration],
+      ttl,
     };
+    localStorage.setItem(this.prefix + key, JSON.stringify(item));
+  }
 
-    localStorage.setItem(cacheKey, JSON.stringify(cacheData));
-  } catch {
-    // Handle quota exceeded or other storage errors
-    console.warn("Failed to cache data:", key);
+  static get<T>(key: string): T | null {
+    const itemStr = localStorage.getItem(this.prefix + key);
+    if (!itemStr) return null;
+
+    try {
+      const item: { data: T; timestamp: number; ttl: number } =
+        JSON.parse(itemStr);
+
+      if (Date.now() - item.timestamp > item.ttl) {
+        this.delete(key);
+        return null;
+      }
+
+      return item.data;
+    } catch {
+      return null;
+    }
+  }
+
+  static has(key: string): boolean {
+    return this.get(key) !== null;
+  }
+
+  static delete(key: string): void {
+    localStorage.removeItem(this.prefix + key);
+  }
+
+  static clear(): void {
+    const keys = Object.keys(localStorage);
+    keys.forEach((key) => {
+      if (key.startsWith(this.prefix)) {
+        localStorage.removeItem(key);
+      }
+    });
+  }
+
+  static size(): number {
+    const keys = Object.keys(localStorage);
+    return keys.filter((key) => key.startsWith(this.prefix)).length;
   }
 }
 
-/**
- * Remove data from cache
- */
-export function removeCachedData(key: string): void {
-  if (typeof window === "undefined") return;
-
-  try {
-    const cacheKey = `${CACHE_PREFIX}:${key}`;
-    localStorage.removeItem(cacheKey);
-  } catch {
-    // Handle errors gracefully
-  }
-}
-
-/**
- * Clear all application cache
- */
-export function clearAllCache(): void {
-  if (typeof window === "undefined") return;
-
-  try {
-    const keys = Object.keys(localStorage).filter((key) =>
-      key.startsWith(CACHE_PREFIX),
-    );
-
-    keys.forEach((key) => localStorage.removeItem(key));
-  } catch {
-    console.warn("Failed to clear cache");
-  }
-}
-
-/**
- * Invalidate cache by prefix
- */
-export function invalidateCache(prefix: string): void {
-  if (typeof window === "undefined") return;
-
-  try {
-    const keys = Object.keys(localStorage).filter((key) =>
-      key.startsWith(`${CACHE_PREFIX}:${prefix}`),
-    );
-
-    keys.forEach((key) => localStorage.removeItem(key));
-  } catch {
-    console.warn("Failed to invalidate cache:", prefix);
-  }
-}
-
-/**
- * Memory cache for in-session data
- */
-const memoryCache = new Map<string, { data: unknown; expiry: number }>();
-
-/**
- * Get data from memory cache
- */
-export function getMemoryCache<T>(key: string): T | null {
-  const cached = memoryCache.get(key);
-
-  if (!cached) return null;
-
-  if (Date.now() > cached.expiry) {
-    memoryCache.delete(key);
-    return null;
-  }
-
-  return cached.data as T;
-}
-
-/**
- * Set data in memory cache
- */
-export function setMemoryCache<T>(
-  key: string,
-  data: T,
-  durationMs: number = CACHE_DURATIONS.medium,
-): void {
-  memoryCache.set(key, {
-    data,
-    expiry: Date.now() + durationMs,
+// Cache warming utilities
+export function warmCache(keys: string[]): void {
+  keys.forEach((key) => {
+    if (appCache.has(key)) {
+      // Access the cache to keep it warm
+      appCache.get(key);
+    }
   });
 }
 
-/**
- * Clear memory cache
- */
-export function clearMemoryCache(): void {
-  memoryCache.clear();
+// Cache invalidation
+export function invalidateCache(key: string | RegExp): void {
+  if (key instanceof RegExp) {
+    appCache.deleteByPattern(key);
+  } else {
+    appCache.delete(key);
+  }
 }
 
-/**
- * API response cache with deduplication
- */
-const apiRequestCache = new Map<
-  string,
-  { promise: Promise<unknown>; expiry: number }
->();
+// Cache statistics
+export function getCacheStats(): {
+  size: number;
+  hitRate: number;
+  missRate: number;
+  averageTtl: number;
+} {
+  const entries = Array.from(appCache.keys())
+    .map((key) => ({ key, item: appCache.get(key) as CacheItem<unknown> }))
+    .filter((entry) => entry.item !== null);
 
-/**
- * Cache API request with deduplication
- */
-export async function cachedApiRequest<T>(
-  key: string,
-  fetchFn: () => Promise<T>,
-  durationMs: number = CACHE_DURATIONS.medium,
-): Promise<T> {
-  // Check if request is already in flight
-  const cached = apiRequestCache.get(key);
-  if (cached && Date.now() < cached.expiry) {
-    return cached.promise as Promise<T>;
-  }
+  const size = entries.length;
+  const totalTtl = entries.reduce((sum, { item }) => sum + item.ttl, 0);
 
-  // Check memory cache
-  const memoryCached = getMemoryCache<T>(key);
-  if (memoryCached) {
-    return memoryCached;
-  }
-
-  // Check localStorage cache
-  const storageCached = getCachedData<T>(key);
-  if (storageCached) {
-    setMemoryCache(key, storageCached, durationMs);
-    return storageCached;
-  }
-
-  // Make the request
-  const promise = fetchFn().then((data) => {
-    setMemoryCache(key, data, durationMs);
-    setCacheData(
-      key,
-      data,
-      durationMs > CACHE_DURATIONS.medium ? "long" : "medium",
-    );
-    return data;
-  });
-
-  // Cache the promise for deduplication
-  apiRequestCache.set(key, {
-    promise,
-    expiry: Date.now() + durationMs,
-  });
-
-  return promise;
-}
-
-/**
- * Invalidate all API caches
- */
-export function invalidateAllApiCaches(): void {
-  apiRequestCache.clear();
-  clearMemoryCache();
-  clearAllCache();
+  return {
+    size,
+    hitRate: 0, // Need to track hits/misses separately
+    missRate: 0, // Need to track hits/misses separately
+    averageTtl: size > 0 ? totalTtl / size : 0,
+  };
 }

@@ -1,13 +1,25 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Transaction, Category, TransactionFilters, FinancialSummary } from '@/types';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+} from "react";
+import { appCache, LocalStorageCache } from "@/lib/cache";
 import {
-  getCategories,
-  getFilteredTransactions,
+  Transaction,
+  Category,
+  TransactionFilters,
+  FinancialSummary,
+} from "@/types";
+import {
+  getCategories as getMockCategories,
   calculateFinancialSummary,
   generateTransactions,
-} from '@/lib/mock-data';
+} from "@/lib/mock-data";
 
 interface DataContextType {
   transactions: Transaction[];
@@ -17,41 +29,61 @@ interface DataContextType {
   updateTransaction: (id: string, updates: Partial<Transaction>) => void;
   deleteTransaction: (id: string) => void;
   getFilteredTransactions: (filters?: TransactionFilters) => Transaction[];
-  getTransactionsByCategory: (category: string, type: 'income' | 'expense') => Transaction[];
+  getTransactionsByCategory: (
+    category: string,
+    type: "income" | "expense",
+  ) => Transaction[];
   getTransactionsByDateRange: (startDate: Date, endDate: Date) => Transaction[];
   getFinancialSummary: (days?: number) => FinancialSummary;
-  getCategories: (type?: 'income' | 'expense') => Category[];
+  getCategories: (type?: "income" | "expense") => Category[];
   refreshTransactions: () => void;
+  clearCache: () => void;
 }
 
-export const DataContext = createContext<DataContextType | undefined>(undefined);
+export const DataContext = createContext<DataContextType | undefined>(
+  undefined,
+);
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Load initial data
-  useEffect(() => {
-    loadInitialData();
-  }, []);
-
-  const loadInitialData = () => {
+  const loadInitialData = useCallback(() => {
     setLoading(true);
     try {
-      // Generate mock transactions
-      const newTransactions = generateTransactions(100);
-      setTransactions(newTransactions);
+      // Try to load from cache first
+      const cachedTransactions =
+        LocalStorageCache.get<Transaction[]>("transactions");
+      const cachedCategories = LocalStorageCache.get<Category[]>("categories");
 
-      // Load categories
-      const newCategories = getCategories();
-      setCategories(newCategories);
+      if (cachedTransactions && cachedCategories) {
+        setTransactions(cachedTransactions);
+        setCategories(cachedCategories);
+      } else {
+        // Generate mock transactions
+        const newTransactions = generateTransactions(100);
+        setTransactions(newTransactions);
+
+        // Load categories
+        const newCategories = getMockCategories();
+        setCategories(newCategories);
+
+        // Cache the data for 30 minutes
+        LocalStorageCache.set("transactions", newTransactions, 1800000);
+        LocalStorageCache.set("categories", newCategories, 1800000);
+      }
     } catch (error) {
-      console.error('Failed to load initial data:', error);
+      console.error("Failed to load initial data:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Load initial data
+  useEffect(() => {
+    loadInitialData();
+  }, [loadInitialData]);
 
   const addTransaction = (transaction: Transaction) => {
     setTransactions((prev) => [transaction, ...prev]);
@@ -59,7 +91,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   const updateTransaction = (id: string, updates: Partial<Transaction>) => {
     setTransactions((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, ...updates } : t))
+      prev.map((t) => (t.id === id ? { ...t, ...updates } : t)),
     );
   };
 
@@ -67,10 +99,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     setTransactions((prev) => prev.filter((t) => t.id !== id));
   };
 
-  const getFilteredTransactions = (filters?: TransactionFilters): Transaction[] => {
+  const getFilteredTransactions = (
+    filters?: TransactionFilters,
+  ): Transaction[] => {
     let filtered = [...transactions];
 
-    if (filters?.type && filters.type !== 'all') {
+    if (filters?.type && filters.type !== "all") {
       filtered = filtered.filter((t) => t.type === filters.type);
     }
 
@@ -79,9 +113,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (filters?.dateRange) {
+      const { start, end } = filters.dateRange;
       filtered = filtered.filter((t) => {
         const date = new Date(t.date);
-        return date >= (filters.dateRange as any).start && date <= (filters.dateRange as any).end;
+        return date >= start && date <= end;
       });
     }
 
@@ -91,7 +126,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         (t) =>
           t.description.toLowerCase().includes(search) ||
           t.category.toLowerCase().includes(search) ||
-          (t.reference && t.reference.toLowerCase().includes(search))
+          (t.reference && t.reference.toLowerCase().includes(search)),
       );
     }
 
@@ -104,14 +139,16 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   const getTransactionsByCategory = (
     category: string,
-    type: 'income' | 'expense'
+    type: "income" | "expense",
   ): Transaction[] => {
-    return transactions.filter((t) => t.category === category && t.type === type);
+    return transactions.filter(
+      (t) => t.category === category && t.type === type,
+    );
   };
 
   const getTransactionsByDateRange = (
     startDate: Date,
-    endDate: Date
+    endDate: Date,
   ): Transaction[] => {
     return transactions.filter((t) => {
       const date = new Date(t.date);
@@ -123,16 +160,40 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     return calculateFinancialSummary(transactions, days);
   };
 
-  const getCategories = (type?: 'income' | 'expense'): Category[] => {
+  const getCategories = (type?: "income" | "expense"): Category[] => {
     if (type) {
-      return getCategories(type);
+      return getMockCategories(type);
     }
     return categories;
   };
 
-  const refreshTransactions = () => {
+  const refreshTransactions = useCallback(() => {
+    setLoading(true);
+    try {
+      // Generate new mock transactions
+      const newTransactions = generateTransactions(100);
+      setTransactions(newTransactions);
+
+      // Load categories
+      const newCategories = getMockCategories();
+      setCategories(newCategories);
+
+      // Cache the data for 30 minutes
+      LocalStorageCache.set("transactions", newTransactions, 1800000);
+      LocalStorageCache.set("categories", newCategories, 1800000);
+    } catch (error) {
+      console.error("Failed to refresh transactions:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const clearCache = useCallback(() => {
+    appCache.clear();
+    LocalStorageCache.clear();
+    // Reload fresh data
     loadInitialData();
-  };
+  }, []);
 
   return (
     <DataContext.Provider
@@ -149,6 +210,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         getFinancialSummary,
         getCategories,
         refreshTransactions,
+        clearCache,
       }}
     >
       {children}
@@ -159,7 +221,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 export function useData() {
   const context = useContext(DataContext);
   if (!context) {
-    throw new Error('useData must be used within a DataProvider');
+    throw new Error("useData must be used within a DataProvider");
   }
   return context;
 }
