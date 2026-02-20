@@ -1,23 +1,32 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useState, useEffect, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Home, Menu, X, Users, FileText } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Home,
+  Menu,
+  X,
+  Users,
+  FileText,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { SkipLink } from "@/components/ui/skip-link";
 
 // 路由配置：用於生成麵包屑
 const routeConfig: Record<string, { label: string; parent?: string }> = {
-  '/': { label: 'Dashboard' },
-  '/transactions': { label: 'Transactions', parent: '/' },
-  '/reports': { label: 'Reports', parent: '/' },
-  '/categories': { label: 'Categories', parent: '/' },
-  '/customers': { label: 'Customers', parent: '/' },
-  '/customers/new': { label: 'New Customer', parent: '/customers' },
-  '/quotations': { label: 'Quotations', parent: '/' },
-  '/quotations/new': { label: 'New Quotation', parent: '/quotations' },
-  '/invoices': { label: 'Invoices', parent: '/' },
-  '/invoices/new': { label: 'New Invoice', parent: '/invoices' },
+  "/": { label: "Dashboard" },
+  "/transactions": { label: "Transactions", parent: "/" },
+  "/reports": { label: "Reports", parent: "/" },
+  "/categories": { label: "Categories", parent: "/" },
+  "/customers": { label: "Customers", parent: "/" },
+  "/customers/new": { label: "New Customer", parent: "/customers" },
+  "/quotations": { label: "Quotations", parent: "/" },
+  "/quotations/new": { label: "New Quotation", parent: "/quotations" },
+  "/invoices": { label: "Invoices", parent: "/" },
+  "/invoices/new": { label: "New Invoice", parent: "/invoices" },
 };
 
 interface BreadcrumbItem {
@@ -31,23 +40,24 @@ export function Breadcrumb() {
   const [items, setItems] = useState<BreadcrumbItem[]>([]);
 
   useEffect(() => {
-    const pathSegments = pathname.split('/').filter(Boolean);
+    const pathSegments = pathname.split("/").filter(Boolean);
     const breadcrumbs: BreadcrumbItem[] = [];
 
     // 添加首頁
     breadcrumbs.push({
-      href: '/',
-      label: 'Home',
-      isActive: pathname === '/',
+      href: "/",
+      label: "Home",
+      isActive: pathname === "/",
     });
 
     // 構建路徑
-    let currentPath = '';
+    let currentPath = "";
     pathSegments.forEach((segment, index) => {
       currentPath += `/${segment}`;
       const isLast = index === pathSegments.length - 1;
       const config = routeConfig[currentPath];
-      const label = config?.label || segment.charAt(0).toUpperCase() + segment.slice(1);
+      const label =
+        config?.label || segment.charAt(0).toUpperCase() + segment.slice(1);
 
       breadcrumbs.push({
         href: currentPath,
@@ -71,19 +81,19 @@ export function Breadcrumb() {
       {items.map((item, index) => (
         <div key={item.href} className="flex items-center gap-2">
           {index > 0 && (
-            <ChevronRight className="h-4 w-4 text-gray-400" aria-hidden="true" />
+            <ChevronRight
+              className="h-4 w-4 text-gray-400"
+              aria-hidden="true"
+            />
           )}
           {item.isActive ? (
-            <span
-              className="text-gray-900 font-medium"
-              aria-current="page"
-            >
+            <span className="text-gray-900 font-medium" aria-current="page">
               {item.label}
             </span>
           ) : (
             <Link
               href={item.href}
-              className="text-gray-500 hover:text-gray-700 transition-colors"
+              className="text-gray-500 hover:text-gray-700 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded"
             >
               {item.label}
             </Link>
@@ -103,13 +113,13 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { href: '/', label: 'Dashboard', icon: Home },
-  { href: '/transactions', label: 'Transactions', icon: 'Receipt' },
-  { href: '/reports', label: 'Reports', icon: 'BarChart' },
-  { href: '/categories', label: 'Categories', icon: 'Tag' },
-  { href: '/customers', label: 'Customers', icon: 'Users' },
-  { href: '/quotations', label: 'Quotations', icon: 'FileText' },
-  { href: '/invoices', label: 'Invoices', icon: 'FileText2' },
+  { href: "/", label: "Dashboard", icon: Home },
+  { href: "/transactions", label: "Transactions", icon: "Receipt" },
+  { href: "/reports", label: "Reports", icon: "BarChart" },
+  { href: "/categories", label: "Categories", icon: "Tag" },
+  { href: "/customers", label: "Customers", icon: "Users" },
+  { href: "/quotations", label: "Quotations", icon: "FileText" },
+  { href: "/invoices", label: "Invoices", icon: "FileText2" },
 ];
 
 // 圖標映射
@@ -165,45 +175,49 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // 鍵盤導航
-  const handleKeyDown = useCallback((event: React.KeyboardEvent, href: string) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      window.location.href = href;
-    }
-    if (event.key === 'Escape') {
-      setIsMobileMenuOpen(false);
-    }
-  }, []);
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent, href: string) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        window.location.href = href;
+      }
+      if (event.key === "Escape") {
+        setIsMobileMenuOpen(false);
+      }
+    },
+    [],
+  );
 
   // 關閉 mobile menu 當點擊 outside
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      if (!target.closest('[data-sidebar]')) {
+      if (!target.closest("[data-sidebar]")) {
         setIsMobileMenuOpen(false);
       }
     };
 
     if (isMobileMenuOpen) {
-      document.addEventListener('click', handleOutsideClick);
-      return () => document.removeEventListener('click', handleOutsideClick);
+      document.addEventListener("click", handleOutsideClick);
+      return () => document.removeEventListener("click", handleOutsideClick);
     }
   }, [isMobileMenuOpen]);
 
   // 鍵盤快捷鍵：Ctrl/Cmd + B 切換 sidebar
   useEffect(() => {
     const handleKeyboardShortcut = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === 'b') {
+      if ((event.ctrlKey || event.metaKey) && event.key === "b") {
         event.preventDefault();
         onToggle();
       }
     };
 
-    document.addEventListener('keydown', handleKeyboardShortcut);
-    return () => document.removeEventListener('keydown', handleKeyboardShortcut);
+    document.addEventListener("keydown", handleKeyboardShortcut);
+    return () =>
+      document.removeEventListener("keydown", handleKeyboardShortcut);
   }, [onToggle]);
 
-  const sidebarWidth = isCollapsed ? 'w-16' : 'w-64';
+  const sidebarWidth = isCollapsed ? "w-16" : "w-64";
 
   // 側邊欄內容
   const sidebarContent = (
@@ -213,12 +227,14 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         {!isCollapsed ? (
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold text-gray-900">omb-accounting</h1>
+              <h1 className="text-xl font-bold text-gray-900">
+                omb-accounting
+              </h1>
               <p className="text-xs text-gray-500">Accounting System</p>
             </div>
             <button
               onClick={onToggle}
-              className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
               aria-label="Collapse sidebar"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -227,7 +243,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         ) : (
           <button
             onClick={onToggle}
-            className="w-full flex justify-center p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+            className="w-full flex justify-center p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
             aria-label="Expand sidebar"
           >
             <ChevronRight className="h-4 w-4" />
@@ -236,7 +252,11 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
       </div>
 
       {/* 導航項目 */}
-      <nav className="flex-1 py-4" role="navigation" aria-label="Main navigation">
+      <nav
+        className="flex-1 py-4"
+        role="navigation"
+        aria-label="Main navigation"
+      >
         {navItems.map((item) => {
           const Icon = iconMap[item.icon as string] || Home;
           const isActive = pathname === item.href;
@@ -246,13 +266,13 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex items-center gap-3 px-4 py-2.5 mx-2 rounded-lg mb-1 transition-all duration-200',
+                "flex items-center gap-3 px-4 py-2.5 mx-2 rounded-lg mb-1 transition-all duration-200",
                 isActive
-                  ? 'bg-blue-50 text-blue-700 font-medium'
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
-                isCollapsed && 'justify-center px-2'
+                  ? "bg-blue-50 text-blue-700 font-medium"
+                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                isCollapsed && "justify-center px-2",
               )}
-              aria-current={isActive ? 'page' : undefined}
+              aria-current={isActive ? "page" : undefined}
               title={isCollapsed ? item.label : undefined}
               tabIndex={0}
               onKeyDown={(e) => handleKeyDown(e, item.href)}
@@ -260,7 +280,10 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               <Icon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
               {!isCollapsed && <span>{item.label}</span>}
               {!isCollapsed && item.shortcut && (
-                <kbd className="ml-auto text-xs text-gray-400 border border-gray-200 rounded px-1.5">
+                <kbd
+                  className="ml-auto text-xs text-gray-400 border border-gray-200 rounded px-1.5"
+                  aria-label={`Keyboard shortcut: ${item.shortcut}`}
+                >
                   {item.shortcut}
                 </kbd>
               )}
@@ -273,12 +296,13 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
       <div className="p-4 border-t">
         <button
           className={cn(
-            'w-full flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors',
-            isCollapsed && 'justify-center px-2'
+            "w-full flex items-center gap-3 px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors",
+            isCollapsed && "justify-center px-2",
           )}
-          title={isCollapsed ? 'Logout' : undefined}
+          title={isCollapsed ? "Logout" : undefined}
           tabIndex={0}
-          onKeyDown={(e) => handleKeyDown(e, '#')}
+          onKeyDown={(e) => handleKeyDown(e, "#")}
+          aria-label="Logout"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -307,10 +331,11 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
     <>
       {/* Mobile Menu Button */}
       <button
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-white shadow-md"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-white shadow-md focus-visible:ring-2 focus-visible:ring-blue-500"
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+        aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
         aria-expanded={isMobileMenuOpen}
+        aria-controls="mobile-sidebar"
       >
         {isMobileMenuOpen ? (
           <X className="h-5 w-5" />
@@ -324,8 +349,8 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         data-sidebar
         data-testid="desktop-sidebar"
         className={cn(
-          'fixed left-0 top-0 h-full bg-white border-r shadow-sm transition-all duration-300 z-40 hidden lg:flex flex-col',
-          sidebarWidth
+          "fixed left-0 top-0 h-full bg-white border-r shadow-sm transition-all duration-300 z-40 hidden lg:flex flex-col",
+          sidebarWidth,
         )}
         aria-label="Desktop navigation"
       >
@@ -343,14 +368,17 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
 
       {/* Mobile Sidebar */}
       <aside
+        id="mobile-sidebar"
         data-sidebar
         data-testid="mobile-sidebar"
         className={cn(
-          'lg:hidden fixed left-0 top-0 h-full bg-white border-r shadow-sm z-40 transition-transform duration-300 flex flex-col',
-          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full',
-          'w-64'
+          "lg:hidden fixed left-0 top-0 h-full bg-white border-r shadow-sm z-40 transition-transform duration-300 flex flex-col",
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full",
+          "w-64",
         )}
         aria-label="Mobile navigation"
+        role="dialog"
+        aria-modal="true"
       >
         {sidebarContent}
       </aside>
@@ -370,7 +398,7 @@ export function NavigationLayout({ children }: NavigationLayoutProps) {
   // 檢測是否為移動設備 - 只在客戶端執行
   useEffect(() => {
     let rafId: number;
-    
+
     const initializeMobile = () => {
       const isMobileDevice = window.innerWidth < 1024;
       setIsMobile(isMobileDevice);
@@ -381,10 +409,10 @@ export function NavigationLayout({ children }: NavigationLayoutProps) {
     };
 
     initializeMobile();
-    window.addEventListener('resize', initializeMobile);
-    
+    window.addEventListener("resize", initializeMobile);
+
     return () => {
-      window.removeEventListener('resize', initializeMobile);
+      window.removeEventListener("resize", initializeMobile);
       cancelAnimationFrame(rafId);
     };
   }, []);
@@ -392,14 +420,14 @@ export function NavigationLayout({ children }: NavigationLayoutProps) {
   // 在移動設備上自動展開 sidebar
   useEffect(() => {
     let rafId: number;
-    
+
     if (mounted && isMobile) {
       // 使用 requestAnimationFrame 來避免同步 setState
       rafId = requestAnimationFrame(() => {
         setIsSidebarCollapsed(true);
       });
     }
-    
+
     return () => cancelAnimationFrame(rafId);
   }, [isMobile, mounted]);
 
@@ -407,7 +435,8 @@ export function NavigationLayout({ children }: NavigationLayoutProps) {
   if (!mounted) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <main className="p-4 lg:p-8">
+        <SkipLink targetId="main-content" />
+        <main id="main-content" className="p-4 lg:p-8" tabIndex={-1}>
           <div className="max-w-7xl mx-auto">{children}</div>
         </main>
       </div>
@@ -416,15 +445,20 @@ export function NavigationLayout({ children }: NavigationLayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SkipLink targetId="main-content" />
       <Sidebar
         isCollapsed={isSidebarCollapsed}
         onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
       <main
+        id="main-content"
         className={cn(
-          'transition-all duration-300 p-4 lg:p-8',
-          isMobile || isSidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
+          "transition-all duration-300 p-4 lg:p-8",
+          isMobile || isSidebarCollapsed ? "lg:ml-16" : "lg:ml-64",
         )}
+        role="main"
+        aria-label="Main content"
+        tabIndex={-1}
       >
         <div className="max-w-7xl mx-auto">
           <Breadcrumb />
