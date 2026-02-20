@@ -40,8 +40,7 @@ interface CustomerFormProps {
 
 export function CustomerForm({ onSubmit, onCancel }: CustomerFormProps) {
   const { addCustomer } = useCustomers();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [localError, setLocalError] = useState<Error | null>(null);
 
   const formMethods = useForm<CustomerFormData>({
     resolver: zodResolver(customerSchema),
@@ -50,7 +49,7 @@ export function CustomerForm({ onSubmit, onCancel }: CustomerFormProps) {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     trigger,
     clearErrors,
     reset,
@@ -66,8 +65,7 @@ export function CustomerForm({ onSubmit, onCancel }: CustomerFormProps) {
   };
 
   const onSubmitHandler = async (data: CustomerFormData) => {
-    setIsSubmitting(true);
-    setError(null);
+    setLocalError(null);
 
     try {
       const newCustomer: Customer = {
@@ -82,11 +80,9 @@ export function CustomerForm({ onSubmit, onCancel }: CustomerFormProps) {
     } catch (err) {
       const error =
         err instanceof Error ? err : new Error("Failed to create customer");
-      setError(error);
+      setLocalError(error);
       toast.error(error.message);
       console.error(error);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -190,7 +186,7 @@ export function CustomerForm({ onSubmit, onCancel }: CustomerFormProps) {
           </Button>
         </div>
 
-        {error && <FormErrorIndicator error={error} />}
+        {localError && <FormErrorIndicator error={localError} />}
       </form>
     </FormProvider>
   );
