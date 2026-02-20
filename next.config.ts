@@ -19,18 +19,26 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
 
+  // Bundle analysis for optimization (commented out due to Next.js 16 incompatibility)
+  // webpack: (config, { dev, isServer }) => {
+  //   if (!dev && !isServer) {
+  //     // Add bundle analyzer plugin for production builds
+  //     config.plugins.push(
+  //       new BundleAnalyzerPlugin({
+  //         analyzerMode: "static",
+  //         openAnalyzer: false,
+  //         generateStatsFile: true,
+  //         statsOptions: { source: false },
+  //       })
+  //     );
+  //   }
+  //   return config;
+  // },
+
   // Enable compiler optimizations
   compiler: {
     // Remove console.log in production
     removeConsole: process.env.NODE_ENV === "production",
-  },
-
-  // Turbopack configuration
-  turbopack: {
-    // Enable additional optimizations
-    resolveAlias: {
-      // Ensure consistent module resolution
-    },
   },
 
   // Headers for caching

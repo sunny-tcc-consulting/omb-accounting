@@ -1,22 +1,19 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 /**
  * Caching utilities for Phase 2.8 performance optimization
  */
 
 // In-memory cache with TTL
-type CacheItem<T> = {
-  data: T;
-  timestamp: number;
-  ttl: number;
-};
+class Cache {
+  private cache: Map<
+    string,
+    { data: unknown; timestamp: number; ttl: number }
+  > = new Map();
 
-export class Cache<T = unknown> {
-  private cache: Map<string, CacheItem<T>> = new Map();
-
-  set(key: string, data: T, ttl: number = 300000): void {
+  set<T>(key: string, data: T, ttl: number = 300000): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -24,7 +21,7 @@ export class Cache<T = unknown> {
     });
   }
 
-  get(key: string): T | null {
+  get<T>(key: string): T | null {
     const item = this.cache.get(key);
     if (!item) return null;
 
@@ -33,11 +30,11 @@ export class Cache<T = unknown> {
       return null;
     }
 
-    return item.data;
+    return item.data as T;
   }
 
   has(key: string): boolean {
-    return this.get(key) !== null;
+    return this.cache.has(key) && this.get(key) !== null;
   }
 
   delete(key: string): void {
@@ -61,24 +58,164 @@ export class Cache<T = unknown> {
   }
 
   size(): number {
-    return this.cache.size;
+    return this.getStats().size;
+  }
+
+  getStats(): { size: number; averageTtl: number } {
+    let count = 0;
+    let totalTtl = 0;
+    this.cache.forEach((item) => {
+      if (Date.now() - item.timestamp <= item.ttl) {
+        count++;
+        totalTtl += item.ttl;
+      }
+    });
+    return { size: count, averageTtl: count > 0 ? totalTtl / count : 0 };
   }
 }
 
 // Singleton cache instance
 export const appCache = new Cache();
 
-// Hook to check if component is still mounted
-function useIsMounted(): { current: boolean } {
-  const isMounted = useRef(true);
+// React Query-like hook for data fetching with caching
+export function useCachedFetch<T>(
+  key: string,
+  fetcher: () => Promise<T>,
+  options: {
+    ttl?: number;
+    staleWhileRevalidate?: boolean;
+    refetchOnWindowFocus?: boolean;
+    onSuccess?: (data: T) => void;
+    onError?: (error: Error) => void;
+  } = {},
+): {
+  data: T | null;
+  error: Error | null;
+  loading: boolean;
+  refetch: () => void;
+} {
+  const [data, setData] = useState<T | null>(appCache.get<T>(key));
+  const [error, setError] = useState<Error | null>(null);
+  const [loading, setLoading] = useState(false);
 
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await fetcher();
+      setData(result);
+      appCache.set(key, result, options.ttl || 300000);
+      options.onSuccess?.(result);
+      return result;
+    } catch (err) {
+      setError(err as Error);
+      options.onError?.(err as Error);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [key, fetcher, options.ttl, options.onSuccess, options.onError]);
+
+  // Auto refetch on window focus if enabled
   useEffect(() => {
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
+    if (options.refetchOnWindowFocus !== false) {
+      const handleFocus = () => {
+        if (!loading && !data) {
+          fetchData();
+        }
+      };
+      window.addEventListener("focus", handleFocus);
+      return () => window.removeEventListener("focus", handleFocus);
+    }
+  }, [loading, data, fetchData, options.refetchOnWindowFocus]);
 
-  return isMounted;
+  // Return cache data immediately if available
+  const cachedData = appCache.get<T>(key);
+  useEffect(() => {
+    if (cachedData && !data) {
+      setData(cachedData);
+    }
+  }, [cachedData, data]);
+
+  return {
+    data: data ?? cachedData,
+    error,
+    loading,
+    refetch: fetchData,
+  };
+}
+
+// SWR-like hook for client-side caching
+export function useStaleWhileRevalidate<T>(
+  key: string,
+  fetcher: () => Promise<T>,
+  options: {
+    ttl?: number;
+    refetchOnWindowFocus?: boolean;
+    onSuccess?: (data: T) => void;
+    onError?: (error: Error) => void;
+  } = {},
+): {
+  data: T | null;
+  error: Error | null;
+  loading: boolean;
+  refetch: () => void;
+} {
+  const [data, setData] = useState<T | null>(appCache.get<T>(key));
+  const [error, setError] = useState<Error | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await fetcher();
+      setData(result);
+      appCache.set(key, result, options.ttl || 300000);
+      options.onSuccess?.(result);
+      return result;
+    } catch (err) {
+      setError(err as Error);
+      options.onError?.(err as Error);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [key, fetcher, options.ttl, options.onSuccess, options.onError]);
+
+  // Auto refetch on window focus if enabled
+  useEffect(() => {
+    if (options.refetchOnWindowFocus !== false) {
+      const handleFocus = () => {
+        if (!loading && !data) {
+          fetchData();
+        }
+      };
+      window.addEventListener("focus", handleFocus);
+      return () => window.removeEventListener("focus", handleFocus);
+    }
+  }, [loading, data, fetchData, options.refetchOnWindowFocus]);
+
+  // Return cached data immediately, refetch in background
+  useEffect(() => {
+    if (!data && appCache.has(key)) {
+      const cached = appCache.get<T>(key);
+      if (cached) {
+        setData(cached);
+      }
+      // Refetch in background to keep cache fresh
+      fetchData().catch(() => {});
+    }
+  }, [key, data, fetchData]);
+
+  return {
+    data,
+    error,
+    loading,
+    refetch: fetchData,
+  };
 }
 
 // HTTP caching utilities
@@ -129,7 +266,7 @@ export class HttpCache {
 export class LocalStorageCache {
   private static prefix = "omb-accounting-cache-";
 
-  static set(key: string, data: unknown, ttl: number = 300000): void {
+  static set<T>(key: string, data: T, ttl: number = 300000): void {
     const item = {
       data,
       timestamp: Date.now(),
@@ -206,17 +343,15 @@ export function getCacheStats(): {
   missRate: number;
   averageTtl: number;
 } {
+  const stats = appCache.getStats();
   const entries = Array.from(appCache.keys())
-    .map((key) => ({ key, item: appCache.get(key) as CacheItem<unknown> }))
+    .map((key) => ({ key, item: appCache.get(key) }))
     .filter((entry) => entry.item !== null);
 
-  const size = entries.length;
-  const totalTtl = entries.reduce((sum, { item }) => sum + item.ttl, 0);
-
   return {
-    size,
+    size: stats.size,
     hitRate: 0, // Need to track hits/misses separately
     missRate: 0, // Need to track hits/misses separately
-    averageTtl: size > 0 ? totalTtl / size : 0,
+    averageTtl: stats.averageTtl,
   };
 }
