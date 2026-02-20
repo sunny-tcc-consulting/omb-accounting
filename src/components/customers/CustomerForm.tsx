@@ -190,7 +190,7 @@ export function CustomerForm({ onSubmit, onCancel }: CustomerFormProps) {
           </Button>
         </div>
 
-        <FormErrorIndicator error={error || new Error("Unknown error")} />
+        {error && <FormErrorIndicator error={error} />}
       </form>
     </FormProvider>
   );
