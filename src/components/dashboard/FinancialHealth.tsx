@@ -1,13 +1,43 @@
 "use client";
 
+import { memo, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, TrendingUp, TrendingDown } from "lucide-react";
 import { useData } from "@/contexts/DataContext";
 import { formatCurrency, formatPercentage } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState, useEffect } from "react";
 
-export function FinancialHealth() {
+// Helper functions - declared outside memoized component
+function calculateHealthScore(profitMargin: number): number {
+  if (profitMargin >= 30) return 100;
+  if (profitMargin >= 20) return 80;
+  if (profitMargin >= 10) return 60;
+  if (profitMargin >= 0) return 40;
+  if (profitMargin >= -10) return 20;
+  return 0;
+}
+
+function getHealthMessage(profitMargin: number): string {
+  if (profitMargin >= 30) {
+    return "Your financial health is excellent! Profit margin is at a high level.";
+  }
+  if (profitMargin >= 20) {
+    return "Your financial health is good, profit margin is normal.";
+  }
+  if (profitMargin >= 10) {
+    return "Your financial health is fair, profit margin is low.";
+  }
+  if (profitMargin >= 0) {
+    return "Your financial health needs attention, profit margin is negative.";
+  }
+  if (profitMargin >= -10) {
+    return "Your financial health is poor, need to take measures to improve.";
+  }
+  return "Your financial health is very dangerous, need to take immediate action.";
+}
+
+// Memoized component to prevent unnecessary re-renders
+export const FinancialHealth = memo(function FinancialHealth() {
   const { getFinancialSummary, loading } = useData();
   const summary = getFinancialSummary(30);
   const [animated, setAnimated] = useState(false);
@@ -130,32 +160,4 @@ export function FinancialHealth() {
       </CardContent>
     </Card>
   );
-}
-
-function calculateHealthScore(profitMargin: number): number {
-  if (profitMargin >= 30) return 100;
-  if (profitMargin >= 20) return 80;
-  if (profitMargin >= 10) return 60;
-  if (profitMargin >= 0) return 40;
-  if (profitMargin >= -10) return 20;
-  return 0;
-}
-
-function getHealthMessage(profitMargin: number): string {
-  if (profitMargin >= 30) {
-    return "Your financial health is excellent! Profit margin is at a high level.";
-  }
-  if (profitMargin >= 20) {
-    return "Your financial health is good, profit margin is normal.";
-  }
-  if (profitMargin >= 10) {
-    return "Your financial health is fair, profit margin is low.";
-  }
-  if (profitMargin >= 0) {
-    return "Your financial health needs attention, profit margin is negative.";
-  }
-  if (profitMargin >= -10) {
-    return "Your financial health is poor, need to take measures to improve.";
-  }
-  return "Your financial health is very dangerous, need to take immediate action.";
-}
+});

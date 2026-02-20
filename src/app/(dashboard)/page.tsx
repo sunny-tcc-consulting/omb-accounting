@@ -1,21 +1,62 @@
 "use client";
 
-import { OverviewCard } from "@/components/dashboard/OverviewCard";
-import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
-import { FinancialHealth } from "@/components/dashboard/FinancialHealth";
-import {
-  RevenueChart,
-  ExpenseBreakdown,
-  TransactionTrend,
-  RecentTransactionsChart,
-  FinancialHealthChart,
-} from "@/components/dashboard/charts";
+import { lazy, Suspense, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { RefreshCw, Search, Filter, TrendingUp, TrendingDown, Wallet, Activity, Calendar } from "lucide-react";
-import { useState, useMemo } from "react";
+import {
+  RefreshCw,
+  Search,
+  Filter,
+  TrendingUp,
+  TrendingDown,
+  Wallet,
+  Activity,
+} from "lucide-react";
 import { useData } from "@/contexts/DataContext";
+
+// Lazy load heavy chart components for better performance
+const OverviewCard = lazy(() =>
+  import("@/components/dashboard/OverviewCard").then((module) => ({
+    default: module.OverviewCard,
+  })),
+);
+const RevenueChart = lazy(() =>
+  import("@/components/dashboard/charts").then((module) => ({
+    default: module.RevenueChart,
+  })),
+);
+const ExpenseBreakdown = lazy(() =>
+  import("@/components/dashboard/charts").then((module) => ({
+    default: module.ExpenseBreakdown,
+  })),
+);
+const TransactionTrend = lazy(() =>
+  import("@/components/dashboard/charts").then((module) => ({
+    default: module.TransactionTrend,
+  })),
+);
+const RecentTransactionsChart = lazy(() =>
+  import("@/components/dashboard/charts").then((module) => ({
+    default: module.RecentTransactionsChart,
+  })),
+);
+const FinancialHealthChart = lazy(() =>
+  import("@/components/dashboard/charts").then((module) => ({
+    default: module.FinancialHealthChart,
+  })),
+);
+
+// Skeleton loader for Suspense
+function ChartSkeleton() {
+  return (
+    <div className="space-y-3">
+      <Skeleton className="h-4 w-[150px]" />
+      <Skeleton className="h-8 w-full" />
+      <Skeleton className="h-32 w-full" />
+    </div>
+  );
+}
 
 export default function DashboardPage() {
   const [refreshing, setRefreshing] = useState(false);
@@ -24,13 +65,16 @@ export default function DashboardPage() {
   const { refreshTransactions } = useData();
 
   // Memoize dashboard data to prevent unnecessary re-renders
-  const dashboardData = useMemo(() => ({
-    totalRevenue: 125430,
-    totalExpenses: 75680,
-    netIncome: 49750,
-    profitMargin: 39.7,
-    lastUpdated: new Date(),
-  }), []);
+  const dashboardData = useMemo(
+    () => ({
+      totalRevenue: 125430,
+      totalExpenses: 75680,
+      netIncome: 49750,
+      profitMargin: 39.7,
+      lastUpdated: new Date(),
+    }),
+    [],
+  );
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -40,17 +84,18 @@ export default function DashboardPage() {
 
   const totalRevenue = 125430; // This would come from real data
   const totalExpenses = 75680;
-  const netIncome = totalRevenue - totalExpenses;
-  const profitMargin = totalRevenue > 0 ? (netIncome / totalRevenue) * 100 : 0;
 
   return (
     <div className="space-y-6">
       {/* Enhanced Header with Search and Actions */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            Dashboard
+          </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Financial overview and insights • Last updated: {new Date().toLocaleTimeString()}
+            Financial overview and insights • Last updated:{" "}
+            {new Date().toLocaleTimeString()}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -70,7 +115,11 @@ export default function DashboardPage() {
             variant="outline"
             size="icon"
             onClick={() => setShowFilters(!showFilters)}
-            className={showFilters ? "bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400" : ""}
+            className={
+              showFilters
+                ? "bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400"
+                : ""
+            }
           >
             <Filter className="h-4 w-4" />
           </Button>
@@ -81,8 +130,12 @@ export default function DashboardPage() {
             disabled={refreshing}
             className="gap-2"
           >
-            <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
-            <span className="hidden sm:inline">{refreshing ? "Refreshing..." : "Refresh"}</span>
+            <RefreshCw
+              className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+            />
+            <span className="hidden sm:inline">
+              {refreshing ? "Refreshing..." : "Refresh"}
+            </span>
           </Button>
         </div>
       </div>
@@ -93,7 +146,9 @@ export default function DashboardPage() {
           <CardContent className="pt-6">
             <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Date Range</label>
+                <label className="block text-sm font-medium mb-2">
+                  Date Range
+                </label>
                 <select className="w-full border rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-900">
                   <option>Last 7 days</option>
                   <option>Last 30 days</option>
@@ -104,7 +159,9 @@ export default function DashboardPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Transaction Type</label>
+                <label className="block text-sm font-medium mb-2">
+                  Transaction Type
+                </label>
                 <select className="w-full border rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-900">
                   <option>All</option>
                   <option value="income">Income</option>
@@ -112,7 +169,9 @@ export default function DashboardPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Category</label>
+                <label className="block text-sm font-medium mb-2">
+                  Category
+                </label>
                 <select className="w-full border rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-900">
                   <option>All categories</option>
                   <option>Sales</option>
@@ -144,7 +203,9 @@ export default function DashboardPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Revenue</p>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  Total Revenue
+                </p>
                 <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                   ${dashboardData.totalRevenue.toLocaleString()}
                 </p>
@@ -153,14 +214,18 @@ export default function DashboardPage() {
                 <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
             </div>
-            <p className="text-xs text-green-600 dark:text-green-400 mt-2">↑ 12% from last month</p>
+            <p className="text-xs text-green-600 dark:text-green-400 mt-2">
+              ↑ 12% from last month
+            </p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Expenses</p>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  Total Expenses
+                </p>
                 <p className="text-2xl font-bold text-red-600 dark:text-red-400">
                   ${dashboardData.totalExpenses.toLocaleString()}
                 </p>
@@ -169,14 +234,18 @@ export default function DashboardPage() {
                 <TrendingDown className="h-6 w-6 text-red-600 dark:text-red-400" />
               </div>
             </div>
-            <p className="text-xs text-red-600 dark:text-red-400 mt-2">↑ 8% from last month</p>
+            <p className="text-xs text-red-600 dark:text-red-400 mt-2">
+              ↑ 8% from last month
+            </p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Net Income</p>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  Net Income
+                </p>
                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                   ${dashboardData.netIncome.toLocaleString()}
                 </p>
@@ -194,26 +263,44 @@ export default function DashboardPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Health Score</p>
-                <p className="text-2xl font-bold text-green-600 dark:text-green-400">85/100</p>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  Health Score
+                </p>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  85/100
+                </p>
               </div>
               <div className="w-12 h-12 bg-green-100 dark:bg-green-950/30 rounded-lg flex items-center justify-center">
                 <Activity className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
             </div>
-            <p className="text-xs text-green-600 dark:text-green-400 mt-2">Excellent condition</p>
+            <p className="text-xs text-green-600 dark:text-green-400 mt-2">
+              Excellent condition
+            </p>
           </CardContent>
         </Card>
       </div>
 
       {/* Main Dashboard Widgets Grid - Responsive with improved layout */}
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 auto-rows-min">
-        <RevenueChart />
-        <ExpenseBreakdown />
-        <TransactionTrend />
-        <RecentTransactionsChart />
-        <FinancialHealthChart />
-        <OverviewCard />
+        <Suspense fallback={<ChartSkeleton />}>
+          <RevenueChart />
+        </Suspense>
+        <Suspense fallback={<ChartSkeleton />}>
+          <ExpenseBreakdown />
+        </Suspense>
+        <Suspense fallback={<ChartSkeleton />}>
+          <TransactionTrend />
+        </Suspense>
+        <Suspense fallback={<ChartSkeleton />}>
+          <RecentTransactionsChart />
+        </Suspense>
+        <Suspense fallback={<ChartSkeleton />}>
+          <FinancialHealthChart />
+        </Suspense>
+        <Suspense fallback={<ChartSkeleton />}>
+          <OverviewCard />
+        </Suspense>
       </div>
 
       {/* Additional Dashboard Widget Row (could add more here later) */}
