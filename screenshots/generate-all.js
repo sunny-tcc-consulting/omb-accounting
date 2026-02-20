@@ -1,46 +1,71 @@
 const puppeteer = require('puppeteer');
 const path = require('path');
-const fs = require('fs');
 
-async function generateScreenshots() {
-  const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
+const PAGES = [
+  { url: 'http://localhost:3000', name: 'dashboard' },
+  { url: 'http://localhost:3000/customers', name: 'customers' },
+  { url: 'http://localhost:3000/customers/new', name: 'customers-new' },
+  { url: 'http://localhost:3000/invoices', name: 'invoices' },
+  { url: 'http://localhost:3000/invoices/new', name: 'invoices-new' },
+  { url: 'http://localhost:3000/quotations', name: 'quotations' },
+  { url: 'http://localhost:3000/quotations/new', name: 'quotations-new' },
+];
 
-  const pages = [
-    { url: 'http://localhost:3000', name: 'dashboard' },
-    { url: 'http://localhost:3000/customers', name: 'customers' },
-    { url: 'http://localhost:3000/customers/new', name: 'customers-new' },
-    { url: 'http://localhost:3000/invoices', name: 'invoices' },
-    { url: 'http://localhost:3000/invoices/new', name: 'invoices-new' },
-    { url: 'http://localhost:3000/quotations', name: 'quotations' },
-    { url: 'http://localhost:3000/quotations/new', name: 'quotations-new' }
-  ];
-
-  const outputDir = '/home/tcc/.openclaw/media/inbound';
-
-  for (const page of pages) {
-    try {
-      const pageInstance = await browser.newPage();
-      await pageInstance.setViewport({ width: 1280, height: 720 });
-      await pageInstance.goto(page.url, { waitUntil: 'networkidle0', timeout: 30000 });
-
-      // Wait for content to load
-      await pageInstance.waitForTimeout(2000);
-
-      const filePath = path.join(outputDir, `${page.name}.png`);
-      await pageInstance.screenshot({ path: filePath, fullPage: false });
-
-      console.log(`✅ Generated: ${filePath}`);
-      await pageInstance.close();
-    } catch (err) {
-      console.error(`❌ Error generating ${page.name}: ${err.message}`);
-    }
-  }
-
-  await browser.close();
-  console.log('🎉 All screenshots generated!');
+async function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-generateScreenshots();
+async function generateScreenshots() {
+  console.log('🚀 Starting screenshot generation...');
+  
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+  });
+  
+  const errors = [];
+  
+  for (const pageInfo of PAGES) {
+    console.log(`📸 Capturing: ${pageInfo.name}...`);
+    
+    const page = await browser.newPage();
+    page.setDefaultTimeout(30000);
+    
+    page.on('console', msg => {
+      if (msg.type() === 'error') {
+        const text = msg.text();
+        // Ignore hydration warnings from Next.js
+        if (!text.includes('Hydration') && !text.includes('did not match')) {
+          errors.push(`${pageInfo.name}: ${text}`);
+        }
+      }
+    });
+    
+    page.on('pageerror', err => {
+      errors.push(`${pageInfo.name}: ${err.message}`);
+    });
+    
+    try {
+      await page.goto(pageInfo.url, { waitUntil: 'networkidle0', timeout: 30000 });
+      await delay(2000);
+      
+      const outputPath = path.join(__dirname, `${pageInfo.name}.png`);
+      await page.screenshot({ path: outputPath, fullPage: true });
+      console.log(`✅ Saved: ${outputPath}`);
+    } catch (err) {
+      console.log(`❌ Failed: ${pageInfo.name} - ${err.message}`);
+    }
+    
+    await page.close();
+  }
+  
+  await browser.close();
+  
+  console.log('\n📊 Summary:');
+  console.log(`Errors: ${errors.length}`);
+  if (errors.length > 0) {
+    errors.slice(0, 5).forEach(e => console.log(`  - ${e}`));
+  }
+}
+
+generateScreenshots().catch(console.error);

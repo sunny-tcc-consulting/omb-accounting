@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { cn, skipLinkStyles } from "@/lib/a11y";
+import { skipLinkStyles } from "@/lib/a11y";
+import { cn } from "@/lib/utils";
 
 interface SkipLinkProps {
   /** Target content area ID (default: main-content) */
