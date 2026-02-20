@@ -195,8 +195,8 @@ function EmptyState({
   secondaryAction,
   className,
 }: EmptyStateProps) {
-  const IllustrationComponent =
-    customIllustration || EmptyStateIllustrations[illustration];
+  const IllustrationComponent: React.ReactNode =
+    customIllustration || EmptyStateIllustrations[illustration]();
 
   return (
     <div

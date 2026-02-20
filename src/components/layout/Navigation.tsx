@@ -108,7 +108,7 @@ export function Breadcrumb() {
 interface NavItem {
   href: string;
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string }> | string;
   shortcut?: string;
 }
 

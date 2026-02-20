@@ -187,7 +187,7 @@ export function useSupportsHover(): boolean {
 /**
  * Debounce resize handler
  */
-export function useDebouncedResize<T extends (...args: Parameters<T>) => void>(
+export function useDebouncedResize<T extends (...args: never[]) => void>(
   callback: T,
   delay: number = 150,
 ): T {

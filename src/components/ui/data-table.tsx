@@ -514,6 +514,5 @@ export type {
   SortableHeaderProps,
   ColumnResizerProps,
   DataTableRowProps,
-  TableColumn,
   DataTableProps,
 };

@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { XIcon, GripVerticalIcon } from "lucide-react";
-import { Dialog as DialogPrimitive, DialogPortal } from "radix-ui";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { DialogPortal } from "@radix-ui/react-dialog";
 import { useTheme } from "next-themes";
 
 import { cn } from "@/lib/utils";
@@ -16,6 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogOverlay,
 } from "@/components/ui/dialog";
 
 export interface ModalProps {

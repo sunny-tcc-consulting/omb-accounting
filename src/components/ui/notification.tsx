@@ -265,5 +265,4 @@ export {
   CustomToast,
   NotificationCenter,
   type NotificationOptions,
-  type NotificationPriority,
 };
