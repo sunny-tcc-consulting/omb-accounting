@@ -5,10 +5,17 @@ import { Activity, TrendingUp, TrendingDown } from "lucide-react";
 import { useData } from "@/contexts/DataContext";
 import { formatCurrency, formatPercentage } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState, useEffect } from "react";
 
 export function FinancialHealth() {
   const { getFinancialSummary, loading } = useData();
   const summary = getFinancialSummary(30);
+  const [animated, setAnimated] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimated(true), 400);
+    return () => clearTimeout(timer);
+  }, []);
 
   if (loading) {
     return (
@@ -26,8 +33,30 @@ export function FinancialHealth() {
   // Calculate health score based on profit margin
   const healthScore = calculateHealthScore(summary.profitMargin);
 
+  const scoreColors = {
+    excellent: {
+      text: "text-green-600",
+      bg: "bg-green-500",
+      darkText: "dark:text-green-400",
+    },
+    good: {
+      text: "text-yellow-600",
+      bg: "bg-yellow-500",
+      darkText: "dark:text-yellow-400",
+    },
+    poor: {
+      text: "text-red-600",
+      bg: "bg-red-500",
+      darkText: "dark:text-red-400",
+    },
+  };
+
+  const healthStatus =
+    healthScore >= 80 ? "excellent" : healthScore >= 60 ? "good" : "poor";
+  const colors = scoreColors[healthStatus];
+
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg">
       <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950">
         <CardTitle className="flex items-center gap-2">
           <Activity className="h-5 w-5 text-green-600" />
@@ -43,13 +72,7 @@ export function FinancialHealth() {
             </span>
           </div>
           <div
-            className={`text-3xl font-bold ${
-              healthScore >= 80
-                ? "text-green-600"
-                : healthScore >= 60
-                  ? "text-yellow-600"
-                  : "text-red-600"
-            }`}
+            className={`text-3xl font-bold transition-all duration-500 ${colors.text} ${colors.darkText}`}
           >
             {healthScore}/100
           </div>
@@ -62,27 +85,21 @@ export function FinancialHealth() {
                 Profit Margin
               </span>
               <span
-                className={`font-semibold ${healthScore >= 80 ? "text-green-600" : healthScore >= 60 ? "text-yellow-600" : "text-red-600"}`}
+                className={`font-semibold ${colors.text} ${colors.darkText}`}
               >
                 {formatPercentage(summary.profitMargin)}
               </span>
             </div>
             <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all duration-500 ${
-                  healthScore >= 80
-                    ? "bg-green-500"
-                    : healthScore >= 60
-                      ? "bg-yellow-500"
-                      : "bg-red-500"
-                }`}
-                style={{ width: `${healthScore}%` }}
+                className={`h-full rounded-full transition-all duration-1000 ease-out ${colors.bg}`}
+                style={{ width: animated ? `${healthScore}%` : "0%" }}
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-            <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+            <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg transition-transform duration-300 hover:scale-105">
               <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400 mb-1">
                 <TrendingUp className="h-3 w-3" />
                 <span>Income</span>
@@ -91,7 +108,7 @@ export function FinancialHealth() {
                 {formatCurrency(summary.totalIncome)}
               </p>
             </div>
-            <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg">
+            <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg transition-transform duration-300 hover:scale-105">
               <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400 mb-1">
                 <TrendingDown className="h-3 w-3" />
                 <span>Expenses</span>
@@ -104,13 +121,7 @@ export function FinancialHealth() {
 
           <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
             <p
-              className={`text-sm font-medium ${
-                healthScore >= 80
-                  ? "text-green-600 dark:text-green-400"
-                  : healthScore >= 60
-                    ? "text-yellow-600 dark:text-yellow-400"
-                    : "text-red-600 dark:text-red-400"
-              }`}
+              className={`text-sm font-medium transition-opacity duration-500 ${animated ? "opacity-100" : "opacity-0"} ${colors.text} ${colors.darkText}`}
             >
               {getHealthMessage(summary.profitMargin)}
             </p>

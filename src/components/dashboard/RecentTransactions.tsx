@@ -6,10 +6,17 @@ import Link from "next/link";
 import { useData } from "@/contexts/DataContext";
 import { formatCurrency, formatDate, getRelativeDateString } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState, useEffect } from "react";
 
 export function RecentTransactions() {
   const { getFilteredTransactions, loading } = useData();
   const recentTransactions = getFilteredTransactions({ type: "all", limit: 5 });
+  const [animated, setAnimated] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimated(true), 300);
+    return () => clearTimeout(timer);
+  }, []);
 
   if (loading) {
     return (
@@ -27,7 +34,7 @@ export function RecentTransactions() {
   }
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg">
       <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
@@ -53,14 +60,19 @@ export function RecentTransactions() {
               <p className="text-sm text-gray-500">No transactions yet</p>
             </div>
           ) : (
-            recentTransactions.map((transaction) => (
+            recentTransactions.map((transaction, index) => (
               <div
                 key={transaction.id}
-                className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer group"
+                className={`flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-300 cursor-pointer group hover:scale-[1.02] ${
+                  animated
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-4"
+                }`}
+                style={{ transitionDelay: `${index * 100}ms` }}
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow ${
+                    className={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300 group-hover:scale-110 ${
                       transaction.type === "income"
                         ? "bg-green-100 text-green-600 dark:bg-green-950/30 dark:text-green-400"
                         : "bg-red-100 text-red-600 dark:bg-red-950/30 dark:text-red-400"
@@ -81,7 +93,7 @@ export function RecentTransactions() {
                   </div>
                 </div>
                 <div
-                  className={`font-semibold text-sm ${
+                  className={`font-semibold text-sm transition-transform duration-300 group-hover:scale-105 ${
                     transaction.type === "income"
                       ? "text-green-600 dark:text-green-400"
                       : "text-red-600 dark:text-red-400"

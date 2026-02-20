@@ -1,8 +1,38 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { TrendingUp, TrendingDown, Wallet, Activity, DollarSign, Calendar } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+import {
+  TrendingUp,
+  TrendingDown,
+  Wallet,
+  Activity,
+  DollarSign,
+  Calendar,
+} from "lucide-react";
+import { useState, useEffect } from "react";
 
 // Mock data for charts
 const monthlyRevenue = [
@@ -33,16 +63,31 @@ const transactionTrend = [
 ];
 
 export function RevenueChart() {
+  const [animated, setAnimated] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimated(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Revenue Overview</CardTitle>
-        <CardDescription>Monthly revenue and expenses (Last 6 months)</CardDescription>
+    <Card className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+      <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 pb-4">
+        <CardTitle className="flex items-center gap-2">
+          <TrendingUp className="h-5 w-5 text-green-600" />
+          Revenue Overview
+        </CardTitle>
+        <CardDescription>
+          Monthly revenue and expenses (Last 6 months)
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
           <AreaChart data={monthlyRevenue}>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
+            <CartesianGrid
+              strokeDasharray="3 3"
+              className="stroke-gray-200 dark:stroke-gray-700"
+            />
             <XAxis
               dataKey="name"
               className="text-xs text-gray-500 dark:text-gray-400"
@@ -60,7 +105,10 @@ export function RevenueChart() {
                 borderRadius: "8px",
                 boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
               }}
-              formatter={(value: number | undefined) => [`$${(value || 0).toLocaleString()}`, "Amount"]}
+              formatter={(value: number | undefined) => [
+                `$${(value || 0).toLocaleString()}`,
+                "Amount",
+              ]}
             />
             <Legend />
             <Area
@@ -70,6 +118,8 @@ export function RevenueChart() {
               fill="#10b981"
               fillOpacity={0.2}
               name="Revenue"
+              animationDuration={animated ? 1500 : 0}
+              animationEasing="ease-out"
             />
             <Area
               type="monotone"
@@ -78,6 +128,8 @@ export function RevenueChart() {
               fill="#ef4444"
               fillOpacity={0.2}
               name="Expenses"
+              animationDuration={animated ? 1500 : 0}
+              animationEasing="ease-out"
             />
           </AreaChart>
         </ResponsiveContainer>
@@ -87,10 +139,20 @@ export function RevenueChart() {
 }
 
 export function ExpenseBreakdown() {
+  const [animated, setAnimated] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimated(true), 200);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Expense Breakdown</CardTitle>
+    <Card className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+      <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950 dark:to-orange-950 pb-4">
+        <CardTitle className="flex items-center gap-2">
+          <Wallet className="h-5 w-5 text-amber-600" />
+          Expense Breakdown
+        </CardTitle>
         <CardDescription>Top expense categories</CardDescription>
       </CardHeader>
       <CardContent>
@@ -101,10 +163,14 @@ export function ExpenseBreakdown() {
               cx="50%"
               cy="50%"
               labelLine={false}
-              label={({ name, percent }) => `${name} ${(percent! * 100).toFixed(0)}%`}
+              label={({ name, percent }) =>
+                `${name} ${(percent! * 100).toFixed(0)}%`
+              }
               outerRadius={100}
               fill="#8884d8"
               dataKey="value"
+              animationDuration={animated ? 1500 : 0}
+              animationEasing="ease-out"
             >
               {incomeExpenseDistribution.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
@@ -117,7 +183,10 @@ export function ExpenseBreakdown() {
                 borderRadius: "8px",
                 boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
               }}
-              formatter={(value: number | undefined, name: string | undefined) => [`$${(value || 0).toLocaleString()}`, name || ""]}
+              formatter={(
+                value: number | undefined,
+                name: string | undefined,
+              ) => [`$${(value || 0).toLocaleString()}`, name || ""]}
             />
           </PieChart>
         </ResponsiveContainer>
@@ -127,16 +196,29 @@ export function ExpenseBreakdown() {
 }
 
 export function TransactionTrend() {
+  const [animated, setAnimated] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimated(true), 300);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Transaction Trend</CardTitle>
+    <Card className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+      <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 pb-4">
+        <CardTitle className="flex items-center gap-2">
+          <Activity className="h-5 w-5 text-blue-600" />
+          Transaction Trend
+        </CardTitle>
         <CardDescription>Daily transactions (This week)</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={transactionTrend}>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
+            <CartesianGrid
+              strokeDasharray="3 3"
+              className="stroke-gray-200 dark:stroke-gray-700"
+            />
             <XAxis
               dataKey="date"
               className="text-xs text-gray-500 dark:text-gray-400"
@@ -153,9 +235,17 @@ export function TransactionTrend() {
                 borderRadius: "8px",
                 boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
               }}
-              formatter={(value: number | undefined) => [`${value || 0} transactions`, "Count"]}
+              formatter={(value: number | undefined) => [
+                `${value || 0} transactions`,
+                "Count",
+              ]}
             />
-            <Bar dataKey="transactions" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+            <Bar
+              dataKey="transactions"
+              fill="#3b82f6"
+              radius={[4, 4, 0, 0]}
+              animationDuration={animated ? 1500 : 0}
+            />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>
@@ -164,91 +254,139 @@ export function TransactionTrend() {
 }
 
 export function QuickStats() {
+  const stats = [
+    {
+      label: "Total Revenue",
+      value: "$125,430",
+      change: "+12%",
+      icon: TrendingUp,
+      color: "green",
+    },
+    {
+      label: "Total Expenses",
+      value: "$75,680",
+      change: "+8%",
+      icon: TrendingDown,
+      color: "red",
+    },
+    {
+      label: "Net Income",
+      value: "$49,750",
+      change: "39.7%",
+      icon: Wallet,
+      color: "blue",
+    },
+    {
+      label: "Health Score",
+      value: "85/100",
+      change: "Excellent",
+      icon: Activity,
+      color: "green",
+    },
+  ];
+
+  const colorStyles: Record<
+    string,
+    { bg: string; text: string; bgDark: string; textDark: string }
+  > = {
+    green: {
+      bg: "bg-green-100",
+      text: "text-green-600",
+      bgDark: "dark:bg-green-950/30",
+      textDark: "dark:text-green-400",
+    },
+    red: {
+      bg: "bg-red-100",
+      text: "text-red-600",
+      bgDark: "dark:bg-red-950/30",
+      textDark: "dark:text-red-400",
+    },
+    blue: {
+      bg: "bg-blue-100",
+      text: "text-blue-600",
+      bgDark: "dark:bg-blue-950/30",
+      textDark: "dark:text-blue-400",
+    },
+  };
+
   return (
     <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Revenue</p>
-              <p className="text-2xl font-bold text-green-600 dark:text-green-400">$125,430</p>
-            </div>
-            <div className="w-12 h-12 bg-green-100 dark:bg-green-950/30 rounded-lg flex items-center justify-center">
-              <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
-            </div>
-          </div>
-          <p className="text-xs text-green-600 dark:text-green-400 mt-2">↑ 12% from last month</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Expenses</p>
-              <p className="text-2xl font-bold text-red-600 dark:text-red-400">$75,680</p>
-            </div>
-            <div className="w-12 h-12 bg-red-100 dark:bg-red-950/30 rounded-lg flex items-center justify-center">
-              <TrendingDown className="h-6 w-6 text-red-600 dark:text-red-400" />
-            </div>
-          </div>
-          <p className="text-xs text-red-600 dark:text-red-400 mt-2">↑ 8% from last month</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Net Income</p>
-              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">$49,750</p>
-            </div>
-            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-950/30 rounded-lg flex items-center justify-center">
-              <Wallet className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-            </div>
-          </div>
-          <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">39.7% profit margin</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Health Score</p>
-              <p className="text-2xl font-bold text-green-600 dark:text-green-400">85/100</p>
-            </div>
-            <div className="w-12 h-12 bg-green-100 dark:bg-green-950/30 rounded-lg flex items-center justify-center">
-              <Activity className="h-6 w-6 text-green-600 dark:text-green-400" />
-            </div>
-          </div>
-          <p className="text-xs text-green-600 dark:text-green-400 mt-2">Excellent condition</p>
-        </CardContent>
-      </Card>
+      {stats.map((stat) => {
+        const Icon = stat.icon;
+        const colors = colorStyles[stat.color];
+        return (
+          <Card
+            key={stat.label}
+            className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+          >
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    {stat.label}
+                  </p>
+                  <p
+                    className={`text-2xl font-bold ${colors.text} ${colors.textDark}`}
+                  >
+                    {stat.value}
+                  </p>
+                </div>
+                <div
+                  className={`w-12 h-12 ${colors.bg} ${colors.bgDark} rounded-lg flex items-center justify-center`}
+                >
+                  <Icon
+                    className={`h-6 w-6 ${colors.text} ${colors.textDark}`}
+                  />
+                </div>
+              </div>
+              <p className={`text-xs ${colors.text} ${colors.textDark} mt-2`}>
+                {stat.label === "Net Income"
+                  ? `${stat.change} profit margin`
+                  : stat.label === "Health Score"
+                    ? stat.change
+                    : `↑ ${stat.change} from last month`}
+              </p>
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 }
 
 export function RecentTransactionsChart() {
+  const transactions = [
+    { name: "ABC Corp", type: "income", amount: 12500, date: "Today" },
+    { name: "XYZ Ltd", type: "income", amount: 8400, date: "Yesterday" },
+    { name: "Utility Bill", type: "expense", amount: 2300, date: "Yesterday" },
+    { name: "Service Fee", type: "income", amount: 5600, date: "2 days ago" },
+    {
+      name: "Office Supplies",
+      type: "expense",
+      amount: 1200,
+      date: "3 days ago",
+    },
+  ];
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Recent Transactions</CardTitle>
+    <Card className="transition-all duration-300 hover:shadow-lg">
+      <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 pb-4">
+        <CardTitle className="flex items-center gap-2">
+          <DollarSign className="h-5 w-5 text-purple-600" />
+          Recent Transactions
+        </CardTitle>
         <CardDescription>Latest financial activities</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {[
-            { name: "ABC Corp", type: "income", amount: 12500, date: "Today" },
-            { name: "XYZ Ltd", type: "income", amount: 8400, date: "Yesterday" },
-            { name: "Utility Bill", type: "expense", amount: 2300, date: "Yesterday" },
-            { name: "Service Fee", type: "income", amount: 5600, date: "2 days ago" },
-            { name: "Office Supplies", type: "expense", amount: 1200, date: "3 days ago" },
-          ].map((transaction, index) => (
+        <div className="space-y-3">
+          {transactions.map((transaction, index) => (
             <div
               key={index}
-              className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+              className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-200 hover:scale-[1.02] cursor-pointer group"
             >
               <div className="flex items-center gap-3">
                 <div
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                  className={`w-10 h-10 rounded-lg flex items-center justify-center transition-transform duration-200 group-hover:scale-110 ${
                     transaction.type === "income"
                       ? "bg-green-100 dark:bg-green-950/30 text-green-600 dark:text-green-400"
                       : "bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400"
@@ -261,19 +399,23 @@ export function RecentTransactionsChart() {
                   )}
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">{transaction.name}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{transaction.date}</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">
+                    {transaction.name}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {transaction.date}
+                  </p>
                 </div>
               </div>
               <p
-                className={`font-semibold ${
+                className={`font-semibold transition-colors duration-200 ${
                   transaction.type === "income"
                     ? "text-green-600 dark:text-green-400"
                     : "text-red-600 dark:text-red-400"
                 }`}
               >
-                {transaction.type === "income" ? "+" : "-"}
-                ${transaction.amount.toLocaleString()}
+                {transaction.type === "income" ? "+" : "-"}$
+                {transaction.amount.toLocaleString()}
               </p>
             </div>
           ))}
@@ -284,50 +426,75 @@ export function RecentTransactionsChart() {
 }
 
 export function FinancialHealthChart() {
+  const [animated, setAnimated] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimated(true), 400);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const metrics = [
+    {
+      label: "Revenue Growth",
+      value: 85,
+      color: "from-green-400 to-green-600",
+      textColor: "text-green-600",
+      change: "+12.5%",
+    },
+    {
+      label: "Expense Control",
+      value: 92,
+      color: "from-blue-400 to-blue-600",
+      textColor: "text-blue-600",
+      change: "-8.2%",
+    },
+    {
+      label: "Cash Flow",
+      value: 88,
+      color: "from-purple-400 to-purple-600",
+      textColor: "text-purple-600",
+      change: "+18.3%",
+    },
+    {
+      label: "Profit Margin",
+      value: 85,
+      color: "from-emerald-400 to-emerald-600",
+      textColor: "text-emerald-600",
+      change: "+5.2%",
+    },
+  ];
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Financial Health Score</CardTitle>
+    <Card className="transition-all duration-300 hover:shadow-lg">
+      <CardHeader className="bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-950 dark:to-teal-950 pb-4">
+        <CardTitle className="flex items-center gap-2">
+          <Activity className="h-5 w-5 text-green-600" />
+          Financial Health Score
+        </CardTitle>
         <CardDescription>Health metrics over time</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-6">
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Revenue Growth</span>
-              <span className="text-sm font-bold text-green-600 dark:text-green-400">+12.5%</span>
+        <div className="space-y-5">
+          {metrics.map((metric, index) => (
+            <div key={metric.label}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {metric.label}
+                </span>
+                <span
+                  className={`text-sm font-bold ${metric.textColor} dark:text-${metric.textColor.replace("text-", "")}-400`}
+                >
+                  {metric.change}
+                </span>
+              </div>
+              <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                <div
+                  className={`h-full bg-gradient-to-r ${metric.color} rounded-full transition-all duration-1000 ease-out`}
+                  style={{ width: animated ? `${metric.value}%` : "0%" }}
+                />
+              </div>
             </div>
-            <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full" style={{ width: "85%" }} />
-            </div>
-          </div>
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Expense Control</span>
-              <span className="text-sm font-bold text-blue-600 dark:text-blue-400">-8.2%</span>
-            </div>
-            <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full" style={{ width: "92%" }} />
-            </div>
-          </div>
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Cash Flow</span>
-              <span className="text-sm font-bold text-purple-600 dark:text-purple-400">+18.3%</span>
-            </div>
-            <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-purple-400 to-purple-600 rounded-full" style={{ width: "88%" }} />
-            </div>
-          </div>
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Profit Margin</span>
-              <span className="text-sm font-bold text-green-600 dark:text-green-400">+5.2%</span>
-            </div>
-            <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full" style={{ width: "85%" }} />
-            </div>
-          </div>
+          ))}
         </div>
       </CardContent>
     </Card>
