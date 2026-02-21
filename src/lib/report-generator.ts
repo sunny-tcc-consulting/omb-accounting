@@ -524,9 +524,22 @@ export function generateGeneralLedger(
 export function generateAllGeneralLedgers(
   accounts: Account[],
   journalEntries: JournalEntry[],
+  filters?: {
+    startDate?: Date;
+    endDate?: Date;
+  },
 ): GeneralLedger[] {
+  // Filter journal entries by date range if provided
+  const filteredEntries =
+    filters?.startDate && filters?.endDate
+      ? journalEntries.filter(
+          (entry) =>
+            entry.date >= filters.startDate && entry.date <= filters.endDate,
+        )
+      : journalEntries;
+
   return accounts.map((account) =>
-    generateGeneralLedger(account.code, journalEntries),
+    generateGeneralLedger(account.code, filteredEntries),
   );
 }
 

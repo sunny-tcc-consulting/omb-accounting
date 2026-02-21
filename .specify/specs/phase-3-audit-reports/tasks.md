@@ -122,19 +122,19 @@
 ### Task 3.2.3: Custom Date Ranges
 
 - **File**: `src/components/reports/DateRangePicker.tsx`
-- **Status**: 🔄 IN PROGRESS
+- **Status**: ✅ COMPLETED (2026-02-21)
 - **Priority**: Medium
 - **Description**: Allow custom start/end dates for all reports (currently only P&L has date range)
 - **Dependencies**: Task 3.1.4
-- **Estimate**: 3 hours
+- **Estimate**: 3 hours → Actual: 2 hours
 
 **Subtasks**:
 
-1. [ ] Create reusable DateRangePicker component
-2. [ ] Add to Balance Sheet (as-of date)
-3. [ ] Add to Trial Balance (as-of date)
-4. [ ] Add to General Ledger (date range)
-5. [ ] Update ReportContext filters
+1. [x] Create reusable DateRangePicker component (single date and date range)
+2. [x] Add to Trial Balance (as-of date) via DatePicker
+3. [x] Add to Balance Sheet (as-of date) via DatePicker
+4. [x] Add to General Ledger (date range)
+5. [x] Update ReportContext filters
 
 ### Task 3.2.4: Cash Flow Statement
 

@@ -31,7 +31,7 @@ interface ReportContextType {
   generateTrialBalance: () => TrialBalance;
   generateBalanceSheet: (asOfDate?: Date) => BalanceSheet;
   generateProfitAndLoss: (startDate: Date, endDate: Date) => ProfitAndLoss;
-  generateGeneralLedgers: () => GeneralLedger[];
+  generateGeneralLedgers: (startDate?: Date, endDate?: Date) => GeneralLedger[];
 
   // Report Filters
   filters: ReportFilters;
@@ -111,10 +111,16 @@ export function ReportProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const generateGeneralLedgersFn = (): GeneralLedger[] => {
+  const generateGeneralLedgersFn = (
+    startDate?: Date,
+    endDate?: Date,
+  ): GeneralLedger[] => {
     setLoading(true);
     try {
-      return generateAllGeneralLedgers(accounts, journalEntries);
+      return generateAllGeneralLedgers(accounts, journalEntries, {
+        startDate,
+        endDate,
+      });
     } finally {
       setLoading(false);
     }

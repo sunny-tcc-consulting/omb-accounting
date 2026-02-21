@@ -82,6 +82,16 @@ export function ReportPageContent() {
   const [comparisonPeriod, setComparisonPeriod] =
     useState<ComparisonPeriod>("previous_month");
 
+  // General Ledger date range state
+  const [glStartDate, setGlStartDate] = useState<string>(
+    new Date(new Date().setMonth(new Date().getMonth() - 12))
+      .toISOString()
+      .split("T")[0],
+  );
+  const [glEndDate, setGlEndDate] = useState<string>(
+    new Date().toISOString().split("T")[0],
+  );
+
   // Generate reports
   const trialBalance = useMemo(
     () => generateTrialBalance(accounts, journalEntries),
@@ -105,8 +115,12 @@ export function ReportPageContent() {
   );
 
   const generalLedgers = useMemo(
-    () => generateAllGeneralLedgers(accounts, journalEntries),
-    [accounts, journalEntries],
+    () =>
+      generateAllGeneralLedgers(accounts, journalEntries, {
+        startDate: new Date(glStartDate),
+        endDate: new Date(glEndDate),
+      }),
+    [accounts, journalEntries, glStartDate, glEndDate],
   );
 
   // Generate comparison data
@@ -1225,8 +1239,25 @@ export function ReportPageContent() {
         <TabsContent value="general-ledger">
           <Card>
             <CardHeader>
-              <CardTitle>General Ledger</CardTitle>
-              <CardDescription>All account transactions</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>General Ledger</CardTitle>
+                  <CardDescription>
+                    {new Date(glStartDate).toLocaleDateString("zh-CN")} to{" "}
+                    {new Date(glEndDate).toLocaleDateString("zh-CN")}
+                  </CardDescription>
+                </div>
+                <DateRangePicker
+                  startDate={new Date(glStartDate)}
+                  endDate={new Date(glEndDate)}
+                  onStartDateChange={(date) =>
+                    setGlStartDate(date?.toISOString().split("T")[0] || "")
+                  }
+                  onEndDateChange={(date) =>
+                    setGlEndDate(date?.toISOString().split("T")[0] || "")
+                  }
+                />
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
