@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, memo } from "react";
 import {
   Card,
   CardContent,
@@ -31,10 +31,11 @@ import {
   Wallet,
   Activity,
   DollarSign,
-  Calendar,
 } from "lucide-react";
 
-// Mock data - memoized to prevent recreation
+// =============================================================================
+// STATIC DATA - Memoized to prevent recreation on re-renders
+// =============================================================================
 const monthlyRevenue = [
   { name: "Jan", revenue: 45000, expenses: 28000 },
   { name: "Feb", revenue: 52000, expenses: 31000 },
@@ -62,7 +63,37 @@ const transactionTrend = [
   { date: "Sun", transactions: 5 },
 ];
 
-// Memoized recent transactions data
+const quickStatsData = [
+  {
+    label: "Total Revenue",
+    value: "$125,430",
+    change: "+12%",
+    icon: TrendingUp,
+    color: "green",
+  },
+  {
+    label: "Total Expenses",
+    value: "$75,680",
+    change: "+8%",
+    icon: TrendingDown,
+    color: "red",
+  },
+  {
+    label: "Net Income",
+    value: "$49,750",
+    change: "39.7%",
+    icon: Wallet,
+    color: "blue",
+  },
+  {
+    label: "Health Score",
+    value: "85/100",
+    change: "Excellent",
+    icon: Activity,
+    color: "green",
+  },
+] as const;
+
 const recentTransactionsData = [
   { name: "ABC Corp", type: "income" as const, amount: 12500, date: "Today" },
   { name: "XYZ Ltd", type: "income" as const, amount: 8400, date: "Yesterday" },
@@ -86,8 +117,7 @@ const recentTransactionsData = [
   },
 ];
 
-// Memoized financial metrics
-const financialMetrics = [
+const financialMetricsData = [
   {
     label: "Revenue Growth",
     value: 85,
@@ -140,13 +170,10 @@ const colorStyles = {
   },
 } as const;
 
-// Base chart props type for memoization
-interface ChartProps {
-  className?: string;
-}
-
-// Memoized RevenueChart component
-const RevenueChartComponent = () => {
+// =============================================================================
+// HELPER COMPONENTS - Memoized
+// ==============================================================================
+const RevenueChartInner = () => {
   const [animated, setAnimated] = useState(false);
 
   useEffect(() => {
@@ -222,10 +249,7 @@ const RevenueChartComponent = () => {
   );
 };
 
-export const RevenueChart = React.memo(RevenueChartComponent);
-
-// Memoized ExpenseBreakdown component
-const ExpenseBreakdownComponent = () => {
+const ExpenseBreakdownInner = () => {
   const [animated, setAnimated] = useState(false);
 
   useEffect(() => {
@@ -282,10 +306,7 @@ const ExpenseBreakdownComponent = () => {
   );
 };
 
-export const ExpenseBreakdown = React.memo(ExpenseBreakdownComponent);
-
-// Memoized TransactionTrend component
-const TransactionTrendComponent = () => {
+const TransactionTrendInner = () => {
   const [animated, setAnimated] = useState(false);
 
   useEffect(() => {
@@ -343,47 +364,12 @@ const TransactionTrendComponent = () => {
   );
 };
 
-export const TransactionTrend = React.memo(TransactionTrendComponent);
-
-// Quick stats data - memoized
-const quickStatsData = [
-  {
-    label: "Total Revenue",
-    value: "$125,430",
-    change: "+12%",
-    icon: TrendingUp,
-    color: "green" as const,
-  },
-  {
-    label: "Total Expenses",
-    value: "$75,680",
-    change: "+8%",
-    icon: TrendingDown,
-    color: "red" as const,
-  },
-  {
-    label: "Net Income",
-    value: "$49,750",
-    change: "39.7%",
-    icon: Wallet,
-    color: "blue" as const,
-  },
-  {
-    label: "Health Score",
-    value: "85/100",
-    change: "Excellent",
-    icon: Activity,
-    color: "green" as const,
-  },
-] as const;
-
-// Memoized QuickStats component
-const QuickStatsComponent = () => {
+const QuickStatsInner = () => {
   return (
     <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
       {quickStatsData.map((stat) => {
         const Icon = stat.icon;
-        const colors = colorStyles[stat.color];
+        const colors = colorStyles[stat.color as keyof typeof colorStyles];
         return (
           <Card
             key={stat.label}
@@ -412,9 +398,7 @@ const QuickStatsComponent = () => {
               <p className={`text-xs ${colors.text} ${colors.textDark} mt-2`}>
                 {stat.label === "Net Income"
                   ? `${stat.change} profit margin`
-                  : stat.label === "Health Score"
-                    ? stat.change
-                    : `↑ ${stat.change} from last month`}
+                  : stat.change}
               </p>
             </CardContent>
           </Card>
@@ -424,10 +408,7 @@ const QuickStatsComponent = () => {
   );
 };
 
-export const QuickStats = React.memo(QuickStatsComponent);
-
-// Memoized RecentTransactionsChart component
-const RecentTransactionsChartComponent = () => {
+const RecentTransactionsChartInner = () => {
   return (
     <Card className="transition-all duration-300 hover:shadow-lg">
       <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 pb-4">
@@ -446,11 +427,7 @@ const RecentTransactionsChartComponent = () => {
             >
               <div className="flex items-center gap-3">
                 <div
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center transition-transform duration-200 group-hover:scale-110 ${
-                    transaction.type === "income"
-                      ? "bg-green-100 dark:bg-green-950/30 text-green-600 dark:text-green-400"
-                      : "bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400"
-                  }`}
+                  className={`w-10 h-10 rounded-lg flex items-center justify-center transition-transform duration-200 group-hover:scale-110 ${transaction.type === "income" ? "bg-green-100 dark:bg-green-950/30 text-green-600 dark:text-green-400" : "bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400"}`}
                 >
                   {transaction.type === "income" ? (
                     <DollarSign className="h-5 w-5" />
@@ -468,11 +445,7 @@ const RecentTransactionsChartComponent = () => {
                 </div>
               </div>
               <p
-                className={`font-semibold transition-colors duration-200 ${
-                  transaction.type === "income"
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-red-600 dark:text-red-400"
-                }`}
+                className={`font-semibold transition-colors duration-200 ${transaction.type === "income" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
               >
                 {transaction.type === "income" ? "+" : "-"}$
                 {transaction.amount.toLocaleString()}
@@ -485,12 +458,7 @@ const RecentTransactionsChartComponent = () => {
   );
 };
 
-export const RecentTransactionsChart = React.memo(
-  RecentTransactionsChartComponent,
-);
-
-// Memoized FinancialHealthChart component
-const FinancialHealthChartComponent = () => {
+const FinancialHealthChartInner = () => {
   const [animated, setAnimated] = useState(false);
 
   useEffect(() => {
@@ -509,7 +477,7 @@ const FinancialHealthChartComponent = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-5">
-          {financialMetrics.map((metric) => (
+          {financialMetricsData.map((metric) => (
             <div key={metric.label}>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -533,4 +501,12 @@ const FinancialHealthChartComponent = () => {
   );
 };
 
-export const FinancialHealthChart = React.memo(FinancialHealthChartComponent);
+// =============================================================================
+// EXPORTS - Memoized with React.memo for performance
+// =============================================================================
+export const RevenueChart = memo(RevenueChartInner);
+export const ExpenseBreakdown = memo(ExpenseBreakdownInner);
+export const TransactionTrend = memo(TransactionTrendInner);
+export const QuickStats = memo(QuickStatsInner);
+export const RecentTransactionsChart = memo(RecentTransactionsChartInner);
+export const FinancialHealthChart = memo(FinancialHealthChartInner);
