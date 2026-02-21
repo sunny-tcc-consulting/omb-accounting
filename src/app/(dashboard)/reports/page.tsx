@@ -27,7 +27,10 @@ import {
   generateBalanceSheetComparison,
   generateProfitAndLossComparison,
 } from "@/lib/comparative-report";
-import { DateRangePicker } from "@/components/reports/DateRangePicker";
+import {
+  DateRangePicker,
+  DatePicker,
+} from "@/components/reports/DateRangePicker";
 import {
   Card,
   CardContent,
@@ -771,6 +774,12 @@ export function ReportPageContent() {
                     )}
                   </CardDescription>
                 </div>
+                <DatePicker
+                  date={asOfDate ? new Date(asOfDate) : undefined}
+                  onDateChange={(date) =>
+                    setAsOfDate(date?.toISOString().split("T")[0] || "")
+                  }
+                />
                 <div className="text-sm">
                   <span
                     className={
@@ -854,7 +863,7 @@ export function ReportPageContent() {
         <TabsContent value="balance-sheet">
           <Card>
             <CardHeader>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center justify-between">
                 <div>
                   <CardTitle>Balance Sheet</CardTitle>
                   <CardDescription>
@@ -864,15 +873,12 @@ export function ReportPageContent() {
                     )}
                   </CardDescription>
                 </div>
-                <div className="flex items-center gap-2 ml-auto">
-                  <label className="text-sm text-gray-500">As of:</label>
-                  <input
-                    type="date"
-                    value={asOfDate}
-                    onChange={(e) => setAsOfDate(e.target.value)}
-                    className="border rounded px-2 py-1"
-                  />
-                </div>
+                <DatePicker
+                  date={asOfDate ? new Date(asOfDate) : undefined}
+                  onDateChange={(date) =>
+                    setAsOfDate(date?.toISOString().split("T")[0] || "")
+                  }
+                />
               </div>
             </CardHeader>
             <CardContent>
