@@ -1,39 +1,48 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Invoice as InvoiceType } from '@/types';
-import { formatCurrency, formatDate } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Printer, Download } from 'lucide-react';
-import { toast } from 'sonner';
-import { generateInvoicePDF, downloadPDF } from '@/lib/pdf-generator';
+import React from "react";
+import jsPDF from "jspdf";
+import { Invoice as InvoiceType } from "@/types";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Printer, Download } from "lucide-react";
+import { toast } from "sonner";
 
 interface InvoicePreviewProps {
   invoice: InvoiceType;
   onPrint?: () => void;
 }
 
-export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, onPrint }) => {
+export const InvoicePreview: React.FC<InvoicePreviewProps> = ({
+  invoice,
+  onPrint,
+}) => {
   // Calculate totals
   const subtotal = invoice.items.reduce((sum, item) => sum + item.total, 0);
-  const totalTax = invoice.items.reduce((sum, item) => sum + (item.taxRate || 0) * (item.quantity * item.unitPrice), 0);
-  const totalDiscount = invoice.items.reduce((sum, item) => sum + (item.discount || 0), 0);
+  const totalTax = invoice.items.reduce(
+    (sum, item) => sum + (item.taxRate || 0) * (item.quantity * item.unitPrice),
+    0,
+  );
+  const totalDiscount = invoice.items.reduce(
+    (sum, item) => sum + (item.discount || 0),
+    0,
+  );
   const total = subtotal + totalTax - totalDiscount;
 
   // Get status info
   const getStatusInfo = (status: string) => {
     switch (status) {
-      case 'paid':
-        return { label: 'Paid', color: 'text-green-600 bg-green-50' };
-      case 'partial':
-        return { label: 'Partial', color: 'text-yellow-600 bg-yellow-50' };
-      case 'pending':
-        return { label: 'Pending', color: 'text-blue-600 bg-blue-50' };
-      case 'overdue':
-        return { label: 'Overdue', color: 'text-red-600 bg-red-50' };
+      case "paid":
+        return { label: "Paid", color: "text-green-600 bg-green-50" };
+      case "partial":
+        return { label: "Partial", color: "text-yellow-600 bg-yellow-50" };
+      case "pending":
+        return { label: "Pending", color: "text-blue-600 bg-blue-50" };
+      case "overdue":
+        return { label: "Overdue", color: "text-red-600 bg-red-50" };
       default:
-        return { label: 'Draft', color: 'text-gray-600 bg-gray-50' };
+        return { label: "Draft", color: "text-gray-600 bg-gray-50" };
     }
   };
 
@@ -45,20 +54,78 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, onPrint
       onPrint();
     } else {
       window.print();
-      toast.success('Invoice is being printed!');
+      toast.success("Invoice is being printed!");
     }
   };
 
   // Handle PDF download
   const handleDownloadPDF = () => {
     try {
-      const doc = generateInvoicePDF(invoice);
-      downloadPDF(doc, 'invoice', invoice.invoiceNumber);
-      toast.success('Invoice PDF downloaded successfully!');
+      // Using export function for PDF generation
+      exportInvoicePDF(invoice);
+      toast.success("Invoice PDF downloaded successfully!");
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      toast.error('Failed to generate PDF. Please try again.');
+      console.error("Error generating PDF:", error);
+      toast.error("Failed to generate PDF. Please try again.");
     }
+  };
+
+  // Handle Invoice PDF export using ReportPDF
+  const exportInvoicePDF = (invoice: InvoiceType) => {
+    const doc = new jsPDF();
+    doc.setFontSize(22);
+    doc.text("Invoice", 20, 20);
+    doc.setFontSize(10);
+    doc.text(`Invoice Number: ${invoice.invoiceNumber}`, 20, 30);
+    doc.text(`Date: ${formatDate(invoice.issuedDate)}`, 20, 38);
+    doc.text(`Due Date: ${formatDate(invoice.dueDate)}`, 20, 46);
+    doc.text(`Status: ${statusInfo.label}`, 20, 54);
+    doc.text(`Customer: ${invoice.customerName}`, 20, 62);
+    doc.text(`Customer Email: ${invoice.customerEmail}`, 20, 70);
+    if (invoice.customerPhone) {
+      doc.text(`Customer Phone: ${invoice.customerPhone}`, 20, 78);
+    }
+    if (invoice.customerAddress) {
+      doc.text(`Customer Address: ${invoice.customerAddress}`, 20, 86);
+    }
+    doc.text(`Terms: ${invoice.paymentTerms}`, 20, 94);
+    if (invoice.notes) {
+      doc.text(`Notes: ${invoice.notes}`, 20, 102);
+    }
+
+    doc.setFontSize(14);
+    doc.text("Items:", 20, 118);
+
+    let y = 128;
+    invoice.items.forEach((item, index) => {
+      doc.setFontSize(10);
+      doc.text(
+        `${index + 1}. ${item.description} (${item.quantity} x ${formatCurrency(item.unitPrice)})`,
+        20,
+        y,
+      );
+      doc.text(`   Subtotal: ${formatCurrency(item.total)}`, 20, y + 8);
+      doc.text(`   Tax: ${formatCurrency(item.taxRate || 0)}`, 20, y + 16);
+      doc.text(
+        `   Discount: ${formatCurrency(item.discount || 0)}`,
+        20,
+        y + 24,
+      );
+      y += 36;
+    });
+
+    doc.setFontSize(14);
+    doc.text("Totals:", 20, y + 10);
+    doc.text(`Subtotal: ${formatCurrency(invoice.subtotal)}`, 20, y + 20);
+    if (invoice.tax) {
+      doc.text(`Tax: ${formatCurrency(invoice.tax)}`, 20, y + 28);
+    }
+    if (invoice.discount) {
+      doc.text(`Discount: ${formatCurrency(invoice.discount)}`, 20, y + 36);
+    }
+    doc.text(`Total: ${formatCurrency(invoice.total)}`, 20, y + 44);
+
+    doc.save(`invoice-${invoice.invoiceNumber}.pdf`);
   };
 
   return (
@@ -67,7 +134,9 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, onPrint
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">INVOICE</h1>
-          <p className="text-sm text-gray-500 mt-1">Invoice #{invoice.invoiceNumber}</p>
+          <p className="text-sm text-gray-500 mt-1">
+            Invoice #{invoice.invoiceNumber}
+          </p>
         </div>
         <div className="text-right">
           <Badge variant="outline" className={statusInfo.color}>
@@ -82,11 +151,15 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, onPrint
           <h3 className="text-sm font-semibold text-gray-900 mb-3">Bill To</h3>
           <p className="font-medium text-gray-900">{invoice.customerName}</p>
           <p className="text-sm text-gray-600">{invoice.customerEmail}</p>
-          {invoice.customerPhone && <p className="text-sm text-gray-600">{invoice.customerPhone}</p>}
+          {invoice.customerPhone && (
+            <p className="text-sm text-gray-600">{invoice.customerPhone}</p>
+          )}
         </div>
 
         <div className="text-right">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">Invoice Details</h3>
+          <h3 className="text-sm font-semibold text-gray-900 mb-3">
+            Invoice Details
+          </h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-600">Invoice Number:</span>
@@ -94,7 +167,9 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, onPrint
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Issued Date:</span>
-              <span className="font-medium">{formatDate(invoice.issuedDate)}</span>
+              <span className="font-medium">
+                {formatDate(invoice.issuedDate)}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Due Date:</span>
@@ -114,12 +189,24 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, onPrint
         <table className="w-full">
           <thead>
             <tr className="border-b">
-              <th className="text-left py-2 px-2 text-sm font-medium text-gray-600">Description</th>
-              <th className="text-right py-2 px-2 text-sm font-medium text-gray-600">Quantity</th>
-              <th className="text-right py-2 px-2 text-sm font-medium text-gray-600">Unit Price</th>
-              <th className="text-right py-2 px-2 text-sm font-medium text-gray-600">Tax</th>
-              <th className="text-right py-2 px-2 text-sm font-medium text-gray-600">Discount</th>
-              <th className="text-right py-2 px-2 text-sm font-medium text-gray-600">Total</th>
+              <th className="text-left py-2 px-2 text-sm font-medium text-gray-600">
+                Description
+              </th>
+              <th className="text-right py-2 px-2 text-sm font-medium text-gray-600">
+                Quantity
+              </th>
+              <th className="text-right py-2 px-2 text-sm font-medium text-gray-600">
+                Unit Price
+              </th>
+              <th className="text-right py-2 px-2 text-sm font-medium text-gray-600">
+                Tax
+              </th>
+              <th className="text-right py-2 px-2 text-sm font-medium text-gray-600">
+                Discount
+              </th>
+              <th className="text-right py-2 px-2 text-sm font-medium text-gray-600">
+                Total
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -131,14 +218,26 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, onPrint
 
               return (
                 <tr key={item.id} className="border-b">
-                  <td className="py-3 px-2 text-sm text-gray-900">{item.description}</td>
-                  <td className="py-3 px-2 text-sm text-gray-600 text-right">{item.quantity}</td>
-                  <td className="py-3 px-2 text-sm text-gray-600 text-right">{formatCurrency(item.unitPrice, invoice.currency)}</td>
-                  <td className="py-3 px-2 text-sm text-gray-600 text-right">{item.taxRate ? `${(item.taxRate * 100).toFixed(1)}%` : '-'}</td>
-                  <td className="py-3 px-2 text-sm text-gray-600 text-right">
-                    {item.discount ? `-${formatCurrency(item.discount, invoice.currency)}` : '-'}
+                  <td className="py-3 px-2 text-sm text-gray-900">
+                    {item.description}
                   </td>
-                  <td className="py-3 px-2 text-sm font-medium text-gray-900 text-right">{formatCurrency(itemTotal, invoice.currency)}</td>
+                  <td className="py-3 px-2 text-sm text-gray-600 text-right">
+                    {item.quantity}
+                  </td>
+                  <td className="py-3 px-2 text-sm text-gray-600 text-right">
+                    {formatCurrency(item.unitPrice, invoice.currency)}
+                  </td>
+                  <td className="py-3 px-2 text-sm text-gray-600 text-right">
+                    {item.taxRate ? `${(item.taxRate * 100).toFixed(1)}%` : "-"}
+                  </td>
+                  <td className="py-3 px-2 text-sm text-gray-600 text-right">
+                    {item.discount
+                      ? `-${formatCurrency(item.discount, invoice.currency)}`
+                      : "-"}
+                  </td>
+                  <td className="py-3 px-2 text-sm font-medium text-gray-900 text-right">
+                    {formatCurrency(itemTotal, invoice.currency)}
+                  </td>
                 </tr>
               );
             })}
@@ -152,11 +251,15 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, onPrint
           <tbody>
             <tr className="border-b">
               <td className="py-3 px-2 text-sm text-gray-600">Subtotal</td>
-              <td className="py-3 px-2 text-sm text-gray-600 text-right">{formatCurrency(subtotal, invoice.currency)}</td>
+              <td className="py-3 px-2 text-sm text-gray-600 text-right">
+                {formatCurrency(subtotal, invoice.currency)}
+              </td>
             </tr>
             <tr className="border-b">
               <td className="py-3 px-2 text-sm text-gray-600">Tax</td>
-              <td className="py-3 px-2 text-sm text-gray-600 text-right">{formatCurrency(totalTax, invoice.currency)}</td>
+              <td className="py-3 px-2 text-sm text-gray-600 text-right">
+                {formatCurrency(totalTax, invoice.currency)}
+              </td>
             </tr>
             <tr className="border-b">
               <td className="py-3 px-2 text-sm text-gray-600">Discount</td>
@@ -165,8 +268,12 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, onPrint
               </td>
             </tr>
             <tr className="border-b">
-              <td className="py-3 px-2 text-lg font-semibold text-gray-900">Total</td>
-              <td className="py-3 px-2 text-lg font-bold text-blue-600 text-right">{formatCurrency(total, invoice.currency)}</td>
+              <td className="py-3 px-2 text-lg font-semibold text-gray-900">
+                Total
+              </td>
+              <td className="py-3 px-2 text-lg font-bold text-blue-600 text-right">
+                {formatCurrency(total, invoice.currency)}
+              </td>
             </tr>
           </tbody>
         </table>
@@ -182,12 +289,17 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, onPrint
 
       {/* Payment Information */}
       <div className="mb-8 p-4 bg-gray-50 rounded-lg">
-        <h3 className="text-sm font-semibold text-gray-900 mb-2">Payment Information</h3>
+        <h3 className="text-sm font-semibold text-gray-900 mb-2">
+          Payment Information
+        </h3>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <span className="text-gray-600">Amount Due:</span>
             <span className="font-medium text-gray-900 ml-2">
-              {formatCurrency(invoice.amountRemaining || invoice.total, invoice.currency)}
+              {formatCurrency(
+                invoice.amountRemaining || invoice.total,
+                invoice.currency,
+              )}
             </span>
           </div>
           <div>

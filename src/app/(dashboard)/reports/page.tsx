@@ -8,8 +8,23 @@ import {
   generateProfitAndLoss,
   generateAllGeneralLedgers,
   formatCurrency,
-  formatNumber,
 } from "@/lib/report-generator";
+import {
+  TrialBalanceComparisonView,
+  BalanceSheetComparisonView,
+  ProfitAndLossComparisonView,
+} from "@/components/reports/ComparativeReport";
+import type {
+  TrialBalanceComparison,
+  BalanceSheetComparison,
+  ProfitAndLossComparison,
+  ComparisonPeriod,
+} from "@/types/comparative-report";
+import {
+  generateTrialBalanceComparison,
+  generateBalanceSheetComparison,
+  generateProfitAndLossComparison,
+} from "@/lib/comparative-report";
 import {
   Card,
   CardContent,
@@ -18,13 +33,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -42,6 +50,7 @@ import {
   PieChart,
   TrendingUp,
   Printer,
+  RefreshCw,
 } from "lucide-react";
 
 // =============================================================================
@@ -62,6 +71,11 @@ function ReportPageContent() {
   const [endDate, setEndDate] = useState<string>(
     new Date().toISOString().split("T")[0],
   );
+
+  // Comparison state
+  const [isComparisonEnabled, setIsComparisonEnabled] = useState(false);
+  const [comparisonPeriod, setComparisonPeriod] =
+    useState<ComparisonPeriod>("previous_month");
 
   // Generate reports
   const trialBalance = useMemo(
@@ -89,6 +103,47 @@ function ReportPageContent() {
     () => generateAllGeneralLedgers(accounts, journalEntries),
     [accounts, journalEntries],
   );
+
+  // Generate comparison data
+  const comparisonData = useMemo(() => {
+    if (!isComparisonEnabled) return null;
+
+    switch (selectedReport) {
+      case "trial-balance":
+        return generateTrialBalanceComparison(
+          trialBalance,
+          accounts,
+          comparisonPeriod,
+          new Date(asOfDate),
+        );
+      case "balance-sheet":
+        return generateBalanceSheetComparison(
+          balanceSheet,
+          accounts,
+          comparisonPeriod,
+          new Date(asOfDate),
+        );
+      case "profit-loss":
+        return generateProfitAndLossComparison(
+          profitAndLoss,
+          accounts,
+          comparisonPeriod,
+          new Date(endDate),
+        );
+      default:
+        return null;
+    }
+  }, [
+    isComparisonEnabled,
+    selectedReport,
+    trialBalance,
+    balanceSheet,
+    profitAndLoss,
+    accounts,
+    comparisonPeriod,
+    asOfDate,
+    endDate,
+  ]);
 
   const handlePrint = (reportId: string) => {
     window.print();
@@ -173,6 +228,16 @@ function ReportPageContent() {
         </div>
         <div className="flex gap-2">
           <Button
+            variant={isComparisonEnabled ? "default" : "outline"}
+            onClick={() => setIsComparisonEnabled(!isComparisonEnabled)}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw
+              className={`w-4 h-4 ${isComparisonEnabled ? "animate-spin" : ""}`}
+            />
+            {isComparisonEnabled ? "Hide Comparison" : "Compare Periods"}
+          </Button>
+          <Button
             variant="outline"
             onClick={() => handleExportCSV(selectedReport)}
           >
@@ -185,6 +250,52 @@ function ReportPageContent() {
           </Button>
         </div>
       </div>
+
+      {/* Comparison Period Selector (visible when comparison is enabled) */}
+      {isComparisonEnabled && selectedReport !== "general-ledger" && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4 mb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold text-blue-900 dark:text-blue-100">
+                Comparative Report
+              </h3>
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                Comparing current period with previous period data
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-blue-700 dark:text-blue-300">
+                Compare with:
+              </span>
+              <div className="flex gap-2">
+                {(
+                  [
+                    "previous_month",
+                    "previous_quarter",
+                    "previous_year",
+                  ] as const
+                ).map((period) => (
+                  <button
+                    key={period}
+                    onClick={() => setComparisonPeriod(period)}
+                    className={`px-4 py-2 text-sm rounded-lg transition-all ${
+                      comparisonPeriod === period
+                        ? "bg-blue-600 text-white"
+                        : "bg-white dark:bg-gray-700 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-gray-600"
+                    }`}
+                  >
+                    {period === "previous_month"
+                      ? "Last Month"
+                      : period === "previous_quarter"
+                        ? "Last Quarter"
+                        : "Last Year"}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Report Tabs */}
       <Tabs
@@ -300,6 +411,17 @@ function ReportPageContent() {
               </Table>
             </CardContent>
           </Card>
+
+          {/* Trial Balance Comparison View */}
+          {isComparisonEnabled &&
+            selectedReport === "trial-balance" &&
+            comparisonData && (
+              <div className="mt-6">
+                <TrialBalanceComparisonView
+                  comparison={comparisonData as TrialBalanceComparison}
+                />
+              </div>
+            )}
         </TabsContent>
 
         {/* Balance Sheet */}
@@ -449,6 +571,17 @@ function ReportPageContent() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Balance Sheet Comparison View */}
+          {isComparisonEnabled &&
+            selectedReport === "balance-sheet" &&
+            comparisonData && (
+              <div className="mt-6">
+                <BalanceSheetComparisonView
+                  comparison={comparisonData as BalanceSheetComparison}
+                />
+              </div>
+            )}
         </TabsContent>
 
         {/* Profit & Loss */}
@@ -643,6 +776,17 @@ function ReportPageContent() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Profit & Loss Comparison View */}
+          {isComparisonEnabled &&
+            selectedReport === "profit-loss" &&
+            comparisonData && (
+              <div className="mt-6">
+                <ProfitAndLossComparisonView
+                  comparison={comparisonData as ProfitAndLossComparison}
+                />
+              </div>
+            )}
         </TabsContent>
 
         {/* General Ledger */}
