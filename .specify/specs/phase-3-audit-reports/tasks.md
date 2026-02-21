@@ -80,21 +80,27 @@
 ### Task 3.2.1: PDF Export for Reports
 
 - **File**: `src/lib/pdf-generator.ts` (new)
-- **Status**: Pending
+- **Status**: ✅ COMPLETED (2026-02-21)
 - **Priority**: High
 - **Description**: Generate professional PDF documents for each report type using jsPDF
 - **Dependencies**: Task 3.1.4
-- **Estimate**: 4 hours
+- **Estimate**: 4 hours → Actual: 3 hours
 
 **Subtasks**:
 
-1. [ ] Install jsPDF and @types/jspdf
-2. [ ] Create PDF template for Trial Balance
-3. [ ] Create PDF template for Balance Sheet
-4. [ ] Create PDF template for P&L Statement
-5. [ ] Create PDF template for General Ledger
-6. [ ] Add PDF export buttons to UI
-7. [ ] Test PDF generation
+1. [x] Install jsPDF and @types/jspdf
+2. [x] Create PDF template for Trial Balance
+3. [x] Create PDF template for Balance Sheet
+4. [x] Create PDF template for P&L Statement
+5. [x] Create PDF template for General Ledger
+6. [x] Add PDF export buttons to UI
+7. [x] Test PDF generation
+
+**Test Results**:
+
+- ✅ 26/26 PDF Generator tests passing
+- ✅ All 4 report types export to PDF correctly
+- ✅ Professional formatting with headers, tables, and totals
 
 ### Task 3.2.2: Comparative Reports
 
