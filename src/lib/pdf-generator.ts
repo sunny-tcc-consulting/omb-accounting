@@ -89,27 +89,43 @@ abstract class ReportPDF {
   protected addHeader(title: string, subtitle: string = ""): void {
     // Company name (bold)
     this.doc.setFontSize(16);
-    this.doc.setTextColor(...COLORS.primary);
+    this.doc.setTextColor(
+      COLORS.primary[0],
+      COLORS.primary[1],
+      COLORS.primary[2],
+    );
     this.doc.setFont("helvetica", "bold");
     this.doc.text(this.config.companyName, MARGIN, 25);
 
     // Report title
     this.doc.setFontSize(14);
-    this.doc.setTextColor(...COLORS.primary);
+    this.doc.setTextColor(
+      COLORS.primary[0],
+      COLORS.primary[1],
+      COLORS.primary[2],
+    );
     this.doc.setFont("helvetica", "bold");
     this.doc.text(title, MARGIN, 35);
 
     // Subtitle (if provided)
     if (subtitle) {
       this.doc.setFontSize(10);
-      this.doc.setTextColor(...COLORS.secondary);
+      this.doc.setTextColor(
+        COLORS.secondary[0],
+        COLORS.secondary[1],
+        COLORS.secondary[2],
+      );
       this.doc.setFont("helvetica", "normal");
       this.doc.text(subtitle, MARGIN, 42);
     }
 
     // Tax ID and prepared info
     this.doc.setFontSize(9);
-    this.doc.setTextColor(...COLORS.secondary);
+    this.doc.setTextColor(
+      COLORS.secondary[0],
+      COLORS.secondary[1],
+      COLORS.secondary[2],
+    );
     this.doc.setFont("helvetica", "normal");
 
     if (this.config.taxId) {
@@ -129,7 +145,7 @@ abstract class ReportPDF {
     );
 
     // Horizontal line
-    this.doc.setDrawColor(...COLORS.border);
+    this.doc.setDrawColor(COLORS.border[0], COLORS.border[1], COLORS.border[2]);
     this.doc.line(MARGIN, 70, PAGE_WIDTH - MARGIN, 70);
 
     this.yPosition = 80;
@@ -152,7 +168,11 @@ abstract class ReportPDF {
   protected addSectionTitle(title: string): void {
     this.checkNewPage(15);
     this.doc.setFontSize(12);
-    this.doc.setTextColor(...COLORS.primary);
+    this.doc.setTextColor(
+      COLORS.primary[0],
+      COLORS.primary[1],
+      COLORS.primary[2],
+    );
     this.doc.setFont("helvetica", "bold");
     this.doc.text(title, MARGIN, this.yPosition);
     this.yPosition += 8;
@@ -180,7 +200,7 @@ abstract class ReportPDF {
     isBold: boolean = true,
   ): void {
     this.doc.setFontSize(10);
-    this.doc.setTextColor(...COLORS.text);
+    this.doc.setTextColor(COLORS.text[0], COLORS.text[1], COLORS.text[2]);
     this.doc.setFont("helvetica", isBold ? "bold" : "normal");
     this.doc.text(label, MARGIN + CONTENT_WIDTH - 50, this.yPosition);
     this.doc.text(
@@ -198,7 +218,7 @@ abstract class ReportPDF {
    * Add horizontal line
    */
   protected addLine(): void {
-    this.doc.setDrawColor(...COLORS.border);
+    this.doc.setDrawColor(COLORS.border[0], COLORS.border[1], COLORS.border[2]);
     this.doc.line(MARGIN, this.yPosition, PAGE_WIDTH - MARGIN, this.yPosition);
     this.yPosition += 5;
   }
@@ -253,7 +273,7 @@ export class TrialBalancePDF extends ReportPDF {
       ]),
       theme: "striped",
       headStyles: {
-        fillColor: COLORS.primary,
+        fillColor: [COLORS.primary[0], COLORS.primary[1], COLORS.primary[2]],
         textColor: [255, 255, 255],
         fontStyle: "bold",
       },
@@ -276,7 +296,11 @@ export class TrialBalancePDF extends ReportPDF {
         ],
       ],
       footStyles: {
-        fillColor: COLORS.totalRowBg,
+        fillColor: [
+          COLORS.totalRowBg[0],
+          COLORS.totalRowBg[1],
+          COLORS.totalRowBg[2],
+        ],
         fontStyle: "bold",
       },
     });
@@ -371,7 +395,10 @@ export class BalanceSheetPDF extends ReportPDF {
     this.addTotalLine(
       "Total Non-Current Assets",
       this.balanceSheet.assets.totalAssets -
-        this.balanceSheet.assets.totalCurrentAssets,
+        this.balanceSheet.assets.currentAssets.reduce(
+          (sum, a) => sum + a.balance,
+          0,
+        ),
     );
     this.addLine();
     this.addTotalLine(
@@ -674,7 +701,11 @@ export class GeneralLedgerPDF extends ReportPDF {
 
     // Account summary
     this.doc.setFontSize(10);
-    this.doc.setTextColor(...COLORS.secondary);
+    this.doc.setTextColor(
+      COLORS.secondary[0],
+      COLORS.secondary[1],
+      COLORS.secondary[2],
+    );
     this.doc.setFont("helvetica", "normal");
     this.doc.text(
       `Account Type: ${account.type.toUpperCase()}`,
@@ -686,7 +717,7 @@ export class GeneralLedgerPDF extends ReportPDF {
     this.yPosition += 10;
 
     // Opening balance
-    this.doc.setTextColor(...COLORS.text);
+    this.doc.setTextColor(COLORS.text[0], COLORS.text[1], COLORS.text[2]);
     this.doc.setFont("helvetica", "bold");
     this.doc.text("Opening Balance:", MARGIN, this.yPosition);
     this.doc.text(
@@ -710,7 +741,7 @@ export class GeneralLedgerPDF extends ReportPDF {
       ]),
       theme: "striped",
       headStyles: {
-        fillColor: COLORS.primary,
+        fillColor: [COLORS.primary[0], COLORS.primary[1], COLORS.primary[2]],
         textColor: [255, 255, 255],
         fontStyle: "bold",
       },
