@@ -159,7 +159,7 @@ export function QuotationPreview({ quotation }: QuotationPreviewProps) {
           </thead>
           <tbody className="divide-y">
             {quotation.items.map((item: QuotationItem, _index: number) => (
-              <tr key={index}>
+              <tr key={_index}>
                 <td className="px-4 py-3 text-sm text-gray-900">
                   {item.description}
                 </td>

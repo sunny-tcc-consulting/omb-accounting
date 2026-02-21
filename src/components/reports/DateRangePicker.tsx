@@ -140,13 +140,14 @@ export function DateRangePicker({
           <CalendarComponent
             mode="single"
             selected={startDate}
-            onSelect={(date) => {
-              onStartDateChange(date);
-              if (date && endDate && date > endDate) {
-                onEndDateChange(date);
+            onDateSelect={(date) => {
+              if (date instanceof Date) {
+                onStartDateChange(date);
+                if (date && endDate && date > endDate) {
+                  onEndDateChange(date);
+                }
               }
             }}
-            initialFocus
           />
         </PopoverContent>
       </Popover>
@@ -172,13 +173,14 @@ export function DateRangePicker({
           <CalendarComponent
             mode="single"
             selected={endDate}
-            onSelect={(date) => {
-              onEndDateChange(date);
-              if (date && startDate && date < startDate) {
-                onStartDateChange(date);
+            onDateSelect={(date) => {
+              if (date instanceof Date) {
+                onEndDateChange(date);
+                if (date && startDate && date < startDate) {
+                  onStartDateChange(date);
+                }
               }
             }}
-            initialFocus
           />
         </PopoverContent>
       </Popover>
@@ -225,11 +227,12 @@ export function DatePicker({ date, onDateChange, className }: DatePickerProps) {
         <CalendarComponent
           mode="single"
           selected={date}
-          onSelect={(d) => {
-            onDateChange(d);
-            setOpen(false);
+          onDateSelect={(d) => {
+            if (d instanceof Date) {
+              onDateChange(d);
+              setOpen(false);
+            }
           }}
-          initialFocus
         />
       </PopoverContent>
     </Popover>

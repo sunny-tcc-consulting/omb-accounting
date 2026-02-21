@@ -9,6 +9,8 @@ import {
   generateAllGeneralLedgers,
   formatCurrency,
 } from "@/lib/report-generator";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import {
   TrialBalanceComparisonView,
   BalanceSheetComparisonView,
@@ -25,10 +27,7 @@ import {
   generateBalanceSheetComparison,
   generateProfitAndLossComparison,
 } from "@/lib/comparative-report";
-import {
-  DateRangePicker,
-  DatePicker,
-} from "@/components/reports/DateRangePicker";
+import { DateRangePicker } from "@/components/reports/DateRangePicker";
 import {
   Card,
   CardContent,
@@ -50,7 +49,6 @@ import {
   Download,
   FileText,
   Calendar,
-  DollarSign,
   PieChart,
   TrendingUp,
   Printer,
@@ -62,7 +60,7 @@ import {
 // =============================================================================
 
 function ReportPageContent() {
-  const { accounts, journalEntries, transactions } = useReport();
+  const { accounts, journalEntries } = useReport();
   const [selectedReport, setSelectedReport] = useState<string>("trial-balance");
   const [asOfDate, setAsOfDate] = useState<string>(
     new Date().toISOString().split("T")[0],
@@ -149,7 +147,7 @@ function ReportPageContent() {
     endDate,
   ]);
 
-  const handlePrint = (reportId: string) => {
+  const handlePrint = () => {
     window.print();
   };
 
@@ -217,6 +215,402 @@ function ReportPageContent() {
     link.click();
   };
 
+  const handleExportPDF = (reportId: string) => {
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    // Add company header
+    pdf.setFontSize(16);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("OMB Accounting", 20, 25);
+
+    // Add report title
+    pdf.setFontSize(14);
+    pdf.setFont("helvetica", "bold");
+    const reportTitle =
+      reportId === "trial-balance"
+        ? "Trial Balance"
+        : reportId === "balance-sheet"
+          ? "Balance Sheet"
+          : reportId === "profit-loss"
+            ? "Profit and Loss Statement"
+            : "General Ledger";
+
+    const dateLabel =
+      reportId === "trial-balance"
+        ? "As of"
+        : reportId === "balance-sheet"
+          ? "As of"
+          : reportId === "profit-loss"
+            ? ""
+            : "Date Range";
+
+    const dateValue =
+      reportId === "trial-balance"
+        ? new Date(asOfDate).toLocaleDateString("zh-CN")
+        : reportId === "balance-sheet"
+          ? new Date(asOfDate).toLocaleDateString("zh-CN")
+          : reportId === "profit-loss"
+            ? `${new Date(startDate).toLocaleDateString("zh-CN")} to ${new Date(endDate).toLocaleDateString("zh-CN")}`
+            : "";
+
+    pdf.text(
+      `${reportTitle}${dateLabel ? " " + dateLabel : ""}${dateValue ? " " + dateValue : ""}`,
+      20,
+      35,
+    );
+
+    // Add prepared info
+    pdf.setFontSize(9);
+    pdf.setFont("helvetica", "normal");
+    pdf.text(
+      `Prepared by: Admin | Print Date: ${new Date().toLocaleDateString("zh-CN")}`,
+      20,
+      50,
+    );
+    pdf.setDrawColor(200, 200, 200);
+    pdf.line(20, 55, 190, 55);
+
+    let yPosition = 65;
+
+    // Add content based on report type
+    if (reportId === "trial-balance") {
+      const tableData = trialBalance.accounts.map(
+        (item: {
+          account: { code: string; name: string };
+          debitBalance: number;
+          creditBalance: number;
+        }) => [
+          item.account.code,
+          item.account.name,
+          item.debitBalance > 0 ? item.debitBalance.toFixed(2) : "",
+          item.creditBalance > 0 ? item.creditBalance.toFixed(2) : "",
+        ],
+      );
+
+      tableData.push([
+        "",
+        "Totals",
+        trialBalance.totals.totalDebit.toFixed(2),
+        trialBalance.totals.totalCredit.toFixed(2),
+      ]);
+
+      autoTable(pdf, {
+        startY: yPosition,
+        head: [["Code", "Account Name", "Debit", "Credit"]],
+        body: tableData,
+        theme: "grid",
+        headStyles: {
+          fillColor: [245, 245, 245],
+          textColor: [51, 51, 51],
+          lineWidth: 0.1,
+        },
+        styles: {
+          fontSize: 9,
+          cellPadding: 3,
+        },
+        columnStyles: {
+          0: { cellWidth: 30 },
+          1: { cellWidth: 80 },
+          2: { cellWidth: 40 },
+          3: { cellWidth: 40 },
+        },
+      });
+
+      yPosition =
+        (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable
+          .finalY + 10;
+
+      // Add balance status
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "bold");
+      pdf.text(
+        trialBalance.totals.isBalanced ? "✓ Balanced" : "✗ Unbalanced",
+        20,
+        yPosition,
+      );
+    } else if (reportId === "balance-sheet") {
+      const assetsData = balanceSheet.assets.currentAssets.map(
+        (a: { code: string; name: string; balance: number }) => [
+          a.name,
+          formatCurrency(a.balance),
+        ],
+      );
+      assetsData.push([
+        "Total Assets",
+        formatCurrency(balanceSheet.assets.totalAssets),
+      ]);
+
+      autoTable(pdf, {
+        startY: yPosition,
+        head: [["Asset", "Amount"]],
+        body: assetsData,
+        theme: "grid",
+        headStyles: {
+          fillColor: [245, 245, 245],
+          textColor: [51, 51, 51],
+          lineWidth: 0.1,
+        },
+        styles: { fontSize: 9, cellPadding: 3 },
+      });
+
+      yPosition =
+        (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable
+          .finalY + 10;
+
+      const liabilitiesData = balanceSheet.liabilities.currentLiabilities.map(
+        (a: { code: string; name: string; balance: number }) => [
+          a.name,
+          formatCurrency(Math.abs(a.balance)),
+        ],
+      );
+      liabilitiesData.push([
+        "Total Liabilities",
+        formatCurrency(balanceSheet.liabilities.totalLiabilities),
+      ]);
+
+      autoTable(pdf, {
+        startY: yPosition,
+        head: [["Liability", "Amount"]],
+        body: liabilitiesData,
+        theme: "grid",
+        headStyles: {
+          fillColor: [245, 245, 245],
+          textColor: [51, 51, 51],
+          lineWidth: 0.1,
+        },
+        styles: { fontSize: 9, cellPadding: 3 },
+      });
+
+      yPosition =
+        (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable
+          .finalY + 10;
+
+      const equityData = balanceSheet.equity.items.map(
+        (a: { code: string; name: string; balance: number }) => [
+          a.name,
+          formatCurrency(a.balance),
+        ],
+      );
+      equityData.push([
+        "Total Equity",
+        formatCurrency(balanceSheet.equity.totalEquity),
+      ]);
+
+      autoTable(pdf, {
+        startY: yPosition,
+        head: [["Equity", "Amount"]],
+        body: equityData,
+        theme: "grid",
+        headStyles: {
+          fillColor: [245, 245, 245],
+          textColor: [51, 51, 51],
+          lineWidth: 0.1,
+        },
+        styles: { fontSize: 9, cellPadding: 3 },
+      });
+
+      yPosition =
+        (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable
+          .finalY + 10;
+
+      // Add summary
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "bold");
+      pdf.text(
+        `Total Assets: ${formatCurrency(balanceSheet.assets.totalAssets)}`,
+        20,
+        yPosition,
+      );
+      pdf.text(
+        `Total Liabilities & Equity: ${formatCurrency(balanceSheet.totalLiabilitiesAndEquity)}`,
+        20,
+        yPosition + 7,
+      );
+      pdf.text(
+        balanceSheet.isBalanced ? "✓ Balanced" : "✗ Unbalanced",
+        20,
+        yPosition + 14,
+      );
+    } else if (reportId === "profit-loss") {
+      const revenueData = profitAndLoss.revenue.items.map(
+        (item: { name: string; balance: number }) => [
+          item.name,
+          formatCurrency(item.balance),
+        ],
+      );
+      revenueData.push([
+        "Total Revenue",
+        formatCurrency(profitAndLoss.revenue.total),
+      ]);
+
+      autoTable(pdf, {
+        startY: yPosition,
+        head: [["Revenue", "Amount"]],
+        body: revenueData,
+        theme: "grid",
+        headStyles: {
+          fillColor: [245, 245, 245],
+          textColor: [51, 51, 51],
+          lineWidth: 0.1,
+        },
+        styles: { fontSize: 9, cellPadding: 3 },
+      });
+
+      yPosition =
+        (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable
+          .finalY + 10;
+
+      const cogsData = profitAndLoss.costOfGoodsSold.items.map(
+        (item: { name: string; balance: number }) => [
+          item.name,
+          `(${formatCurrency(item.balance)})`,
+        ],
+      );
+      cogsData.push([
+        "Total COGS",
+        `(${formatCurrency(profitAndLoss.costOfGoodsSold.total)})`,
+      ]);
+
+      autoTable(pdf, {
+        startY: yPosition,
+        head: [["Cost of Goods Sold", "Amount"]],
+        body: cogsData,
+        theme: "grid",
+        headStyles: {
+          fillColor: [245, 245, 245],
+          textColor: [51, 51, 51],
+          lineWidth: 0.1,
+        },
+        styles: { fontSize: 9, cellPadding: 3 },
+      });
+
+      yPosition =
+        (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable
+          .finalY + 10;
+
+      const expensesData = profitAndLoss.operatingExpenses.items.map(
+        (item: { name: string; balance: number }) => [
+          item.name,
+          `(${formatCurrency(item.balance)})`,
+        ],
+      );
+      expensesData.push([
+        "Total Operating Expenses",
+        `(${formatCurrency(profitAndLoss.operatingExpenses.total)})`,
+      ]);
+
+      autoTable(pdf, {
+        startY: yPosition,
+        head: [["Operating Expenses", "Amount"]],
+        body: expensesData,
+        theme: "grid",
+        headStyles: {
+          fillColor: [245, 245, 245],
+          textColor: [51, 51, 51],
+          lineWidth: 0.1,
+        },
+        styles: { fontSize: 9, cellPadding: 3 },
+      });
+
+      yPosition =
+        (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable
+          .finalY + 10;
+
+      // Add profit and loss summary
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "bold");
+      pdf.text(
+        `Gross Profit: ${formatCurrency(profitAndLoss.grossProfit)}`,
+        20,
+        yPosition,
+      );
+      pdf.text(
+        `Operating Income: ${formatCurrency(profitAndLoss.operatingIncome)}`,
+        20,
+        yPosition + 7,
+      );
+      pdf.text(
+        `Net Income: ${formatCurrency(profitAndLoss.netIncome)}`,
+        20,
+        yPosition + 14,
+      );
+    } else if (reportId === "general-ledger") {
+      const tableData: string[][] = [];
+
+      generalLedgers.slice(0, 50).forEach((gl) => {
+        if ("transactions" in gl) {
+          (
+            gl as {
+              transactions: Array<{
+                date: string | Date;
+                entryNumber: string;
+                description: string;
+                debit: number;
+                credit: number;
+                balance: number;
+              }>;
+            }
+          ).transactions
+            .slice(0, 10)
+            .forEach((txn) => {
+              tableData.push([
+                new Date(txn.date).toLocaleDateString(),
+                txn.entryNumber,
+                txn.description,
+                txn.debit > 0 ? txn.debit.toFixed(2) : "",
+                txn.credit > 0 ? txn.credit.toFixed(2) : "",
+                txn.balance.toFixed(2),
+              ]);
+            });
+        }
+      });
+
+      autoTable(pdf, {
+        startY: yPosition,
+        head: [["Date", "Entry", "Description", "Debit", "Credit", "Balance"]],
+        body: tableData,
+        theme: "grid",
+        headStyles: {
+          fillColor: [245, 245, 245],
+          textColor: [51, 51, 51],
+          lineWidth: 0.1,
+        },
+        styles: { fontSize: 7, cellPadding: 2 },
+        columnStyles: {
+          0: { cellWidth: 25 },
+          1: { cellWidth: 20 },
+          2: { cellWidth: 50 },
+          3: { cellWidth: 20 },
+          4: { cellWidth: 20 },
+          5: { cellWidth: 20 },
+        },
+      });
+    }
+
+    // Add page numbers
+    const pageCount = (
+      pdf as unknown as { internal: { getNumberOfPages: () => number } }
+    ).internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      pdf.setPage(i);
+      pdf.setFontSize(9);
+      pdf.setTextColor(128, 128, 128);
+      pdf.text(`Page ${i} of ${pageCount}`, 105, 287, { align: "center" });
+    }
+
+    // Download the PDF
+    const pdfBytes = pdf.output("arraybuffer");
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${reportTitle.replace(/\s+/g, "_").toLowerCase()}.pdf`;
+    link.click();
+  };
+
   return (
     <div className="container mx-auto py-8 px-4 max-w-7xl">
       {/* Header */}
@@ -247,6 +641,10 @@ function ReportPageContent() {
           >
             <Download className="w-4 h-4 mr-2" />
             Export CSV
+          </Button>
+          <Button onClick={() => handleExportPDF(selectedReport)}>
+            <FileText className="w-4 h-4 mr-2" />
+            Export PDF
           </Button>
           <Button onClick={() => handlePrint(selectedReport)}>
             <Printer className="w-4 h-4 mr-2" />
