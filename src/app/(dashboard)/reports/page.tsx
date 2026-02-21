@@ -59,7 +59,7 @@ import {
 // REPORT PAGE COMPONENT
 // =============================================================================
 
-function ReportPageContent() {
+export function ReportPageContent() {
   const { accounts, journalEntries } = useReport();
   const [selectedReport, setSelectedReport] = useState<string>("trial-balance");
   const [asOfDate, setAsOfDate] = useState<string>(
