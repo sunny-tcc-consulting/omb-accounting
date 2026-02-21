@@ -7,6 +7,7 @@ import {
   generateBalanceSheet,
   generateProfitAndLoss,
   generateAllGeneralLedgers,
+  generateCashFlowStatement,
   formatCurrency,
 } from "@/lib/report-generator";
 import jsPDF from "jspdf";
@@ -121,6 +122,17 @@ export function ReportPageContent() {
         endDate: new Date(glEndDate),
       }),
     [accounts, journalEntries, glStartDate, glEndDate],
+  );
+
+  const cashFlowStatement = useMemo(
+    () =>
+      generateCashFlowStatement(
+        accounts,
+        journalEntries,
+        new Date(startDate),
+        new Date(endDate),
+      ),
+    [accounts, journalEntries, startDate, endDate],
   );
 
   // Generate comparison data
@@ -628,6 +640,185 @@ export function ReportPageContent() {
     link.click();
   };
 
+  const handleExportCashFlow = () => {
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    // Add company header
+    pdf.setFontSize(16);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("OMB Accounting", 20, 25);
+
+    // Add report title
+    pdf.setFontSize(14);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Cash Flow Statement", 20, 35);
+
+    // Add date range
+    pdf.setFontSize(9);
+    pdf.setFont("helvetica", "normal");
+    pdf.text(
+      `${new Date(startDate).toLocaleDateString("zh-CN")} to ${new Date(endDate).toLocaleDateString("zh-CN")}`,
+      20,
+      50,
+    );
+    pdf.setDrawColor(200, 200, 200);
+    pdf.line(20, 55, 190, 55);
+
+    let yPosition = 65;
+
+    // Operating Activities
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(34, 197, 94); // Green
+    pdf.text("Operating Activities", 20, yPosition);
+    yPosition += 10;
+
+    pdf.setFontSize(9);
+    pdf.setFont("helvetica", "normal");
+    pdf.setTextColor(51, 51, 51);
+
+    const operatingData = cashFlowStatement.operatingActivities.items.map(
+      (item) => [item.description, formatCurrency(item.amount)],
+    );
+    operatingData.push([
+      "Net Cash from Operating Activities",
+      formatCurrency(cashFlowStatement.operatingActivities.netCash),
+    ]);
+
+    autoTable(pdf, {
+      startY: yPosition,
+      head: [["Description", "Amount"]],
+      body: operatingData,
+      theme: "grid",
+      headStyles: {
+        fillColor: [34, 197, 94],
+        textColor: [255, 255, 255],
+        lineWidth: 0.1,
+      },
+      styles: { fontSize: 9, cellPadding: 3 },
+    });
+
+    yPosition =
+      (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable
+        .finalY + 10;
+
+    // Investing Activities
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(59, 130, 246); // Blue
+    pdf.text("Investing Activities", 20, yPosition);
+    yPosition += 10;
+
+    pdf.setFontSize(9);
+    pdf.setFont("helvetica", "normal");
+    pdf.setTextColor(51, 51, 51);
+
+    const investingData = cashFlowStatement.investingActivities.items.map(
+      (item) => [item.description, formatCurrency(item.amount)],
+    );
+    investingData.push([
+      "Net Cash from Investing Activities",
+      formatCurrency(cashFlowStatement.investingActivities.netCash),
+    ]);
+
+    autoTable(pdf, {
+      startY: yPosition,
+      head: [["Description", "Amount"]],
+      body: investingData,
+      theme: "grid",
+      headStyles: {
+        fillColor: [59, 130, 246],
+        textColor: [255, 255, 255],
+        lineWidth: 0.1,
+      },
+      styles: { fontSize: 9, cellPadding: 3 },
+    });
+
+    yPosition =
+      (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable
+        .finalY + 10;
+
+    // Financing Activities
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(168, 85, 247); // Purple
+    pdf.text("Financing Activities", 20, yPosition);
+    yPosition += 10;
+
+    pdf.setFontSize(9);
+    pdf.setFont("helvetica", "normal");
+    pdf.setTextColor(51, 51, 51);
+
+    const financingData = cashFlowStatement.financingActivities.items.map(
+      (item) => [item.description, formatCurrency(item.amount)],
+    );
+    financingData.push([
+      "Net Cash from Financing Activities",
+      formatCurrency(cashFlowStatement.financingActivities.netCash),
+    ]);
+
+    autoTable(pdf, {
+      startY: yPosition,
+      head: [["Description", "Amount"]],
+      body: financingData,
+      theme: "grid",
+      headStyles: {
+        fillColor: [168, 85, 247],
+        textColor: [255, 255, 255],
+        lineWidth: 0.1,
+      },
+      styles: { fontSize: 9, cellPadding: 3 },
+    });
+
+    yPosition =
+      (pdf as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable
+        .finalY + 10;
+
+    // Net Change in Cash
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(0, 0, 0);
+    pdf.text("Net Change in Cash", 20, yPosition);
+    yPosition += 10;
+
+    const netChangeData = [
+      [
+        "Beginning Cash Balance",
+        formatCurrency(cashFlowStatement.beginningCashBalance),
+      ],
+      ["Net Change in Cash", formatCurrency(cashFlowStatement.netChangeInCash)],
+      [
+        "Ending Cash Balance",
+        formatCurrency(cashFlowStatement.endingCashBalance),
+      ],
+    ];
+
+    autoTable(pdf, {
+      startY: yPosition,
+      head: [["Description", "Amount"]],
+      body: netChangeData,
+      theme: "grid",
+      headStyles: {
+        fillColor: [240, 240, 240],
+        textColor: [51, 51, 51],
+        lineWidth: 0.1,
+      },
+      styles: { fontSize: 9, cellPadding: 3 },
+    });
+
+    // Save PDF
+    const pdfBytes = pdf.output("arraybuffer");
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `cash_flow_statement_${new Date(startDate).toISOString().split("T")[0]}_${new Date(endDate).toISOString().split("T")[0]}.pdf`;
+    link.click();
+  };
+
   return (
     <div className="container mx-auto py-8 px-4 max-w-7xl">
       {/* Header */}
@@ -746,7 +937,7 @@ export function ReportPageContent() {
         onValueChange={setSelectedReport}
         className="space-y-6"
       >
-        <TabsList className="grid grid-cols-4 gap-4 bg-gray-100 dark:bg-gray-800 p-1">
+        <TabsList className="grid grid-cols-5 gap-4 bg-gray-100 dark:bg-gray-800 p-1">
           <TabsTrigger
             value="trial-balance"
             className="flex items-center gap-2"
@@ -771,6 +962,10 @@ export function ReportPageContent() {
           >
             <Calendar className="w-4 h-4" />
             General Ledger
+          </TabsTrigger>
+          <TabsTrigger value="cash-flow" className="flex items-center gap-2">
+            <TrendingUp className="w-4 h-4" />
+            Cash Flow
           </TabsTrigger>
         </TabsList>
 
@@ -1343,6 +1538,164 @@ export function ReportPageContent() {
                 <p className="text-sm text-gray-500 text-center">
                   Showing 5 of {generalLedgers.length} accounts
                 </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Cash Flow Statement */}
+        <TabsContent value="cash-flow">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Cash Flow Statement</CardTitle>
+                  <CardDescription>
+                    {new Date(startDate).toLocaleDateString("zh-CN")} to{" "}
+                    {new Date(endDate).toLocaleDateString("zh-CN")}
+                  </CardDescription>
+                </div>
+                <Button onClick={handleExportCashFlow}>
+                  <FileText className="w-4 h-4 mr-2" />
+                  Export PDF
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-8">
+              {/* Operating Activities */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-green-600">
+                  Operating Activities
+                </h3>
+                <div className="border rounded-lg p-4">
+                  {cashFlowStatement.operatingActivities.items.map(
+                    (item, index) => (
+                      <div
+                        key={index}
+                        className="flex justify-between py-2 border-b last:border-0"
+                      >
+                        <span>{item.description}</span>
+                        <span
+                          className={
+                            item.amount > 0 ? "text-green-600" : "text-red-600"
+                          }
+                        >
+                          {item.amount > 0 ? "+" : ""}
+                          {formatCurrency(item.amount)}
+                        </span>
+                      </div>
+                    ),
+                  )}
+                  <div className="flex justify-between py-3 mt-3 font-semibold border-t-2">
+                    <span>Net Cash from Operating Activities</span>
+                    <span className="text-green-600">
+                      {formatCurrency(
+                        cashFlowStatement.operatingActivities.netCash,
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Investing Activities */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-blue-600">
+                  Investing Activities
+                </h3>
+                <div className="border rounded-lg p-4">
+                  {cashFlowStatement.investingActivities.items.map(
+                    (item, index) => (
+                      <div
+                        key={index}
+                        className="flex justify-between py-2 border-b last:border-0"
+                      >
+                        <span>{item.description}</span>
+                        <span
+                          className={
+                            item.amount > 0 ? "text-green-600" : "text-red-600"
+                          }
+                        >
+                          {item.amount > 0 ? "+" : ""}
+                          {formatCurrency(item.amount)}
+                        </span>
+                      </div>
+                    ),
+                  )}
+                  <div className="flex justify-between py-3 mt-3 font-semibold border-t-2">
+                    <span>Net Cash from Investing Activities</span>
+                    <span className="text-blue-600">
+                      {formatCurrency(
+                        cashFlowStatement.investingActivities.netCash,
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Financing Activities */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-purple-600">
+                  Financing Activities
+                </h3>
+                <div className="border rounded-lg p-4">
+                  {cashFlowStatement.financingActivities.items.map(
+                    (item, index) => (
+                      <div
+                        key={index}
+                        className="flex justify-between py-2 border-b last:border-0"
+                      >
+                        <span>{item.description}</span>
+                        <span
+                          className={
+                            item.amount > 0 ? "text-green-600" : "text-red-600"
+                          }
+                        >
+                          {item.amount > 0 ? "+" : ""}
+                          {formatCurrency(item.amount)}
+                        </span>
+                      </div>
+                    ),
+                  )}
+                  <div className="flex justify-between py-3 mt-3 font-semibold border-t-2">
+                    <span>Net Cash from Financing Activities</span>
+                    <span className="text-purple-600">
+                      {formatCurrency(
+                        cashFlowStatement.financingActivities.netCash,
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Net Change in Cash */}
+              <div className="border-t-2 pt-6 space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-semibold">
+                    Net Change in Cash
+                  </span>
+                  <span
+                    className={
+                      cashFlowStatement.netChangeInCash > 0
+                        ? "text-green-600 text-xl font-bold"
+                        : "text-red-600 text-xl font-bold"
+                    }
+                  >
+                    {cashFlowStatement.netChangeInCash > 0 ? "+" : ""}
+                    {formatCurrency(cashFlowStatement.netChangeInCash)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-sm text-gray-600">
+                  <span>Beginning Cash Balance</span>
+                  <span>
+                    {formatCurrency(cashFlowStatement.beginningCashBalance)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-lg font-semibold">
+                  <span>Ending Cash Balance</span>
+                  <span className="text-green-600">
+                    {formatCurrency(cashFlowStatement.endingCashBalance)}
+                  </span>
+                </div>
               </div>
             </CardContent>
           </Card>

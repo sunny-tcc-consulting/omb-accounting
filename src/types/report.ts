@@ -158,6 +158,37 @@ export interface GeneralLedger {
   closingBalance: number;
 }
 
+// Cash Flow Statement
+export interface CashFlowStatement {
+  startDate: Date;
+  endDate: Date;
+  currency: string;
+  operatingActivities: {
+    items: {
+      description: string;
+      amount: number;
+    }[];
+    netCash: number;
+  };
+  investingActivities: {
+    items: {
+      description: string;
+      amount: number;
+    }[];
+    netCash: number;
+  };
+  financingActivities: {
+    items: {
+      description: string;
+      amount: number;
+    }[];
+    netCash: number;
+  };
+  netChangeInCash: number;
+  beginningCashBalance: number;
+  endingCashBalance: number;
+}
+
 // Report Filters
 export interface ReportFilters {
   startDate?: Date;

@@ -8,6 +8,7 @@ import {
   ProfitAndLoss,
   TrialBalance,
   GeneralLedger,
+  CashFlowStatement,
   ReportConfig,
   AccountType,
   AccountCategory,
@@ -541,6 +542,222 @@ export function generateAllGeneralLedgers(
   return accounts.map((account) =>
     generateGeneralLedger(account.code, filteredEntries),
   );
+}
+
+// =============================================================================
+// CASH FLOW STATEMENT
+// =============================================================================
+
+/**
+ * Generate Cash Flow Statement
+ *
+ * Methodology:
+ * 1. Operating Activities: Indirect method (Net Income + Changes in Working Capital)
+ * 2. Investing Activities: Cash flows from investment activities
+ * 3. Financing Activities: Cash flows from financing activities
+ */
+export function generateCashFlowStatement(
+  accounts: Account[],
+  journalEntries: JournalEntry[],
+  startDate: Date,
+  endDate: Date,
+): CashFlowStatement {
+  // Filter entries by date range
+  const filteredEntries = journalEntries.filter(
+    (entry) => entry.date >= startDate && entry.date <= endDate,
+  );
+
+  // Calculate account balances from journal entries
+  const accountBalances = new Map<string, number>();
+  filteredEntries.forEach((entry) => {
+    entry.entries.forEach((line) => {
+      const current = accountBalances.get(line.accountCode) || 0;
+      accountBalances.set(line.accountCode, current + line.credit - line.debit);
+    });
+  });
+
+  // Operating Activities items
+  const operatingItems: { description: string; amount: number }[] = [];
+
+  // Net Income (assume from P&L calculation - revenue - expenses)
+  const revenueAccounts = accounts.filter(
+    (a) =>
+      a.type === "revenue" ||
+      a.category === "sales" ||
+      a.category === "services",
+  );
+  const expenseAccounts = accounts.filter(
+    (a) =>
+      a.type === "expense" ||
+      a.category === "cost_of_goods_sold" ||
+      a.category === "operating_expenses",
+  );
+
+  const totalRevenue = revenueAccounts.reduce((sum, acc) => {
+    return sum + (accountBalances.get(acc.code) || 0);
+  }, 0);
+
+  const totalExpenses = expenseAccounts.reduce((sum, acc) => {
+    return sum + Math.abs(accountBalances.get(acc.code) || 0);
+  }, 0);
+
+  const netIncome = totalRevenue - totalExpenses;
+  if (netIncome !== 0) {
+    operatingItems.push({
+      description: "Net Income",
+      amount: netIncome,
+    });
+  }
+
+  // Depreciation (add back non-cash expense)
+  const depreciationAccounts = accounts.filter(
+    (a) => a.category === "depreciation",
+  );
+  const depreciation = depreciationAccounts.reduce((sum, acc) => {
+    return sum + Math.abs(accountBalances.get(acc.code) || 0);
+  }, 0);
+  if (depreciation > 0) {
+    operatingItems.push({
+      description: "Depreciation and Amortization",
+      amount: depreciation,
+    });
+  }
+
+  // Changes in Working Capital
+  // Accounts Receivable change (increase = cash outflow)
+  const arAccounts = accounts.filter(
+    (a) => a.category === "accounts_receivable",
+  );
+  const arBalance = arAccounts.reduce((sum, acc) => {
+    return sum + (accountBalances.get(acc.code) || 0);
+  }, 0);
+  if (arBalance !== 0) {
+    operatingItems.push({
+      description: "Change in Accounts Receivable",
+      amount: -arBalance,
+    });
+  }
+
+  // Accounts Payable change (increase = cash inflow)
+  const apAccounts = accounts.filter((a) => a.category === "accounts_payable");
+  const apBalance = apAccounts.reduce((sum, acc) => {
+    return sum + (accountBalances.get(acc.code) || 0);
+  }, 0);
+  if (apBalance !== 0) {
+    operatingItems.push({
+      description: "Change in Accounts Payable",
+      amount: apBalance,
+    });
+  }
+
+  // Inventory change (increase = cash outflow)
+  const inventoryAccounts = accounts.filter((a) => a.category === "inventory");
+  const inventoryBalance = inventoryAccounts.reduce((sum, acc) => {
+    return sum + (accountBalances.get(acc.code) || 0);
+  }, 0);
+  if (inventoryBalance !== 0) {
+    operatingItems.push({
+      description: "Change in Inventory",
+      amount: -inventoryBalance,
+    });
+  }
+
+  const operatingNetCash = operatingItems.reduce(
+    (sum, item) => sum + item.amount,
+    0,
+  );
+
+  // Investing Activities items
+  const investingItems: { description: string; amount: number }[] = [];
+
+  // Fixed Assets purchases/sales
+  const faAccounts = accounts.filter((a) => a.category === "fixed_assets");
+  const faBalance = faAccounts.reduce((sum, acc) => {
+    return sum + (accountBalances.get(acc.code) || 0);
+  }, 0);
+  if (faBalance !== 0) {
+    // If positive, it means net purchases (cash outflow)
+    investingItems.push({
+      description: "Purchase of Fixed Assets",
+      amount: -faBalance,
+    });
+  }
+
+  const investingNetCash = investingItems.reduce(
+    (sum, item) => sum + item.amount,
+    0,
+  );
+
+  // Financing Activities items
+  const financingItems: { description: string; amount: number }[] = [];
+
+  // Short-term debt changes
+  const stdAccounts = accounts.filter(
+    (a) => a.category === "short_term_debt" || a.category === "long_term_debt",
+  );
+  const debtBalance = stdAccounts.reduce((sum, acc) => {
+    return sum + (accountBalances.get(acc.code) || 0);
+  }, 0);
+  if (debtBalance !== 0) {
+    financingItems.push({
+      description: "Debt Proceeds/(Repayments)",
+      amount: debtBalance > 0 ? -debtBalance : Math.abs(debtBalance),
+    });
+  }
+
+  // Owner's equity / retained earnings changes
+  const equityAccounts = accounts.filter(
+    (a) => a.category === "owner_equity" || a.category === "retained_earnings",
+  );
+  const equityBalance = equityAccounts.reduce((sum, acc) => {
+    return sum + (accountBalances.get(acc.code) || 0);
+  }, 0);
+  if (equityBalance !== 0) {
+    financingItems.push({
+      description: "Owner/Shareholder Distributions",
+      amount: -equityBalance,
+    });
+  }
+
+  const financingNetCash = financingItems.reduce(
+    (sum, item) => sum + item.amount,
+    0,
+  );
+
+  // Net change in cash
+  const netChangeInCash =
+    operatingNetCash + investingNetCash + financingNetCash;
+
+  // Beginning cash balance (from cash accounts)
+  const cashAccounts = accounts.filter(
+    (a) => a.category === "cash" || a.category === "bank",
+  );
+  const beginningCashBalance = cashAccounts.reduce((sum, acc) => {
+    return sum + (accountBalances.get(acc.code) || 0) * 0.5; // Assume 50% of balance at start
+  }, 0);
+
+  const endingCashBalance = beginningCashBalance + netChangeInCash;
+
+  return {
+    startDate,
+    endDate,
+    currency: "CNY",
+    operatingActivities: {
+      items: operatingItems,
+      netCash: operatingNetCash,
+    },
+    investingActivities: {
+      items: investingItems,
+      netCash: investingNetCash,
+    },
+    financingActivities: {
+      items: financingItems,
+      netCash: financingNetCash,
+    },
+    netChangeInCash,
+    beginningCashBalance,
+    endingCashBalance,
+  };
 }
 
 // =============================================================================

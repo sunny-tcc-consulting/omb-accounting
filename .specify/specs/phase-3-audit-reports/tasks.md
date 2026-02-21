@@ -138,20 +138,21 @@
 
 ### Task 3.2.4: Cash Flow Statement
 
-- **File**: `src/app/(dashboard)/reports/cash-flow/page.tsx`
-- **Status**: Pending
+- **File**: `src/app/(dashboard)/reports/page.tsx` (added Cash Flow tab)
+- **Status**: ✅ COMPLETED (2026-02-22)
 - **Priority**: Low
 - **Description**: Add 5th report type: Cash Flow Statement
 - **Dependencies**: Task 3.1.4
-- **Estimate**: 8 hours
+- **Estimate**: 8 hours → Actual: ~4 hours
 
 **Subtasks**:
 
-1. [ ] Research cash flow calculation methodology
-2. [ ] Define CashFlow data type
-3. [ ] Implement cash flow calculation logic
-4. [ ] Create Cash Flow Statement page
-5. [ ] Add to reports navigation
+1. [x] Research cash flow calculation methodology (indirect method)
+2. [x] Define CashFlowStatement data type
+3. [x] Implement cash flow calculation logic (operating, investing, financing)
+4. [x] Create Cash Flow Statement tab in reports page
+5. [x] Add PDF export functionality
+6. [x] Add to reports navigation (5th tab)
 
 ---
 

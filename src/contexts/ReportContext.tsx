@@ -8,6 +8,7 @@ import {
   ProfitAndLoss,
   TrialBalance,
   GeneralLedger,
+  CashFlowStatement,
   ReportFilters,
 } from "@/types/report";
 import {
@@ -17,6 +18,7 @@ import {
   generateBalanceSheet,
   generateProfitAndLoss,
   generateAllGeneralLedgers,
+  generateCashFlowStatement,
 } from "@/lib/report-generator";
 import { generateTransactions } from "@/lib/mock-data";
 import { Transaction } from "@/types";
@@ -32,6 +34,10 @@ interface ReportContextType {
   generateBalanceSheet: (asOfDate?: Date) => BalanceSheet;
   generateProfitAndLoss: (startDate: Date, endDate: Date) => ProfitAndLoss;
   generateGeneralLedgers: (startDate?: Date, endDate?: Date) => GeneralLedger[];
+  generateCashFlowStatement: (
+    startDate: Date,
+    endDate: Date,
+  ) => CashFlowStatement;
 
   // Report Filters
   filters: ReportFilters;
@@ -126,6 +132,23 @@ export function ReportProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const generateCashFlowStatementFn = (
+    startDate: Date,
+    endDate: Date,
+  ): CashFlowStatement => {
+    setLoading(true);
+    try {
+      return generateCashFlowStatement(
+        accounts,
+        journalEntries,
+        startDate,
+        endDate,
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <ReportContext.Provider
       value={{
@@ -136,6 +159,7 @@ export function ReportProvider({ children }: { children: React.ReactNode }) {
         generateBalanceSheet: generateBalanceSheetFn,
         generateProfitAndLoss: generateProfitAndLossFn,
         generateGeneralLedgers: generateGeneralLedgersFn,
+        generateCashFlowStatement: generateCashFlowStatementFn,
         filters,
         setFilters,
         loading,
