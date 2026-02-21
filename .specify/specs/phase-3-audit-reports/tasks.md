@@ -99,7 +99,7 @@
 ### Task 3.2.2: Comparative Reports
 
 - **File**: `src/components/reports/ComparativeReport.tsx`
-- **Status**: Pending
+- **Status**: ✅ COMPLETED (2026-02-21)
 - **Priority**: Medium
 - **Description**: Add "Compare with Previous Period" functionality
 - **Dependencies**: Task 3.1.4
@@ -107,16 +107,16 @@
 
 **Subtasks**:
 
-1. [ ] Add period selection (Previous Month, Previous Quarter, Previous Year)
-2. [ ] Calculate previous period data
-3. [ ] Create comparison table showing difference (absolute and %)
-4. [ ] Add visual indicators (↑ ↓ arrows)
-5. [ ] Add to existing reports
+1. [x] Add period selection (Previous Month, Previous Quarter, Previous Year)
+2. [x] Calculate previous period data
+3. [x] Create comparison table showing difference (absolute and %)
+4. [x] Add visual indicators (↑ ↓ arrows)
+5. [x] Add to existing reports
 
 ### Task 3.2.3: Custom Date Ranges
 
 - **File**: `src/components/reports/DateRangePicker.tsx`
-- **Status**: Pending
+- **Status**: 🔄 IN PROGRESS
 - **Priority**: Medium
 - **Description**: Allow custom start/end dates for all reports (currently only P&L has date range)
 - **Dependencies**: Task 3.1.4
