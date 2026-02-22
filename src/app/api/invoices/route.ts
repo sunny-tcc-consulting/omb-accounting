@@ -1,33 +1,30 @@
 /**
- * GET /api/bank/accounts
- * Get all bank accounts
+ * GET /api/invoices
+ * Get all invoices
  */
 import { NextResponse } from "next/server";
-import { BankAccountService } from "@/lib/services/bank-account-service";
-import { BankAccountRepository } from "@/lib/repositories/bank-account-repository";
+import { InvoiceService } from "@/lib/services/invoice-service";
 import { dbManager } from "@/lib/database/database";
-import { createBankAccountSchema } from "@/lib/validations/bank.validation";
+import { createInvoiceSchema } from "@/lib/validations/invoice.validation";
 
 export async function GET(request: NextRequest) {
   try {
     const db = dbManager.getDatabase();
-    const bankAccountService = new BankAccountService(
-      new BankAccountRepository(db),
-    );
+    const invoiceService = new InvoiceService(new InvoiceRepository(db));
 
-    const bankAccounts = bankAccountService.getAll();
+    const invoices = invoiceService.getAll();
 
     return NextResponse.json({
       success: true,
-      data: bankAccounts,
-      count: bankAccounts.length,
+      data: invoices,
+      count: invoices.length,
     });
   } catch (error) {
-    console.error("Error fetching bank accounts:", error);
+    console.error("Error fetching invoices:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to fetch bank accounts",
+        error: "Failed to fetch invoices",
       },
       { status: 500 },
     );
@@ -35,15 +32,15 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * POST /api/bank/accounts
- * Create a new bank account
+ * POST /api/invoices
+ * Create a new invoice
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
     // Validate input
-    const validation = createBankAccountSchema.safeParse(body);
+    const validation = createInvoiceSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json(
         {
@@ -56,21 +53,19 @@ export async function POST(request: NextRequest) {
     }
 
     const db = dbManager.getDatabase();
-    const bankAccountService = new BankAccountService(
-      new BankAccountRepository(db),
-    );
+    const invoiceService = new InvoiceService(new InvoiceRepository(db));
 
-    const bankAccount = bankAccountService.create(validation.data);
+    const invoice = invoiceService.create(validation.data);
 
     return NextResponse.json(
       {
         success: true,
-        data: bankAccount,
+        data: invoice,
       },
       { status: 201 },
     );
   } catch (error) {
-    console.error("Error creating bank account:", error);
+    console.error("Error creating invoice:", error);
 
     if (error instanceof Error && error.message.includes("already exists")) {
       return NextResponse.json(
@@ -85,7 +80,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to create bank account",
+        error: "Failed to create invoice",
       },
       { status: 500 },
     );

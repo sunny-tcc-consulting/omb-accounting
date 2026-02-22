@@ -1,12 +1,12 @@
 /**
- * GET /api/bank/accounts/[id]
- * Get bank account by ID
+ * GET /api/bank/statements/[id]
+ * Get bank statement by ID
  */
 import { NextResponse } from "next/server";
-import { BankAccountService } from "@/lib/services/bank-account-service";
-import { BankAccountRepository } from "@/lib/repositories/bank-account-repository";
+import { BankStatementService } from "@/lib/services/bank-statement-service";
+import { BankStatementRepository } from "@/lib/repositories/bank-statement-repository";
 import { dbManager } from "@/lib/database/database";
-import { updateBankAccountSchema } from "@/lib/validations/bank.validation";
+import { updateBankStatementSchema } from "@/lib/validations/bank.validation";
 
 export async function GET(
   request: NextRequest,
@@ -16,17 +16,17 @@ export async function GET(
     const { id } = params;
 
     const db = dbManager.getDatabase();
-    const bankAccountService = new BankAccountService(
-      new BankAccountRepository(db),
+    const bankStatementService = new BankStatementService(
+      new BankStatementRepository(db),
     );
 
-    const bankAccount = bankAccountService.getById(id);
+    const bankStatement = bankStatementService.getById(id);
 
-    if (!bankAccount) {
+    if (!bankStatement) {
       return NextResponse.json(
         {
           success: false,
-          error: "Bank account not found",
+          error: "Bank statement not found",
         },
         { status: 404 },
       );
@@ -34,14 +34,14 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      data: bankAccount,
+      data: bankStatement,
     });
   } catch (error) {
-    console.error("Error fetching bank account:", error);
+    console.error("Error fetching bank statement:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to fetch bank account",
+        error: "Failed to fetch bank statement",
       },
       { status: 500 },
     );
@@ -49,8 +49,8 @@ export async function GET(
 }
 
 /**
- * PUT /api/bank/accounts/[id]
- * Update bank account
+ * PUT /api/bank/statements/[id]
+ * Update bank statement
  */
 export async function PUT(
   request: NextRequest,
@@ -61,7 +61,7 @@ export async function PUT(
     const body = await request.json();
 
     // Validate input
-    const validation = updateBankAccountSchema.safeParse(body);
+    const validation = updateBankStatementSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json(
         {
@@ -74,17 +74,17 @@ export async function PUT(
     }
 
     const db = dbManager.getDatabase();
-    const bankAccountService = new BankAccountService(
-      new BankAccountRepository(db),
+    const bankStatementService = new BankStatementService(
+      new BankStatementRepository(db),
     );
 
-    const bankAccount = bankAccountService.update(id, validation.data);
+    const bankStatement = bankStatementService.update(id, validation.data);
 
-    if (!bankAccount) {
+    if (!bankStatement) {
       return NextResponse.json(
         {
           success: false,
-          error: "Bank account not found",
+          error: "Bank statement not found",
         },
         { status: 404 },
       );
@@ -92,10 +92,10 @@ export async function PUT(
 
     return NextResponse.json({
       success: true,
-      data: bankAccount,
+      data: bankStatement,
     });
   } catch (error) {
-    console.error("Error updating bank account:", error);
+    console.error("Error updating bank statement:", error);
 
     if (error instanceof Error && error.message.includes("already exists")) {
       return NextResponse.json(
@@ -110,7 +110,7 @@ export async function PUT(
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to update bank account",
+        error: "Failed to update bank statement",
       },
       { status: 500 },
     );
@@ -118,8 +118,8 @@ export async function PUT(
 }
 
 /**
- * DELETE /api/bank/accounts/[id]
- * Delete bank account
+ * DELETE /api/bank/statements/[id]
+ * Delete bank statement
  */
 export async function DELETE(
   request: NextRequest,
@@ -129,17 +129,17 @@ export async function DELETE(
     const { id } = params;
 
     const db = dbManager.getDatabase();
-    const bankAccountService = new BankAccountService(
-      new BankAccountRepository(db),
+    const bankStatementService = new BankStatementService(
+      new BankStatementRepository(db),
     );
 
-    const deleted = bankAccountService.delete(id);
+    const deleted = bankStatementService.delete(id);
 
     if (!deleted) {
       return NextResponse.json(
         {
           success: false,
-          error: "Bank account not found",
+          error: "Bank statement not found",
         },
         { status: 404 },
       );
@@ -147,14 +147,14 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: "Bank account deleted successfully",
+      message: "Bank statement deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting bank account:", error);
+    console.error("Error deleting bank statement:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to delete bank account",
+        error: "Failed to delete bank statement",
       },
       { status: 500 },
     );

@@ -1,28 +1,28 @@
 /**
- * Bank Transaction API - GET, PUT, DELETE
- * Part of Phase 4.6: Bank Reconciliation
- */
-
-import { NextRequest, NextResponse } from "next/server";
-import {
-  getBankTransactionById,
-  matchBankTransaction,
-  unmatchBankTransaction,
-} from "@/lib/bank-service";
-
-/**
  * GET /api/bank/transactions/[id]
  * Get bank transaction by ID
  */
+import { NextResponse } from "next/server";
+import { BankTransactionService } from "@/lib/services/bank-transaction-service";
+import { BankTransactionRepository } from "@/lib/repositories/bank-transaction-repository";
+import { dbManager } from "@/lib/database/database";
+import { updateBankTransactionSchema } from "@/lib/validations/bank.validation";
+
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> },
+  { params }: { params: { id: string } },
 ) {
   try {
-    const { id } = await context.params;
-    const transaction = getBankTransactionById(id);
+    const { id } = params;
 
-    if (!transaction) {
+    const db = dbManager.getDatabase();
+    const bankTransactionService = new BankTransactionService(
+      new BankTransactionRepository(db),
+    );
+
+    const bankTransaction = bankTransactionService.getById(id);
+
+    if (!bankTransaction) {
       return NextResponse.json(
         {
           success: false,
@@ -34,7 +34,7 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      data: transaction,
+      data: bankTransaction,
     });
   } catch (error) {
     console.error("Error fetching bank transaction:", error);
@@ -42,7 +42,6 @@ export async function GET(
       {
         success: false,
         error: "Failed to fetch bank transaction",
-        message: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 },
     );
@@ -50,31 +49,38 @@ export async function GET(
 }
 
 /**
- * PUT /api/bank/transactions/[id]/match
- * Match bank transaction with book transaction
+ * PUT /api/bank/transactions/[id]
+ * Update bank transaction
  */
 export async function PUT(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> },
+  { params }: { params: { id: string } },
 ) {
   try {
-    const { id } = await context.params;
+    const { id } = params;
     const body = await request.json();
-    const { bookTransactionId } = body;
 
-    if (!bookTransactionId) {
+    // Validate input
+    const validation = updateBankTransactionSchema.safeParse(body);
+    if (!validation.success) {
       return NextResponse.json(
         {
           success: false,
-          error: "Book transaction ID is required",
+          error: "Validation failed",
+          details: validation.error.errors,
         },
         { status: 400 },
       );
     }
 
-    const success = matchBankTransaction(id, bookTransactionId);
+    const db = dbManager.getDatabase();
+    const bankTransactionService = new BankTransactionService(
+      new BankTransactionRepository(db),
+    );
 
-    if (!success) {
+    const bankTransaction = bankTransactionService.update(id, validation.data);
+
+    if (!bankTransaction) {
       return NextResponse.json(
         {
           success: false,
@@ -86,15 +92,25 @@ export async function PUT(
 
     return NextResponse.json({
       success: true,
-      message: "Bank transaction matched successfully",
+      data: bankTransaction,
     });
   } catch (error) {
-    console.error("Error matching bank transaction:", error);
+    console.error("Error updating bank transaction:", error);
+
+    if (error instanceof Error && error.message.includes("already exists")) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: error.message,
+        },
+        { status: 409 },
+      );
+    }
+
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to match bank transaction",
-        message: error instanceof Error ? error.message : "Unknown error",
+        error: "Failed to update bank transaction",
       },
       { status: 500 },
     );
@@ -102,18 +118,24 @@ export async function PUT(
 }
 
 /**
- * DELETE /api/bank/transactions/[id]/unmatch
- * Unmatch bank transaction
+ * DELETE /api/bank/transactions/[id]
+ * Delete bank transaction
  */
 export async function DELETE(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> },
+  { params }: { params: { id: string } },
 ) {
   try {
-    const { id } = await context.params;
-    const success = unmatchBankTransaction(id);
+    const { id } = params;
 
-    if (!success) {
+    const db = dbManager.getDatabase();
+    const bankTransactionService = new BankTransactionService(
+      new BankTransactionRepository(db),
+    );
+
+    const deleted = bankTransactionService.delete(id);
+
+    if (!deleted) {
       return NextResponse.json(
         {
           success: false,
@@ -125,15 +147,14 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: "Bank transaction unmatched successfully",
+      message: "Bank transaction deleted successfully",
     });
   } catch (error) {
-    console.error("Error unmatching bank transaction:", error);
+    console.error("Error deleting bank transaction:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to unmatch bank transaction",
-        message: error instanceof Error ? error.message : "Unknown error",
+        error: "Failed to delete bank transaction",
       },
       { status: 500 },
     );

@@ -1,12 +1,11 @@
 /**
- * GET /api/bank/accounts/[id]
- * Get bank account by ID
+ * GET /api/invoices/[id]
+ * Get invoice by ID
  */
 import { NextResponse } from "next/server";
-import { BankAccountService } from "@/lib/services/bank-account-service";
-import { BankAccountRepository } from "@/lib/repositories/bank-account-repository";
+import { InvoiceService } from "@/lib/services/invoice-service";
 import { dbManager } from "@/lib/database/database";
-import { updateBankAccountSchema } from "@/lib/validations/bank.validation";
+import { updateInvoiceSchema } from "@/lib/validations/invoice.validation";
 
 export async function GET(
   request: NextRequest,
@@ -16,17 +15,15 @@ export async function GET(
     const { id } = params;
 
     const db = dbManager.getDatabase();
-    const bankAccountService = new BankAccountService(
-      new BankAccountRepository(db),
-    );
+    const invoiceService = new InvoiceService(new InvoiceRepository(db));
 
-    const bankAccount = bankAccountService.getById(id);
+    const invoice = invoiceService.getById(id);
 
-    if (!bankAccount) {
+    if (!invoice) {
       return NextResponse.json(
         {
           success: false,
-          error: "Bank account not found",
+          error: "Invoice not found",
         },
         { status: 404 },
       );
@@ -34,14 +31,14 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      data: bankAccount,
+      data: invoice,
     });
   } catch (error) {
-    console.error("Error fetching bank account:", error);
+    console.error("Error fetching invoice:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to fetch bank account",
+        error: "Failed to fetch invoice",
       },
       { status: 500 },
     );
@@ -49,8 +46,8 @@ export async function GET(
 }
 
 /**
- * PUT /api/bank/accounts/[id]
- * Update bank account
+ * PUT /api/invoices/[id]
+ * Update invoice
  */
 export async function PUT(
   request: NextRequest,
@@ -61,7 +58,7 @@ export async function PUT(
     const body = await request.json();
 
     // Validate input
-    const validation = updateBankAccountSchema.safeParse(body);
+    const validation = updateInvoiceSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json(
         {
@@ -74,17 +71,15 @@ export async function PUT(
     }
 
     const db = dbManager.getDatabase();
-    const bankAccountService = new BankAccountService(
-      new BankAccountRepository(db),
-    );
+    const invoiceService = new InvoiceService(new InvoiceRepository(db));
 
-    const bankAccount = bankAccountService.update(id, validation.data);
+    const invoice = invoiceService.update(id, validation.data);
 
-    if (!bankAccount) {
+    if (!invoice) {
       return NextResponse.json(
         {
           success: false,
-          error: "Bank account not found",
+          error: "Invoice not found",
         },
         { status: 404 },
       );
@@ -92,10 +87,10 @@ export async function PUT(
 
     return NextResponse.json({
       success: true,
-      data: bankAccount,
+      data: invoice,
     });
   } catch (error) {
-    console.error("Error updating bank account:", error);
+    console.error("Error updating invoice:", error);
 
     if (error instanceof Error && error.message.includes("already exists")) {
       return NextResponse.json(
@@ -110,7 +105,7 @@ export async function PUT(
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to update bank account",
+        error: "Failed to update invoice",
       },
       { status: 500 },
     );
@@ -118,8 +113,8 @@ export async function PUT(
 }
 
 /**
- * DELETE /api/bank/accounts/[id]
- * Delete bank account
+ * DELETE /api/invoices/[id]
+ * Delete invoice
  */
 export async function DELETE(
   request: NextRequest,
@@ -129,17 +124,15 @@ export async function DELETE(
     const { id } = params;
 
     const db = dbManager.getDatabase();
-    const bankAccountService = new BankAccountService(
-      new BankAccountRepository(db),
-    );
+    const invoiceService = new InvoiceService(new InvoiceRepository(db));
 
-    const deleted = bankAccountService.delete(id);
+    const deleted = invoiceService.delete(id);
 
     if (!deleted) {
       return NextResponse.json(
         {
           success: false,
-          error: "Bank account not found",
+          error: "Invoice not found",
         },
         { status: 404 },
       );
@@ -147,14 +140,14 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: "Bank account deleted successfully",
+      message: "Invoice deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting bank account:", error);
+    console.error("Error deleting invoice:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to delete bank account",
+        error: "Failed to delete invoice",
       },
       { status: 500 },
     );

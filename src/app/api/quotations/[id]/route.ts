@@ -1,12 +1,11 @@
 /**
- * GET /api/bank/accounts/[id]
- * Get bank account by ID
+ * GET /api/quotations/[id]
+ * Get quotation by ID
  */
 import { NextResponse } from "next/server";
-import { BankAccountService } from "@/lib/services/bank-account-service";
-import { BankAccountRepository } from "@/lib/repositories/bank-account-repository";
+import { QuotationService } from "@/lib/services/quotation-service";
 import { dbManager } from "@/lib/database/database";
-import { updateBankAccountSchema } from "@/lib/validations/bank.validation";
+import { updateQuotationSchema } from "@/lib/validations/quotation.validation";
 
 export async function GET(
   request: NextRequest,
@@ -16,17 +15,15 @@ export async function GET(
     const { id } = params;
 
     const db = dbManager.getDatabase();
-    const bankAccountService = new BankAccountService(
-      new BankAccountRepository(db),
-    );
+    const quotationService = new QuotationService(new QuotationRepository(db));
 
-    const bankAccount = bankAccountService.getById(id);
+    const quotation = quotationService.getById(id);
 
-    if (!bankAccount) {
+    if (!quotation) {
       return NextResponse.json(
         {
           success: false,
-          error: "Bank account not found",
+          error: "Quotation not found",
         },
         { status: 404 },
       );
@@ -34,14 +31,14 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      data: bankAccount,
+      data: quotation,
     });
   } catch (error) {
-    console.error("Error fetching bank account:", error);
+    console.error("Error fetching quotation:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to fetch bank account",
+        error: "Failed to fetch quotation",
       },
       { status: 500 },
     );
@@ -49,8 +46,8 @@ export async function GET(
 }
 
 /**
- * PUT /api/bank/accounts/[id]
- * Update bank account
+ * PUT /api/quotations/[id]
+ * Update quotation
  */
 export async function PUT(
   request: NextRequest,
@@ -61,7 +58,7 @@ export async function PUT(
     const body = await request.json();
 
     // Validate input
-    const validation = updateBankAccountSchema.safeParse(body);
+    const validation = updateQuotationSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json(
         {
@@ -74,17 +71,15 @@ export async function PUT(
     }
 
     const db = dbManager.getDatabase();
-    const bankAccountService = new BankAccountService(
-      new BankAccountRepository(db),
-    );
+    const quotationService = new QuotationService(new QuotationRepository(db));
 
-    const bankAccount = bankAccountService.update(id, validation.data);
+    const quotation = quotationService.update(id, validation.data);
 
-    if (!bankAccount) {
+    if (!quotation) {
       return NextResponse.json(
         {
           success: false,
-          error: "Bank account not found",
+          error: "Quotation not found",
         },
         { status: 404 },
       );
@@ -92,10 +87,10 @@ export async function PUT(
 
     return NextResponse.json({
       success: true,
-      data: bankAccount,
+      data: quotation,
     });
   } catch (error) {
-    console.error("Error updating bank account:", error);
+    console.error("Error updating quotation:", error);
 
     if (error instanceof Error && error.message.includes("already exists")) {
       return NextResponse.json(
@@ -110,7 +105,7 @@ export async function PUT(
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to update bank account",
+        error: "Failed to update quotation",
       },
       { status: 500 },
     );
@@ -118,8 +113,8 @@ export async function PUT(
 }
 
 /**
- * DELETE /api/bank/accounts/[id]
- * Delete bank account
+ * DELETE /api/quotations/[id]
+ * Delete quotation
  */
 export async function DELETE(
   request: NextRequest,
@@ -129,17 +124,15 @@ export async function DELETE(
     const { id } = params;
 
     const db = dbManager.getDatabase();
-    const bankAccountService = new BankAccountService(
-      new BankAccountRepository(db),
-    );
+    const quotationService = new QuotationService(new QuotationRepository(db));
 
-    const deleted = bankAccountService.delete(id);
+    const deleted = quotationService.delete(id);
 
     if (!deleted) {
       return NextResponse.json(
         {
           success: false,
-          error: "Bank account not found",
+          error: "Quotation not found",
         },
         { status: 404 },
       );
@@ -147,14 +140,14 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: "Bank account deleted successfully",
+      message: "Quotation deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting bank account:", error);
+    console.error("Error deleting quotation:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to delete bank account",
+        error: "Failed to delete quotation",
       },
       { status: 500 },
     );

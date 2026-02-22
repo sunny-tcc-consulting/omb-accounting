@@ -1,48 +1,26 @@
 /**
- * Bank Transactions API - GET, POST
- * Part of Phase 4.6: Bank Reconciliation
- */
-
-import { NextRequest, NextResponse } from "next/server";
-import {
-  getAllBankTransactions,
-  getBankTransactionsByStatementId,
-  getUnmatchedBankTransactions,
-  getMatchedBankTransactions,
-} from "@/lib/bank-service";
-
-/**
  * GET /api/bank/transactions
- * Get all bank transactions with optional filters
+ * Get all bank transactions
  */
+import { NextResponse } from "next/server";
+import { BankTransactionService } from "@/lib/services/bank-transaction-service";
+import { BankTransactionRepository } from "@/lib/repositories/bank-transaction-repository";
+import { dbManager } from "@/lib/database/database";
+import { createBankTransactionSchema } from "@/lib/validations/bank.validation";
+
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
+    const db = dbManager.getDatabase();
+    const bankTransactionService = new BankTransactionService(
+      new BankTransactionRepository(db),
+    );
 
-    // Get filter parameters
-    const status = searchParams.get("status") as "pending" | "matched" | null;
-    const statementId = searchParams.get("statementId") as string | null;
-
-    let transactions;
-
-    if (statementId) {
-      transactions = getBankTransactionsByStatementId(statementId);
-    } else if (status) {
-      if (status === "pending") {
-        transactions = getUnmatchedBankTransactions();
-      } else if (status === "matched") {
-        transactions = getMatchedBankTransactions();
-      } else {
-        transactions = getAllBankTransactions();
-      }
-    } else {
-      transactions = getAllBankTransactions();
-    }
+    const bankTransactions = bankTransactionService.getAll();
 
     return NextResponse.json({
       success: true,
-      data: transactions,
-      count: transactions.length,
+      data: bankTransactions,
+      count: bankTransactions.length,
     });
   } catch (error) {
     console.error("Error fetching bank transactions:", error);
@@ -50,7 +28,64 @@ export async function GET(request: NextRequest) {
       {
         success: false,
         error: "Failed to fetch bank transactions",
-        message: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
+    );
+  }
+}
+
+/**
+ * POST /api/bank/transactions
+ * Create a new bank transaction
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+
+    // Validate input
+    const validation = createBankTransactionSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Validation failed",
+          details: validation.error.errors,
+        },
+        { status: 400 },
+      );
+    }
+
+    const db = dbManager.getDatabase();
+    const bankTransactionService = new BankTransactionService(
+      new BankTransactionRepository(db),
+    );
+
+    const bankTransaction = bankTransactionService.create(validation.data);
+
+    return NextResponse.json(
+      {
+        success: true,
+        data: bankTransaction,
+      },
+      { status: 201 },
+    );
+  } catch (error) {
+    console.error("Error creating bank transaction:", error);
+
+    if (error instanceof Error && error.message.includes("already exists")) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: error.message,
+        },
+        { status: 409 },
+      );
+    }
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Failed to create bank transaction",
       },
       { status: 500 },
     );

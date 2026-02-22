@@ -1,33 +1,33 @@
 /**
- * GET /api/bank/accounts
- * Get all bank accounts
+ * GET /api/bank/statements
+ * Get all bank statements
  */
 import { NextResponse } from "next/server";
-import { BankAccountService } from "@/lib/services/bank-account-service";
-import { BankAccountRepository } from "@/lib/repositories/bank-account-repository";
+import { BankStatementService } from "@/lib/services/bank-statement-service";
+import { BankStatementRepository } from "@/lib/repositories/bank-statement-repository";
 import { dbManager } from "@/lib/database/database";
-import { createBankAccountSchema } from "@/lib/validations/bank.validation";
+import { createBankStatementSchema } from "@/lib/validations/bank.validation";
 
 export async function GET(request: NextRequest) {
   try {
     const db = dbManager.getDatabase();
-    const bankAccountService = new BankAccountService(
-      new BankAccountRepository(db),
+    const bankStatementService = new BankStatementService(
+      new BankStatementRepository(db),
     );
 
-    const bankAccounts = bankAccountService.getAll();
+    const bankStatements = bankStatementService.getAll();
 
     return NextResponse.json({
       success: true,
-      data: bankAccounts,
-      count: bankAccounts.length,
+      data: bankStatements,
+      count: bankStatements.length,
     });
   } catch (error) {
-    console.error("Error fetching bank accounts:", error);
+    console.error("Error fetching bank statements:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to fetch bank accounts",
+        error: "Failed to fetch bank statements",
       },
       { status: 500 },
     );
@@ -35,15 +35,15 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * POST /api/bank/accounts
- * Create a new bank account
+ * POST /api/bank/statements
+ * Create a new bank statement
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
     // Validate input
-    const validation = createBankAccountSchema.safeParse(body);
+    const validation = createBankStatementSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json(
         {
@@ -56,21 +56,21 @@ export async function POST(request: NextRequest) {
     }
 
     const db = dbManager.getDatabase();
-    const bankAccountService = new BankAccountService(
-      new BankAccountRepository(db),
+    const bankStatementService = new BankStatementService(
+      new BankStatementRepository(db),
     );
 
-    const bankAccount = bankAccountService.create(validation.data);
+    const bankStatement = bankStatementService.create(validation.data);
 
     return NextResponse.json(
       {
         success: true,
-        data: bankAccount,
+        data: bankStatement,
       },
       { status: 201 },
     );
   } catch (error) {
-    console.error("Error creating bank account:", error);
+    console.error("Error creating bank statement:", error);
 
     if (error instanceof Error && error.message.includes("already exists")) {
       return NextResponse.json(
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to create bank account",
+        error: "Failed to create bank statement",
       },
       { status: 500 },
     );

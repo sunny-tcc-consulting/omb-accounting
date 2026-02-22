@@ -1,33 +1,30 @@
 /**
- * GET /api/bank/accounts
- * Get all bank accounts
+ * GET /api/quotations
+ * Get all quotations
  */
 import { NextResponse } from "next/server";
-import { BankAccountService } from "@/lib/services/bank-account-service";
-import { BankAccountRepository } from "@/lib/repositories/bank-account-repository";
+import { QuotationService } from "@/lib/services/quotation-service";
 import { dbManager } from "@/lib/database/database";
-import { createBankAccountSchema } from "@/lib/validations/bank.validation";
+import { createQuotationSchema } from "@/lib/validations/quotation.validation";
 
 export async function GET(request: NextRequest) {
   try {
     const db = dbManager.getDatabase();
-    const bankAccountService = new BankAccountService(
-      new BankAccountRepository(db),
-    );
+    const quotationService = new QuotationService(new QuotationRepository(db));
 
-    const bankAccounts = bankAccountService.getAll();
+    const quotations = quotationService.getAll();
 
     return NextResponse.json({
       success: true,
-      data: bankAccounts,
-      count: bankAccounts.length,
+      data: quotations,
+      count: quotations.length,
     });
   } catch (error) {
-    console.error("Error fetching bank accounts:", error);
+    console.error("Error fetching quotations:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to fetch bank accounts",
+        error: "Failed to fetch quotations",
       },
       { status: 500 },
     );
@@ -35,15 +32,15 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * POST /api/bank/accounts
- * Create a new bank account
+ * POST /api/quotations
+ * Create a new quotation
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
     // Validate input
-    const validation = createBankAccountSchema.safeParse(body);
+    const validation = createQuotationSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json(
         {
@@ -56,21 +53,19 @@ export async function POST(request: NextRequest) {
     }
 
     const db = dbManager.getDatabase();
-    const bankAccountService = new BankAccountService(
-      new BankAccountRepository(db),
-    );
+    const quotationService = new QuotationService(new QuotationRepository(db));
 
-    const bankAccount = bankAccountService.create(validation.data);
+    const quotation = quotationService.create(validation.data);
 
     return NextResponse.json(
       {
         success: true,
-        data: bankAccount,
+        data: quotation,
       },
       { status: 201 },
     );
   } catch (error) {
-    console.error("Error creating bank account:", error);
+    console.error("Error creating quotation:", error);
 
     if (error instanceof Error && error.message.includes("already exists")) {
       return NextResponse.json(
@@ -85,7 +80,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to create bank account",
+        error: "Failed to create quotation",
       },
       { status: 500 },
     );
