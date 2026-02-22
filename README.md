@@ -1,296 +1,371 @@
 # omb-accounting 📊
 
-A modern accounting web application designed for small and medium enterprises (SMEs). Built with Next.js 14, TypeScript, and shadcn/ui, this application provides a complete frontend solution for managing customers, quotations, invoices, and PDF generation.
+> A modern accounting web application for small and medium enterprises (SMEs).
+> Built with Next.js 14, TypeScript, and shadcn/ui.
 
-## ✨ Features
+---
 
-### Dashboard 📈
-- Financial overview with total income, expenses, and net income
-- Recent transactions list
-- Financial health indicators
-- Responsive sidebar navigation
+## Table of Contents
 
-### Customer Management 👥
-- Create, edit, and delete customers
-- Customer list with search and filtering
-- Customer detail pages
-- Customer form with validation
-- Mock data generation (15+ customers)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Usage](#usage)
+- [Development](#development)
+- [Testing](#testing)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
+- [License](#license)
 
-### Quotation Management 📝
-- Create quotations with customer selection
-- Add line items with description, quantity, unit price, and total
-- Set quotation validity period
-- Generate unique quotation numbers
-- Preview and print quotations
-- Quotation list with search and filtering
-- Quotation detail and edit pages
+---
 
-### Invoice Management 💰
-- Create invoices from scratch
-- Automatic invoice number generation
-- Customer selection with "Create New" option
-- Line item management with tax and discount support
-- Payment status tracking (Paid, Partial, Pending, Overdue)
-- Invoice list with comprehensive filtering and search
-- Invoice detail and edit pages
+## Features
 
-### Quotation to Invoice Conversion 🔄
-- One-click quotation to invoice conversion
-- Automatic data transfer (items, customer, payment terms)
-- Invoice preview before saving
-- Automatic invoice number generation
-- Quotation reference tracking
+### Completed (Phase 1-3) ✅
 
-### PDF Generation 📄
-- Professional PDF generation for quotations and invoices
-- Line items table with autoTable
-- Company header and footer
-- Automatic totals calculation
-- Payment status indicator
-- Page numbers
-- Download PDF functionality
+| Module                   | Features                                                                          |
+| ------------------------ | --------------------------------------------------------------------------------- |
+| **Dashboard**            | Financial overview, key metrics, recent transactions, financial health indicators |
+| **Customer Management**  | CRUD operations, search, filtering, validation                                    |
+| **Quotation Management** | Create quotations, line items, PDF generation, validity periods                   |
+| **Invoice Management**   | Create invoices, line items, tax/discount support, payment tracking               |
+| **Quotation → Invoice**  | One-click conversion with automatic data transfer                                 |
+| **Audit Reports**        | Trial Balance, Balance Sheet, P&L, General Ledger, Cash Flow                      |
+| **PDF Generation**       | Professional PDFs for all documents with company branding                         |
+| **UI/UX Polish**         | SummaryCards, ErrorDisplay, responsive design, accessibility                      |
 
-## 🛠️ Tech Stack
+### Phase 4 (Planned) 🚧
 
-### Frontend Framework
-- **Next.js 14** - React framework with App Router
-- **TypeScript** - Type safety and better developer experience
-- **Tailwind CSS** - Utility-first CSS framework
+| Module                            | Status  |
+| --------------------------------- | ------- |
+| **Invoice Management (Enhanced)** | Pending |
+| **Dashboard & Analytics**         | Pending |
+| **Bank Reconciliation**           | Pending |
+| **Multi-currency Support**        | Pending |
+| **User & Roles**                  | Pending |
+| **Email/Notification System**     | Pending |
+| **Performance Optimization**      | Pending |
+| **Security Hardening**            | Pending |
 
-### UI Components
+---
+
+## Tech Stack
+
+### Core Framework
+
+- **Next.js 14** - App Router, Server Components
+- **TypeScript** - Type safety and developer experience
+- **React 18** - UI library
+
+### UI & Styling
+
 - **shadcn/ui** - Modern, accessible component library
-- **Radix UI** - Unstyled, accessible component primitives
-- **Lucide React** - Beautiful, consistent icon set
+- **Tailwind CSS** - Utility-first CSS
+- **Lucide React** - Icon set
+- **Radix UI** - Accessible primitives
 
-### State Management
-- **React Context API** - Simple state management for the application
+### State & Data
 
-### Data & Utilities
-- **Faker.js** - Realistic mock data generation
-- **React Hook Form + Zod** - Form validation
+- **React Context** - State management
+- **React Hook Form** - Form handling
+- **Zod** - Schema validation
+
+### Utilities
+
 - **date-fns** - Date manipulation
-- **jsPDF + jsPDF-AutoTable** - PDF generation
+- **jsPDF + AutoTable** - PDF generation
+- **Faker.js** - Mock data generation
 
-## 📁 Project Structure
+### Quality Assurance
+
+- **Jest** - Unit testing
+- **React Testing Library** - Component testing
+- **ESLint + Prettier** - Code quality
+
+---
+
+## Project Structure
 
 ```
 omb-accounting/
+├── .specify/                    # Spec-Kit documentation
+│   ├── specs/                   # Project specifications
+│   │   └── phase-4-modules/     # Phase 4 detailed specs
+│   └── memory/
+│       └── constitution.md      # Project governance
 ├── src/
-│   ├── app/                    # Next.js App Router pages
-│   │   ├── (dashboard)/        # Dashboard layout
-│   │   │   ├── layout.tsx      # Main layout with providers
-│   │   │   ├── page.tsx        # Dashboard home
-│   │   │   ├── customers/      # Customer pages
-│   │   │   ├── quotations/     # Quotation pages
-│   │   │   └── invoices/       # Invoice pages
-│   │   └── layout.tsx          # Root layout
+│   ├── app/                     # Next.js App Router
+│   │   ├── (dashboard)/         # Dashboard layout
+│   │   │   ├── layout.tsx       # Main layout with providers
+│   │   │   ├── page.tsx         # Dashboard home
+│   │   │   ├── customers/       # Customer pages
+│   │   │   ├── quotations/      # Quotation pages
+│   │   │   ├── invoices/        # Invoice pages
+│   │   │   └── reports/         # Audit reports
+│   │   └── api/                 # API routes
 │   ├── components/
-│   │   ├── ui/                 # shadcn/ui components
-│   │   ├── dashboard/          # Dashboard components
-│   │   ├── customers/          # Customer components
-│   │   ├── quotations/         # Quotation components
-│   │   ├── invoices/           # Invoice components
-│   │   └── skeletons/          # Loading skeletons
-│   ├── contexts/               # React Context providers
-│   │   ├── DataContext.tsx
-│   │   ├── CustomerContext.tsx
-│   │   ├── QuotationContext.tsx
-│   │   └── InvoiceContext.tsx
-│   ├── lib/
-│   │   ├── mock-data.ts        # Mock data generation
-│   │   ├── utils.ts            # Utility functions
-│   │   ├── validations.ts      # Zod schemas
-│   │   ├── quotation-utils.ts  # Quotation conversion
-│   │   └── pdf-generator.ts    # PDF generation
-│   └── types/
-│       └── index.ts            # TypeScript type definitions
-├── public/                     # Static assets
+│   │   ├── ui/                  # shadcn/ui components
+│   │   ├── dashboard/           # Dashboard components
+│   │   ├── customers/           # Customer components
+│   │   ├── quotations/          # Quotation components
+│   │   ├── invoices/            # Invoice components
+│   │   ├── reports/             # Report components
+│   │   └── shared/              # Shared components
+│   ├── contexts/                # React Context providers
+│   ├── lib/                     # Utility functions
+│   │   ├── pdf-generator.ts     # PDF generation
+│   │   ├── quotation-utils.ts   # Quotation conversion
+│   │   ├── validations.ts       # Zod schemas
+│   │   └── utils.ts             # Common utilities
+│   └── types/                   # TypeScript definitions
+├── prisma/                      # Database schema
+├── public/                      # Static assets
 └── package.json
 ```
 
-## 🚀 Getting Started
+---
+
+## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ installed
-- npm, yarn, pnpm, or bun package manager
+- Node.js 18+
+- npm, yarn, pnpm, or bun
 
 ### Installation
 
-1. Clone the repository:
 ```bash
-git clone <repository-url>
+# Clone the repository
+git clone https://github.com/sunny-tcc-consulting/omb-accounting.git
 cd omb-accounting
-```
 
-2. Install dependencies:
-```bash
+# Install dependencies
 npm install
-# or
-yarn install
-# or
-pnpm install
-# or
-bun install
-```
 
-3. Start the development server:
-```bash
+# Start development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Open http://localhost:3000
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser
+### Available Scripts
 
-## 📖 Usage
+```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run start        # Start production server
+npm run test         # Run tests
+npm run test:watch   # Run tests in watch mode
+npm run lint         # Run ESLint
+npm run format       # Format code with Prettier
+```
+
+---
+
+## Usage
 
 ### Dashboard
-- View financial overview
-- See recent transactions
-- Navigate to different sections
+
+View financial overview, key metrics, and recent transactions. Navigate to different sections from the sidebar.
 
 ### Customer Management
+
 1. Go to **Customers** menu
-2. Click **Add Customer** to create a new customer
-3. Fill in the customer details (name, email, phone, company, address, tax ID)
-4. Click **Save** to create the customer
-5. View customer list, search, filter, and edit customers
+2. Click **Add Customer** to create
+3. Fill in details and save
+4. Use search and filters to find customers
 
 ### Quotation Management
+
 1. Go to **Quotations** menu
-2. Click **Create Quotation** to start a new quotation
-3. Select a customer or create a new one
-4. Add line items with description, quantity, unit price, and discount
-5. Set payment terms and validity period
-6. Click **Save** to create the quotation
-7. View, edit, or delete quotations
-8. Preview and print quotations
+2. Click **Create Quotation**
+3. Select customer, add line items
+4. Set payment terms and validity
+5. Save and preview/print
 
 ### Invoice Management
+
 1. Go to **Invoices** menu
-2. Click **Create Invoice** to start a new invoice
-3. Select a customer or create a new one
-4. Add line items with description, quantity, unit price, tax rate, and discount
-5. Set payment terms and due date
-6. Click **Save** to create the invoice
-7. View, edit, or delete invoices
-8. Track payment status (Paid, Partial, Pending, Overdue)
+2. Click **Create Invoice**
+3. Select customer, add line items
+4. Set payment terms
+5. Track payment status
 
-### Quotation to Invoice Conversion
-1. Go to a quotation in the **Quotations** list
-2. Click **轉為發票** (Convert to Invoice)
-3. Preview the converted invoice
-4. Click **保存發票** (Save Invoice) to create the invoice
-5. The invoice will be automatically saved to the invoices list
+### Quotation to Invoice
 
-### PDF Generation
-1. Open any quotation or invoice
-2. Click **Download PDF** button
-3. The PDF will be downloaded with a professional layout
-4. Or click **Print** to print directly
+1. Open a quotation
+2. Click **Convert to Invoice**
+3. Preview and save
 
-## 🎨 Customization
+### Audit Reports
 
-### Company Information
-Edit `src/lib/pdf-generator.ts` to update company details:
-```typescript
-const companyInfo = {
-  name: 'Your Company Name',
-  address: '123 Business Road, City',
-  email: 'info@yourcompany.com',
-  phone: '+1 234 567 8900',
-};
+1. Go to **Reports** menu
+2. Select report type (Trial Balance, Balance Sheet, P&L, etc.)
+3. Set date range filters
+4. View or export to PDF
+
+---
+
+## Development
+
+### Code Standards
+
+This project follows the [Project Constitution](.specify/memory/constitution.md):
+
+- **TypeScript**: Strict mode enabled
+- **Testing**: 80%+ coverage required
+- **Commits**: Conventional commit format
+- **Reviews**: Self-review before commit
+
+### Git Workflow
+
+```bash
+# Create feature branch
+git checkout -b feature/my-feature
+
+# Make changes and commit
+git add .
+git commit -m "feat(scope): add new feature"
+
+# Push and create PR
+git push origin feature/my-feature
 ```
 
-### Data Generation
-Customize mock data in `src/lib/mock-data.ts`:
-```typescript
-export function generateCustomers(count: number): Customer[] {
-  // Your custom data generation logic
-}
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run with coverage
+npm test -- --coverage
+
+# Run specific test file
+npm test -- quotation-utils.test.ts
 ```
 
-### Styling
-Customize Tailwind CSS classes in component files:
-```tsx
-<div className="max-w-4xl mx-auto bg-white p-8">
-  {/* Your component */}
-</div>
+### Spec-Kit Documentation
+
+This project uses [Spec-Kit](https://clawhub.com) for structured development:
+
+| Document            | Purpose                       |
+| ------------------- | ----------------------------- |
+| `spec.md`           | User stories and requirements |
+| `clarifications.md` | Technical decisions           |
+| `plan.md`           | Architecture and data models  |
+| `tasks.md`          | Implementation tasks          |
+
+**View Phase 4 specs**: [`.specify/specs/phase-4-modules/`](.specify/specs/phase-4-modules/)
+
+---
+
+## Testing
+
+### Test Structure
+
+```
+src/
+├── __tests__/              # Integration and unit tests
+│   ├── pdf-generator.test.ts
+│   ├── quotation-utils.test.ts
+│   ├── report-context.test.tsx
+│   └── InvoiceContext.test.tsx
+├── components/
+│   └── ui/
+│       └── __tests__/      # Component tests
+│           ├── empty-state.test.tsx
+│           ├── skeleton.test.tsx
+│           └── notification.test.tsx
+└── lib/
+    └── __tests__/          # Library tests
+        └── a11y.test.ts
 ```
 
-## 🧪 Testing
+### Test Coverage
 
-The application currently uses mock data and doesn't have backend integration. To test:
+| Module              | Coverage |
+| ------------------- | -------- |
+| PDF Generator       | 100%     |
+| Quotation Utils     | 100%     |
+| Invoice Context     | 100%     |
+| Report Context      | 100%     |
+| Accessibility Utils | 100%     |
 
-1. **Customer Management**: Create, view, edit, and delete customers
-2. **Quotation Management**: Create quotations and convert them to invoices
-3. **Invoice Management**: Create invoices and track payment status
-4. **PDF Generation**: Download and print PDFs
-5. **Search & Filter**: Test search functionality across all lists
+**Current**: 174/174 tests passing ✅
 
-## 📝 Code Structure
+---
 
-### Context Providers
-- **DataContext**: Manages transactions and financial data
-- **CustomerContext**: Manages customer data and operations
-- **QuotationContext**: Manages quotation data and operations
-- **InvoiceContext**: Manages invoice data and operations
+## Documentation
 
-### Component Organization
-- **Pages**: Route-level components in `src/app/`
-- **Components**: Reusable components in `src/components/`
-- **Skeletons**: Loading state components in `src/components/skeletons/`
+### User Guide
 
-### Utility Functions
-- **mock-data.ts**: Generates realistic test data
-- **utils.ts**: Common utility functions
-- **validations.ts**: Zod schemas for form validation
-- **quotation-utils.ts**: Quotation conversion logic
-- **pdf-generator.ts**: PDF generation functions
+- [User Documentation](docs/user-guide.md) - Complete user guide
 
-## 🔮 Future Enhancements
+### Developer Documentation
 
-- [ ] Backend API integration
-- [ ] Database implementation
-- [ ] Real authentication
-- [ ] Transaction history with filters
-- [ ] Financial reports and charts
-- [ ] Category management
-- [ ] Email notifications
-- [ ] Multi-currency support
-- [ ] API documentation
+- [Developer Guide](docs/developer-guide.md) - Technical documentation
+- [API Reference](docs/api-reference.md) - API endpoints
+- [Data Model](docs/data-model.md) - Database schema
 
-## 🤝 Contributing
+### Phase Documentation
 
-Contributions are welcome! Please follow these steps:
+- [Phase 1-3 Summary](docs/phase-1-3-summary.md)
+- [Phase 4 Specs](.specify/specs/phase-4-modules/)
+
+---
+
+## Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'feat(scope): add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📄 License
+### Branch Strategy
 
-This project is licensed under the MIT License.
+| Branch      | Purpose            |
+| ----------- | ------------------ |
+| `main`      | Production-ready   |
+| `openclaw`  | Development branch |
+| `feature/*` | New features       |
+| `bugfix/*`  | Bug fixes          |
+| `docs/*`    | Documentation      |
 
-## 👥 Authors
+---
 
-- **omb-accounting Team**
+## Project Status
 
-## 🙏 Acknowledgments
+### Phase 1-3: Complete ✅
 
-- Next.js team for the amazing framework
-- shadcn/ui for the beautiful components
-- Lucide for the icon set
+- Core accounting features
+- Customer, Quotation, Invoice management
+- Audit Reports (Trial Balance, Balance Sheet, P&L, GL, Cash Flow)
+- PDF generation
+- UI/UX improvements
+- 174 tests passing
+
+### Phase 4: In Planning 🚧
+
+See [`.specify/specs/phase-4-modules/`](.specify/specs/phase-4-modules/) for detailed plans.
+
+---
+
+## License
+
+MIT License - see [LICENSE](LICENSE) file.
+
+---
+
+## Acknowledgments
+
+- [Next.js](https://nextjs.org/) - React framework
+- [shadcn/ui](https://ui.shadcn.com/) - UI components
+- [Lucide](https://lucide.dev/) - Icons
+- [Spec-Kit](https://clawhub.com) - Structured development
 - All contributors and users
 
 ---
 
-**Note**: This is a frontend prototype with mock data. No backend or database is currently implemented.
+**Built with ❤️ for SME accounting needs**
