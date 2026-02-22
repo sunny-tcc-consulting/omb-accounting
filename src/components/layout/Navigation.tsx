@@ -17,7 +17,8 @@ import { SkipLink } from "@/components/ui/skip-link";
 
 // 路由配置：用於生成麵包屑
 const routeConfig: Record<string, { label: string; parent?: string }> = {
-  "/": { label: "Dashboard" },
+  "/": { label: "Home" },
+  "/dashboard": { label: "Analytics Dashboard", parent: "/" },
   "/transactions": { label: "Transactions", parent: "/" },
   "/reports": { label: "Reports", parent: "/" },
   "/categories": { label: "Categories", parent: "/" },

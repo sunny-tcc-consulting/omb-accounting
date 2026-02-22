@@ -9,7 +9,6 @@ import { useState, useMemo } from "react";
 import { useUser } from "@/contexts/UserContext";
 import {
   Role,
-  RoleFormData,
   Permission,
   PermissionAction,
   PermissionResource,

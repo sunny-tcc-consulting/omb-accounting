@@ -135,7 +135,7 @@ export function useSession(config: Partial<SessionConfig> = {}) {
       navigator.userAgent,
     );
 
-    trackActivity("mousemove");
+    trackActivity();
   }, [currentUser, trackActivity]);
 
   // Start keep-alive ping
@@ -168,11 +168,11 @@ export function useSession(config: Partial<SessionConfig> = {}) {
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    const activityHandler = () => trackActivity("mousemove");
-    const keyHandler = () => trackActivity("keydown");
-    const clickHandler = () => trackActivity("click");
-    const scrollHandler = () => trackActivity("scroll");
-    const touchHandler = () => trackActivity("touchstart");
+    const activityHandler = () => trackActivity();
+    const keyHandler = () => trackActivity();
+    const clickHandler = () => trackActivity();
+    const scrollHandler = () => trackActivity();
+    const touchHandler = () => trackActivity();
 
     // Add event listeners for activity tracking
     document.addEventListener("mousemove", activityHandler);
@@ -184,13 +184,13 @@ export function useSession(config: Partial<SessionConfig> = {}) {
     // Track visibility changes
     const visibilityHandler = () => {
       if (document.visibilityState === "visible") {
-        trackActivity("visibilitychange");
+        trackActivity();
       }
     };
     document.addEventListener("visibilitychange", visibilityHandler);
 
     // Initial activity tracking
-    trackActivity("mousemove");
+    trackActivity();
     startKeepAlive();
 
     return () => {

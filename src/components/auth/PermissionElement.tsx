@@ -5,19 +5,19 @@
 
 "use client";
 
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 import { usePermission } from "@/hooks/usePermission";
-import { Permission } from "@/types";
+import { PermissionCheck } from "@/types";
 
 interface PermissionElementProps {
   /** Child element to show/hide */
   children: ReactNode;
   /** Permission required to show element */
-  permission?: Permission;
+  permission?: PermissionCheck;
   /** One of multiple permissions - show if user has any */
-  oneOf?: Permission[];
+  oneOf?: PermissionCheck[];
   /** All of multiple permissions - show if user has all */
-  allOf?: Permission[];
+  allOf?: PermissionCheck[];
   /** Hide element if user doesn't have permission */
   fallback?: ReactNode;
   /** Disable element if user doesn't have permission */
@@ -87,30 +87,7 @@ export function PermissionElement({
     return fallback || null;
   }
 
-  const clonedChildren = React.Children.map(children, (child) => {
-    if (
-      disabled &&
-      typeof child === "object" &&
-      child !== null &&
-      "type" in child
-    ) {
-      // Check if it's a button-like element
-      const type = (child as React.ReactElement).type;
-      if (typeof type === "function") {
-        const typeObj = type as { displayName?: string };
-        const displayName = typeObj.displayName;
-        if (displayName?.includes("Button")) {
-          return React.cloneElement(child as React.ReactElement, {
-            disabled: true,
-            title: "You do not have permission to perform this action",
-          });
-        }
-      }
-    }
-    return child;
-  });
-
-  return <>{clonedChildren}</>;
+  return <>{children}</>;
 }
 
 /**

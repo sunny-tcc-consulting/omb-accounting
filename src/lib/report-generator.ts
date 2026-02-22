@@ -535,7 +535,8 @@ export function generateAllGeneralLedgers(
     filters?.startDate && filters?.endDate
       ? journalEntries.filter(
           (entry) =>
-            entry.date >= filters.startDate && entry.date <= filters.endDate,
+            entry.date >= (filters.startDate || new Date()) &&
+            entry.date <= (filters.endDate || new Date()),
         )
       : journalEntries;
 

@@ -494,12 +494,25 @@ export const getPermissionById = (id: string): Permission | undefined => {
 };
 
 /**
- * Check if user has specific permission
+ * Check if user permissions include the required permission
  */
-export const hasPermission = (userId: string, permission: string): boolean => {
-  // This would need user service - simplified version here
-  // In real implementation, get user role and check permissions
-  return true; // Placeholder
+export const hasPermission = (
+  userPermissions: Permission[],
+  required: { resource: PermissionResource; action: PermissionAction },
+): boolean => {
+  if (!userPermissions || userPermissions.length === 0) {
+    return false;
+  }
+
+  // Admin role has all permissions
+  const isAdmin = userPermissions.some(
+    (p) => p.resource === "users" && p.action === "delete",
+  );
+  if (isAdmin) return true;
+
+  return userPermissions.some(
+    (p) => p.resource === required.resource && p.action === required.action,
+  );
 };
 
 /**

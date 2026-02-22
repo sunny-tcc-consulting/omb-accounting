@@ -7,7 +7,7 @@
 
 import { useState } from "react";
 import { useUser } from "@/contexts/UserContext";
-import { User, UserStatus, UserFormData } from "@/types";
+import { User, UserStatus } from "@/types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";

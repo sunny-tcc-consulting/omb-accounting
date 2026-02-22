@@ -177,7 +177,7 @@ export const searchActivities = (query: string): UserActivity[] => {
 
   return activities.filter((a) => {
     return (
-      a.userName.toLowerCase().includes(lowerQuery) ||
+      (a.userName && a.userName.toLowerCase().includes(lowerQuery)) ||
       a.action.toLowerCase().includes(lowerQuery) ||
       a.resource.toLowerCase().includes(lowerQuery) ||
       (a.resourceId && a.resourceId.toLowerCase().includes(lowerQuery))

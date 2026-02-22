@@ -8,24 +8,24 @@
 import { ReactNode, useEffect, useState } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { usePermission } from "@/hooks/usePermission";
-import { Permission } from "@/types";
+import { Permission, PermissionCheck } from "@/types";
 import { ShieldAlert, Lock } from "lucide-react";
 
 interface PermissionGuardProps {
   children: ReactNode;
   /** Require specific permission to access */
-  requirePermission?: Permission;
+  requirePermission?: PermissionCheck;
   /** Require one of multiple permissions */
-  requireOneOf?: Permission[];
+  requireOneOf?: PermissionCheck[];
   /** Require all of multiple permissions */
-  requireAllOf?: Permission[];
+  requireAllOf?: PermissionCheck[];
   /** Show loading state while checking permissions */
   loading?: boolean;
   /** Show unauthorized message when access denied */
   showUnauthorized?: boolean;
   /** Custom unauthorized component */
   UnauthorizedComponent?: React.ComponentType<{
-    requiredPermissions?: Permission[];
+    requiredPermissions?: PermissionCheck[];
   }>;
 }
 
@@ -118,10 +118,13 @@ export function PermissionGuard({
 
   if (!hasAccess) {
     if (showUnauthorized && UnauthorizedComponent) {
+      // Normalize permissions to array format
+      const permissions =
+        requirePermission || requireOneOf || requireAllOf || [];
       return (
         <UnauthorizedComponent
           requiredPermissions={
-            requirePermission || requireOneOf || requireAllOf
+            Array.isArray(permissions) ? permissions : [permissions]
           }
         />
       );

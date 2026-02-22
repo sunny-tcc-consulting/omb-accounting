@@ -3,10 +3,274 @@
  * Part of Phase 4: User & Roles module
  */
 
-import { User, UserFormData, UserFilters, UserStatus } from "@/types";
+import {
+  User,
+  UserFormData,
+  UserFilters,
+  UserStatus,
+  Role,
+  UserPreferences,
+} from "@/types";
 
 // In-memory user store (replace with database in production)
 const users: Map<string, User> = new Map();
+
+// In-memory role store (replace with database in production)
+const roles: Map<string, Role> = new Map();
+
+// Initialize default roles
+const initializeDefaultRoles = () => {
+  const adminRole: Role = {
+    id: "role-admin",
+    name: "Admin",
+    description: "Full system access",
+    permissions: [
+      {
+        id: "perm-users-create",
+        resource: "users",
+        action: "create",
+        description: "Create new users",
+        name: "Create Users",
+      },
+      {
+        id: "perm-users-read",
+        resource: "users",
+        action: "read",
+        description: "View user information",
+        name: "Read Users",
+      },
+      {
+        id: "perm-users-update",
+        resource: "users",
+        action: "update",
+        description: "Update user information",
+        name: "Update Users",
+      },
+      {
+        id: "perm-users-delete",
+        resource: "users",
+        action: "delete",
+        description: "Delete users",
+        name: "Delete Users",
+      },
+      {
+        id: "perm-roles-create",
+        resource: "roles",
+        action: "create",
+        description: "Create new roles",
+        name: "Create Roles",
+      },
+      {
+        id: "perm-roles-read",
+        resource: "roles",
+        action: "read",
+        description: "View role information",
+        name: "Read Roles",
+      },
+      {
+        id: "perm-roles-update",
+        resource: "roles",
+        action: "update",
+        description: "Update role permissions",
+        name: "Update Roles",
+      },
+      {
+        id: "perm-roles-delete",
+        resource: "roles",
+        action: "delete",
+        description: "Delete roles",
+        name: "Delete Roles",
+      },
+      {
+        id: "perm-invoices-create",
+        resource: "invoices",
+        action: "create",
+        description: "Create new invoices",
+        name: "Create Invoices",
+      },
+      {
+        id: "perm-invoices-read",
+        resource: "invoices",
+        action: "read",
+        description: "View invoice information",
+        name: "Read Invoices",
+      },
+      {
+        id: "perm-invoices-update",
+        resource: "invoices",
+        action: "update",
+        description: "Update invoice information",
+        name: "Update Invoices",
+      },
+      {
+        id: "perm-invoices-delete",
+        resource: "invoices",
+        action: "delete",
+        description: "Delete invoices",
+        name: "Delete Invoices",
+      },
+      {
+        id: "perm-quotations-create",
+        resource: "quotations",
+        action: "create",
+        description: "Create new quotations",
+        name: "Create Quotations",
+      },
+      {
+        id: "perm-quotations-read",
+        resource: "quotations",
+        action: "read",
+        description: "View quotation information",
+        name: "Read Quotations",
+      },
+      {
+        id: "perm-quotations-update",
+        resource: "quotations",
+        action: "update",
+        description: "Update quotation information",
+        name: "Update Quotations",
+      },
+      {
+        id: "perm-quotations-delete",
+        resource: "quotations",
+        action: "delete",
+        description: "Delete quotations",
+        name: "Delete Quotations",
+      },
+      {
+        id: "perm-reports-read",
+        resource: "reports",
+        action: "read",
+        description: "View reports",
+        name: "Read Reports",
+      },
+      {
+        id: "perm-reports-update",
+        resource: "reports",
+        action: "update",
+        description: "Update reports",
+        name: "Update Reports",
+      },
+      {
+        id: "perm-customers-create",
+        resource: "customers",
+        action: "create",
+        description: "Create new customers",
+        name: "Create Customers",
+      },
+      {
+        id: "perm-customers-read",
+        resource: "customers",
+        action: "read",
+        description: "View customer information",
+        name: "Read Customers",
+      },
+      {
+        id: "perm-customers-update",
+        resource: "customers",
+        action: "update",
+        description: "Update customer information",
+        name: "Update Customers",
+      },
+      {
+        id: "perm-customers-delete",
+        resource: "customers",
+        action: "delete",
+        description: "Delete customers",
+        name: "Delete Customers",
+      },
+    ],
+    isSystem: true,
+    isActive: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  const userRole: Role = {
+    id: "role-user",
+    name: "User",
+    description: "Standard user access",
+    permissions: [
+      {
+        id: "perm-invoices-create",
+        resource: "invoices",
+        action: "create",
+        description: "Create new invoices",
+        name: "Create Invoices",
+      },
+      {
+        id: "perm-invoices-read",
+        resource: "invoices",
+        action: "read",
+        description: "View invoice information",
+        name: "Read Invoices",
+      },
+      {
+        id: "perm-invoices-update",
+        resource: "invoices",
+        action: "update",
+        description: "Update invoice information",
+        name: "Update Invoices",
+      },
+      {
+        id: "perm-quotations-create",
+        resource: "quotations",
+        action: "create",
+        description: "Create new quotations",
+        name: "Create Quotations",
+      },
+      {
+        id: "perm-quotations-read",
+        resource: "quotations",
+        action: "read",
+        description: "View quotation information",
+        name: "Read Quotations",
+      },
+      {
+        id: "perm-quotations-update",
+        resource: "quotations",
+        action: "update",
+        description: "Update quotation information",
+        name: "Update Quotations",
+      },
+      {
+        id: "perm-customers-create",
+        resource: "customers",
+        action: "create",
+        description: "Create new customers",
+        name: "Create Customers",
+      },
+      {
+        id: "perm-customers-read",
+        resource: "customers",
+        action: "read",
+        description: "View customer information",
+        name: "Read Customers",
+      },
+      {
+        id: "perm-customers-update",
+        resource: "customers",
+        action: "update",
+        description: "Update customer information",
+        name: "Update Customers",
+      },
+      {
+        id: "perm-reports-read",
+        resource: "reports",
+        action: "read",
+        description: "View reports",
+        name: "Read Reports",
+      },
+    ],
+    isSystem: true,
+    isActive: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  roles.set(adminRole.id, adminRole);
+  roles.set(userRole.id, userRole);
+};
 
 // Initialize with default admin user
 const initializeDefaultUsers = () => {
@@ -35,6 +299,162 @@ const initializeDefaultUsers = () => {
       notificationInApp: true,
       emailDigest: "weekly",
     },
+    permissions: [
+      {
+        id: "perm-users-create",
+        resource: "users",
+        action: "create",
+        description: "Create new users",
+        name: "Create Users",
+      },
+      {
+        id: "perm-users-read",
+        resource: "users",
+        action: "read",
+        description: "View user information",
+        name: "Read Users",
+      },
+      {
+        id: "perm-users-update",
+        resource: "users",
+        action: "update",
+        description: "Update user information",
+        name: "Update Users",
+      },
+      {
+        id: "perm-users-delete",
+        resource: "users",
+        action: "delete",
+        description: "Delete users",
+        name: "Delete Users",
+      },
+      {
+        id: "perm-roles-create",
+        resource: "roles",
+        action: "create",
+        description: "Create new roles",
+        name: "Create Roles",
+      },
+      {
+        id: "perm-roles-read",
+        resource: "roles",
+        action: "read",
+        description: "View role information",
+        name: "Read Roles",
+      },
+      {
+        id: "perm-roles-update",
+        resource: "roles",
+        action: "update",
+        description: "Update role permissions",
+        name: "Update Roles",
+      },
+      {
+        id: "perm-roles-delete",
+        resource: "roles",
+        action: "delete",
+        description: "Delete roles",
+        name: "Delete Roles",
+      },
+      {
+        id: "perm-invoices-create",
+        resource: "invoices",
+        action: "create",
+        description: "Create new invoices",
+        name: "Create Invoices",
+      },
+      {
+        id: "perm-invoices-read",
+        resource: "invoices",
+        action: "read",
+        description: "View invoice information",
+        name: "Read Invoices",
+      },
+      {
+        id: "perm-invoices-update",
+        resource: "invoices",
+        action: "update",
+        description: "Update invoice information",
+        name: "Update Invoices",
+      },
+      {
+        id: "perm-invoices-delete",
+        resource: "invoices",
+        action: "delete",
+        description: "Delete invoices",
+        name: "Delete Invoices",
+      },
+      {
+        id: "perm-quotations-create",
+        resource: "quotations",
+        action: "create",
+        description: "Create new quotations",
+        name: "Create Quotations",
+      },
+      {
+        id: "perm-quotations-read",
+        resource: "quotations",
+        action: "read",
+        description: "View quotation information",
+        name: "Read Quotations",
+      },
+      {
+        id: "perm-quotations-update",
+        resource: "quotations",
+        action: "update",
+        description: "Update quotation information",
+        name: "Update Quotations",
+      },
+      {
+        id: "perm-quotations-delete",
+        resource: "quotations",
+        action: "delete",
+        description: "Delete quotations",
+        name: "Delete Quotations",
+      },
+      {
+        id: "perm-reports-read",
+        resource: "reports",
+        action: "read",
+        description: "View reports",
+        name: "Read Reports",
+      },
+      {
+        id: "perm-reports-update",
+        resource: "reports",
+        action: "update",
+        description: "Update reports",
+        name: "Update Reports",
+      },
+      {
+        id: "perm-customers-create",
+        resource: "customers",
+        action: "create",
+        description: "Create new customers",
+        name: "Create Customers",
+      },
+      {
+        id: "perm-customers-read",
+        resource: "customers",
+        action: "read",
+        description: "View customer information",
+        name: "Read Customers",
+      },
+      {
+        id: "perm-customers-update",
+        resource: "customers",
+        action: "update",
+        description: "Update customer information",
+        name: "Update Customers",
+      },
+      {
+        id: "perm-customers-delete",
+        resource: "customers",
+        action: "delete",
+        description: "Delete customers",
+        name: "Delete Customers",
+      },
+    ],
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -129,6 +549,10 @@ export const createUser = async (formData: UserFormData): Promise<User> => {
   const id = `user-${crypto.randomUUID().slice(0, 8)}`;
   const now = new Date();
 
+  // Get role permissions
+  const role = roles.get(formData.roleId);
+  const permissions = role?.permissions || [];
+
   const newUser: User = {
     id,
     email: formData.email,
@@ -153,6 +577,7 @@ export const createUser = async (formData: UserFormData): Promise<User> => {
       notificationInApp: true,
       emailDigest: "weekly",
     },
+    permissions,
     createdAt: now,
     updatedAt: now,
   };
@@ -181,6 +606,11 @@ export const updateUser = (
     }
   }
 
+  // Merge preferences properly
+  const mergedPreferences = updates.preferences
+    ? { ...user.preferences, ...updates.preferences }
+    : user.preferences;
+
   const updatedUser: User = {
     ...user,
     ...updates,
@@ -189,6 +619,7 @@ export const updateUser = (
     name: updates.name || user.name,
     roleId: updates.roleId || user.roleId,
     status: updates.status || user.status,
+    preferences: mergedPreferences as UserPreferences,
     phone: updates.phone ?? user.phone,
     updatedAt: new Date(),
   };

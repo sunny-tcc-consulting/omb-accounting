@@ -228,6 +228,7 @@ export interface User {
   passwordChangedAt: Date;
   twoFactorEnabled: boolean;
   preferences: UserPreferences;
+  permissions: Permission[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -239,6 +240,7 @@ export interface UserFormData {
   roleId: string;
   phone?: string;
   status?: UserStatus;
+  preferences?: Record<string, unknown>;
 }
 
 // User filters
@@ -294,13 +296,22 @@ export type PermissionResource =
   | "roles"
   | "audit";
 
-// Permission interface
+// Permission interface (full)
 export interface Permission {
   id: string;
   resource: PermissionResource;
   action: PermissionAction;
   description: string;
   name: string;
+}
+
+// Permission level for hierarchical checks
+export type PermissionLevel = "none" | "read" | "create" | "write" | "delete";
+
+// Simplified permission for runtime checks
+export interface PermissionCheck {
+  resource: PermissionResource;
+  action: PermissionAction;
 }
 
 // Role permission assignment

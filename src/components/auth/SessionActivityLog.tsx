@@ -7,7 +7,8 @@
 
 import { useState, useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
-import { Activity, getRecentActivities } from "@/lib/activity-logger";
+import { UserActivity } from "@/types";
+import { getRecentActivities } from "@/lib/activity-logger";
 import {
   Clock,
   LogIn,
@@ -53,7 +54,7 @@ export function SessionActivityLog({
   className = "",
 }: SessionActivityLogProps) {
   const { currentUser } = useUser();
-  const [activities, setActivities] = useState<Activity[]>([]);
+  const [activities, setActivities] = useState<UserActivity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -68,14 +69,7 @@ export function SessionActivityLog({
     setIsLoading(true);
 
     try {
-      const recentActivities = getRecentActivities({
-        userId: currentUser.id,
-        limit,
-        activityTypes: sessionOnly
-          ? ["login", "logout", "session_expire", "session_extend"]
-          : undefined,
-      });
-
+      const recentActivities = getRecentActivities(limit);
       setActivities(recentActivities);
     } catch (error) {
       console.error("Failed to load session activities:", error);
@@ -92,13 +86,7 @@ export function SessionActivityLog({
       setIsRefreshing(true);
       // Reload activities
       if (currentUser) {
-        const recentActivities = getRecentActivities({
-          userId: currentUser.id,
-          limit,
-          activityTypes: sessionOnly
-            ? ["login", "logout", "session_expire", "session_extend"]
-            : undefined,
-        });
+        const recentActivities = getRecentActivities(limit);
         setActivities(recentActivities);
       }
       setIsRefreshing(false);
@@ -124,7 +112,7 @@ export function SessionActivityLog({
   };
 
   // Get activity description
-  const getActivityDescription = (activity: Activity) => {
+  const getActivityDescription = (activity: UserActivity) => {
     switch (activity.action) {
       case "login":
         return "Logged in successfully";
@@ -204,7 +192,9 @@ export function SessionActivityLog({
                   <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
                     <Clock className="w-3 h-3" />
                     <span>
-                      {formatDistanceToNow(new Date(activity.timestamp), true)}
+                      {formatDistanceToNow(new Date(activity.createdAt), {
+                        addSuffix: true,
+                      })}
                     </span>
                     {activity.ipAddress && (
                       <>

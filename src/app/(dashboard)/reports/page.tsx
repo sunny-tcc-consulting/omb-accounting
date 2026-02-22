@@ -871,7 +871,7 @@ export function ReportPageContent() {
             <FileText className="w-4 h-4 mr-2" />
             Export PDF
           </Button>
-          <Button onClick={() => handlePrint(selectedReport)}>
+          <Button onClick={() => handlePrint()}>
             <Printer className="w-4 h-4 mr-2" />
             Print
           </Button>
