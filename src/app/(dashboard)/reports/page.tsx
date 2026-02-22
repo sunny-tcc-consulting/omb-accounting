@@ -32,6 +32,7 @@ import {
   DateRangePicker,
   DatePicker,
 } from "@/components/reports/DateRangePicker";
+import { ErrorDisplay } from "@/components/reports/ErrorDisplay";
 import {
   Card,
   CardContent,
@@ -92,6 +93,22 @@ export function ReportPageContent() {
   const [glEndDate, setGlEndDate] = useState<string>(
     new Date().toISOString().split("T")[0],
   );
+
+  // Error handling state
+  const [error, setError] = useState<string | null>(null);
+
+  // Error handler wrapper for report generation
+  const handleError = (err: unknown, context: string) => {
+    const message =
+      err instanceof Error ? err.message : `Error generating ${context}`;
+    setError(message);
+    console.error(`Error in ${context}:`, err);
+  };
+
+  // Retry handler
+  const handleRetry = () => {
+    setError(null);
+  };
 
   // Generate reports
   const trialBalance = useMemo(
@@ -1055,6 +1072,13 @@ export function ReportPageContent() {
               </Table>
             </CardContent>
           </Card>
+
+          {/* Error Display */}
+          {error && (
+            <div className="mt-6">
+              <ErrorDisplay message={error} onRetry={handleRetry} />
+            </div>
+          )}
 
           {/* Trial Balance Comparison View */}
           {isComparisonEnabled &&
