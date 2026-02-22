@@ -192,6 +192,20 @@ export interface InvoiceFormData {
   notes?: string;
 }
 
+// Journal Entry types (Phase 4.6: Bank Reconciliation)
+export interface JournalEntry {
+  id: string;
+  date: Date;
+  description: string;
+  amount: number;
+  type: "debit" | "credit";
+  category?: string;
+  reference?: string;
+  status: "completed" | "pending";
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // ============================================
 // USER & ROLES TYPES (Phase 4)
 // ============================================
@@ -366,4 +380,51 @@ export interface TokenPayload {
   roleId: string;
   exp: number;
   iat: number;
+}
+
+// Bank Statement types (Phase 4.6: Bank Reconciliation)
+export interface BankAccount {
+  id: string;
+  name: string;
+  bankName: string;
+  accountNumber: string;
+  accountType: "checking" | "savings";
+  currency: string;
+  openingBalance: number;
+  balance: number;
+  isPrimary: boolean;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface BankStatement {
+  id: string;
+  bankAccountId: string;
+  statementNumber: string;
+  startDate: Date;
+  endDate: Date;
+  closingBalance: number;
+  currency: string;
+  status: "imported" | "reconciled";
+  importedAt: Date;
+  reconciledAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface BankTransaction {
+  id: string;
+  statementId: string;
+  transactionDate: Date;
+  description: string;
+  amount: number;
+  type: "debit" | "credit";
+  category?: string;
+  reference?: string;
+  status: "pending" | "matched";
+  matchedBookTransactionId: string | null;
+  matchedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
