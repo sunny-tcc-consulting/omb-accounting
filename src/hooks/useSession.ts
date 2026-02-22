@@ -5,9 +5,8 @@
 
 "use client";
 
-import { useEffect, useCallback, useRef, useMemo } from "react";
-import { useContext } from "react";
-import { UserContext } from "@/contexts/UserContext";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useUser } from "@/contexts/UserContext";
 import { logActivity } from "@/lib/activity-logger";
 
 interface SessionState {
@@ -32,7 +31,7 @@ const DEFAULT_CONFIG: SessionConfig = {
 };
 
 export function useSession(config: Partial<SessionConfig> = {}) {
-  const { currentUser, isAuthenticated } = useContext(UserContext);
+  const { currentUser, isAuthenticated } = useUser();
 
   // Memoize config to prevent unnecessary re-renders
   const mergedConfig = useMemo(

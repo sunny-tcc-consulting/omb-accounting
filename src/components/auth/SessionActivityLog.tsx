@@ -17,7 +17,7 @@ import {
   Globe,
   Monitor,
 } from "lucide-react";
-import { formatDistanceToNow } from "@/lib/utils";
+import { formatDistanceToNow } from "date-fns";
 
 interface SessionActivityLogProps {
   /** Maximum number of activities to show */

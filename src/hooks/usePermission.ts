@@ -5,8 +5,7 @@
 
 "use client";
 
-import { useContext } from "react";
-import { UserContext } from "@/contexts/UserContext";
+import { useUser } from "@/contexts/UserContext";
 import {
   Permission,
   PermissionAction,
@@ -20,7 +19,7 @@ interface UsePermissionReturn {
   canAll: (permissions: Permission[]) => boolean;
   canAny: (permissions: Permission[]) => boolean;
   userPermissions: Permission[];
-  currentUser: typeof import("@/types").User;
+  currentUser: typeof import("@/types").User | null;
 }
 
 /**
@@ -28,61 +27,32 @@ interface UsePermissionReturn {
  * @returns Permission checking functions
  *
  * @example
- * // Check if user can read invoices
  * const { can } = usePermission();
- * if (can('invoices', 'read')) {
- *   // Show invoice list
- * }
- *
- * @example
- * // Check if user has any of multiple permissions
- * const { canAny } = usePermission();
- * if (canAny(['invoices.read', 'customers.create'])) {
- *   // Show action button
- * }
- *
- * @example
- * // Check if user has all permissions
- * const { canAll } = usePermission();
- * if (canAll(['reports.read', 'reports.update'])) {
- *   // Show admin features
- * }
+ * if (can('invoices', 'create')) { ... }
  */
 export function usePermission(): UsePermissionReturn {
-  const { currentUser, users } = useContext(UserContext);
+  const { currentUser } = useUser();
 
-  if (!currentUser) {
-    return {
-      can: () => false,
-      canAll: () => false,
-      canAny: () => false,
-      hasPermission: () => false,
-      userPermissions: [],
-      currentUser: null,
+  const can = (resource: string, action?: string): boolean => {
+    if (!currentUser) return false;
+    const permission: Permission = {
+      resource,
+      action: (action as PermissionAction) || "read",
     };
-  }
-
-  const userPermissions =
-    users.find((u) => u.id === currentUser.id)?.permissions ||
-    currentUser.permissions ||
-    [];
-
-  const can = (
-    resource: PermissionResource,
-    action?: PermissionAction,
-  ): boolean => {
-    return hasPermission(userPermissions, resource, action);
+    return hasPermission(currentUser.permissions, permission);
   };
 
   const canAll = (permissions: Permission[]): boolean => {
-    return permissions.every((perm) =>
-      hasPermission(userPermissions, perm.resource, perm.action),
+    if (!currentUser) return false;
+    return permissions.every((permission) =>
+      hasPermission(currentUser.permissions, permission),
     );
   };
 
   const canAny = (permissions: Permission[]): boolean => {
-    return permissions.some((perm) =>
-      hasPermission(userPermissions, perm.resource, perm.action),
+    if (!currentUser) return false;
+    return permissions.some((permission) =>
+      hasPermission(currentUser.permissions, permission),
     );
   };
 
@@ -90,32 +60,46 @@ export function usePermission(): UsePermissionReturn {
     can,
     canAll,
     canAny,
-    userPermissions,
+    userPermissions: currentUser?.permissions || [],
     currentUser,
   };
 }
 
 /**
- * Hook to check permission level
- * @param level - Permission level to check
- * @returns True if user has at least this level
+ * Hook to check user permission level for a specific resource
+ * @param resource - The resource to check
+ * @returns The highest permission level for the resource
  */
-export function usePermissionLevel(level: PermissionLevel): boolean {
-  const { currentUser } = useContext(UserContext);
-  if (!currentUser) return false;
+export function usePermissionLevel(
+  resource: PermissionResource,
+): PermissionLevel {
+  const { currentUser } = useUser();
 
-  const levelOrder: PermissionLevel[] = [
-    "none",
-    "read",
-    "update",
-    "create",
-    "delete",
-    "admin",
-  ];
-  const userLevel = levelOrder.indexOf(currentUser.roleLevel || "read");
-  const targetLevel = levelOrder.indexOf(level);
+  if (!currentUser) return "none";
 
-  return userLevel >= targetLevel;
+  const resourcePermissions = currentUser.permissions.filter(
+    (p) => p.resource === resource,
+  );
+
+  if (!resourcePermissions.length) return "none";
+
+  const actionLevels: Record<PermissionAction, PermissionLevel> = {
+    none: "none",
+    read: "read",
+    create: "create",
+    update: "write",
+    delete: "delete",
+  };
+
+  // Find the highest level permission
+  const levels = resourcePermissions.map(
+    (p) => actionLevels[p.action] || "none",
+  );
+  if (levels.includes("delete")) return "delete";
+  if (levels.includes("write")) return "write";
+  if (levels.includes("create")) return "create";
+  if (levels.includes("read")) return "read";
+  return "none";
 }
 
 export default usePermission;
