@@ -1,13 +1,13 @@
 // Transaction types
 export interface Transaction {
   id: string;
-  type: 'income' | 'expense';
+  type: "income" | "expense";
   date: Date;
   amount: number;
   category: string;
   description: string;
   reference?: string;
-  status: 'completed' | 'pending' | 'cancelled';
+  status: "completed" | "pending" | "cancelled";
   attachments?: string[];
 }
 
@@ -15,7 +15,7 @@ export interface Transaction {
 export interface Category {
   id: string;
   name: string;
-  type: 'income' | 'expense';
+  type: "income" | "expense";
   color: string;
   icon: string;
   isDefault: boolean;
@@ -23,7 +23,7 @@ export interface Category {
 
 // Transaction filters
 export interface TransactionFilters {
-  type?: 'income' | 'expense' | 'all';
+  type?: "income" | "expense" | "all";
   category?: string;
   dateRange?: {
     start: Date;
@@ -109,7 +109,7 @@ export interface Quotation {
   discount?: number;
   total: number;
   validityPeriod: Date;
-  status: 'draft' | 'sent' | 'accepted' | 'rejected';
+  status: "draft" | "sent" | "accepted" | "rejected";
   issuedDate: Date;
   notes?: string;
   termsAndConditions?: string;
@@ -151,7 +151,7 @@ export interface Invoice {
   total: number;
   paymentTerms: string;
   dueDate: Date;
-  status: 'draft' | 'pending' | 'partial' | 'paid' | 'overdue';
+  status: "draft" | "pending" | "partial" | "paid" | "overdue";
   issuedDate: Date;
   paidDate?: Date;
   amountPaid?: number;
@@ -190,4 +190,169 @@ export interface InvoiceFormData {
   dueDate: Date;
   issuedDate: Date;
   notes?: string;
+}
+
+// ============================================
+// USER & ROLES TYPES (Phase 4)
+// ============================================
+
+// User status
+export type UserStatus = "active" | "inactive" | "locked";
+
+// User preferences
+export interface UserPreferences {
+  theme: "light" | "dark" | "system";
+  language: string;
+  timezone: string;
+  dateFormat: string;
+  currency: string;
+  notificationEmail: boolean;
+  notificationInApp: boolean;
+  emailDigest: "none" | "daily" | "weekly";
+}
+
+// User interface
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  roleId: string;
+  roleName?: string;
+  status: UserStatus;
+  avatar?: string;
+  phone?: string;
+  lastLoginAt?: Date;
+  loginCount: number;
+  failedLoginAttempts: number;
+  passwordHash: string;
+  passwordChangedAt: Date;
+  twoFactorEnabled: boolean;
+  preferences: UserPreferences;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// User form data
+export interface UserFormData {
+  email: string;
+  name: string;
+  roleId: string;
+  phone?: string;
+  status?: UserStatus;
+}
+
+// User filters
+export interface UserFilters {
+  search?: string;
+  roleId?: string;
+  status?: UserStatus;
+}
+
+// User session
+export interface UserSession {
+  id: string;
+  userId: string;
+  token: string;
+  ipAddress: string;
+  userAgent: string;
+  createdAt: Date;
+  expiresAt: Date;
+  lastActivityAt: Date;
+  isActive: boolean;
+}
+
+// Role interface
+export interface Role {
+  id: string;
+  name: string;
+  description: string;
+  isSystem: boolean;
+  isActive: boolean;
+  permissions: Permission[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Role form data
+export interface RoleFormData {
+  name: string;
+  description: string;
+  permissionIds: string[];
+  isActive?: boolean;
+}
+
+// Permission types
+export type PermissionAction = "create" | "read" | "update" | "delete";
+export type PermissionResource =
+  | "dashboard"
+  | "customers"
+  | "quotations"
+  | "invoices"
+  | "reports"
+  | "settings"
+  | "users"
+  | "roles"
+  | "audit";
+
+// Permission interface
+export interface Permission {
+  id: string;
+  resource: PermissionResource;
+  action: PermissionAction;
+  description: string;
+  name: string;
+}
+
+// Role permission assignment
+export interface RolePermission {
+  roleId: string;
+  permissionId: string;
+  grantedAt: Date;
+  grantedBy: string;
+}
+
+// User activity log
+export interface UserActivity {
+  id: string;
+  userId: string;
+  userName?: string;
+  action: string;
+  resource: string;
+  resourceId?: string;
+  details?: Record<string, unknown>;
+  ipAddress: string;
+  userAgent: string;
+  createdAt: Date;
+}
+
+// Activity filters
+export interface ActivityFilters {
+  userId?: string;
+  action?: string;
+  resource?: string;
+  dateRange?: {
+    start: Date;
+    end: Date;
+  };
+  limit?: number;
+}
+
+// Authentication types
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  user: User;
+  token: string;
+  expiresAt: Date;
+}
+
+export interface TokenPayload {
+  userId: string;
+  email: string;
+  roleId: string;
+  exp: number;
+  iat: number;
 }
