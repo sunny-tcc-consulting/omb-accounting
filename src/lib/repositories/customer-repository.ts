@@ -23,7 +23,7 @@ export interface UpdateCustomerInput {
 }
 
 export class CustomerRepository {
-  constructor(private db: SQLiteDatabase) {}
+  constructor(private db: unknown) {}
 
   /**
    * Create a new customer
@@ -60,55 +60,57 @@ export class CustomerRepository {
    * Get customer by ID
    */
   findById(id: string): Customer | undefined {
-    return this.db.get<Customer>("SELECT * FROM customers WHERE id = ?", [id]);
+    return this.db.get("SELECT * FROM customers WHERE id = ?", [id]) as
+      | Customer
+      | undefined;
   }
 
   /**
    * Get customer by email
    */
   findByEmail(email: string): Customer | undefined {
-    return this.db.get<Customer>("SELECT * FROM customers WHERE email = ?", [
-      email,
-    ]);
+    return this.db.get("SELECT * FROM customers WHERE email = ?", [email]) as
+      | Customer
+      | undefined;
   }
 
   /**
    * Get all customers
    */
   findAll(): Customer[] {
-    return this.db.query<Customer>(
+    return this.db.query(
       "SELECT * FROM customers ORDER BY created_at DESC",
-    );
+    ) as Customer[];
   }
 
   /**
    * Get customers by name (search)
    */
   searchByName(name: string): Customer[] {
-    return this.db.query<Customer>(
+    return this.db.query(
       "SELECT * FROM customers WHERE name LIKE ? ORDER BY created_at DESC",
       [`%${name}%`],
-    );
+    ) as Customer[];
   }
 
   /**
    * Get customers by email (search)
    */
   searchByEmail(email: string): Customer[] {
-    return this.db.query<Customer>(
+    return this.db.query(
       "SELECT * FROM customers WHERE email LIKE ? ORDER BY created_at DESC",
       [`%${email}%`],
-    );
+    ) as Customer[];
   }
 
   /**
    * Get customers by phone (search)
    */
   searchByPhone(phone: string): Customer[] {
-    return this.db.query<Customer>(
+    return this.db.query(
       "SELECT * FROM customers WHERE phone LIKE ? ORDER BY created_at DESC",
       [`%${phone}%`],
-    );
+    ) as Customer[];
   }
 
   /**
@@ -164,10 +166,9 @@ export class CustomerRepository {
    * Check if customer exists
    */
   exists(id: string): boolean {
-    const result = this.db.get<Record<string, unknown>>(
-      "SELECT 1 FROM customers WHERE id = ?",
-      [id],
-    );
+    const result = this.db.get("SELECT 1 FROM customers WHERE id = ?", [
+      id,
+    ]) as Record<string, unknown>;
     return !!result;
   }
 
@@ -175,9 +176,9 @@ export class CustomerRepository {
    * Get customer count
    */
   count(): number {
-    const result = this.db.get<Record<string, unknown>>(
+    const result = this.db.get(
       "SELECT COUNT(*) as count FROM customers",
-    );
+    ) as Record<string, unknown>;
     return (result as Record<string, unknown>).count as number;
   }
 }

@@ -22,7 +22,7 @@ export interface UpdateUserInput {
 }
 
 export class UserRepository {
-  constructor(private db: SQLiteDatabase) {}
+  constructor(private db: unknown) {}
 
   /**
    * Create a new user
@@ -59,21 +59,27 @@ export class UserRepository {
    * Get user by ID
    */
   findById(id: string): User | undefined {
-    return this.db.get<User>("SELECT * FROM users WHERE id = ?", [id]);
+    return this.db.get("SELECT * FROM users WHERE id = ?", [id]) as
+      | User
+      | undefined;
   }
 
   /**
    * Get user by email
    */
   findByEmail(email: string): User | undefined {
-    return this.db.get<User>("SELECT * FROM users WHERE email = ?", [email]);
+    return this.db.get("SELECT * FROM users WHERE email = ?", [email]) as
+      | User
+      | undefined;
   }
 
   /**
    * Get all users
    */
   findAll(): User[] {
-    return this.db.query<User>("SELECT * FROM users ORDER BY created_at DESC");
+    return this.db.query(
+      "SELECT * FROM users ORDER BY created_at DESC",
+    ) as User[];
   }
 
   /**
@@ -122,10 +128,9 @@ export class UserRepository {
    * Check if user exists
    */
   exists(id: string): boolean {
-    const result = this.db.get<Record<string, unknown>>(
-      "SELECT 1 FROM users WHERE id = ?",
-      [id],
-    );
+    const result = this.db.get("SELECT 1 FROM users WHERE id = ?", [
+      id,
+    ]) as Record<string, unknown>;
     return !!result;
   }
 }

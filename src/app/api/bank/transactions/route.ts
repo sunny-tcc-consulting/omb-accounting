@@ -3,11 +3,11 @@
  * Get all bank transactions
  */
 import { NextRequest, NextResponse } from "next/server";
-import { dbManager } from "@/lib/database/database";
+import { dbManager } from "@/lib/database/database-server";
 import { BankTransactionService } from "@/lib/services/bank-transaction-service";
 import { BankTransactionRepository } from "@/lib/repositories/bank-transaction-repository";
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const db = dbManager.getDatabase();
     const transactionService = new BankTransactionService(

@@ -23,7 +23,7 @@ export interface UpdateQuotationInput {
 }
 
 export class QuotationRepository {
-  constructor(private db: SQLiteDatabase) {}
+  constructor(private db: unknown) {}
 
   /**
    * Create a new quotation
@@ -60,48 +60,47 @@ export class QuotationRepository {
    * Get quotation by ID
    */
   findById(id: string): Quotation | undefined {
-    return this.db.get<Quotation>("SELECT * FROM quotations WHERE id = ?", [
-      id,
-    ]);
+    return this.db.get("SELECT * FROM quotations WHERE id = ?", [id]) as
+      | Quotation
+      | undefined;
   }
 
   /**
    * Get quotation by number
    */
   findByNumber(quotation_number: string): Quotation | undefined {
-    return this.db.get<Quotation>(
-      "SELECT * FROM quotations WHERE quotation_number = ?",
-      [quotation_number],
-    );
+    return this.db.get("SELECT * FROM quotations WHERE quotation_number = ?", [
+      quotation_number,
+    ]) as Quotation | undefined;
   }
 
   /**
    * Get all quotations
    */
   findAll(): Quotation[] {
-    return this.db.query<Quotation>(
+    return this.db.query(
       "SELECT * FROM quotations ORDER BY created_at DESC",
-    );
+    ) as Quotation[];
   }
 
   /**
    * Get quotations by customer
    */
   findByCustomer(customer_id: string): Quotation[] {
-    return this.db.query<Quotation>(
+    return this.db.query(
       "SELECT * FROM quotations WHERE customer_id = ? ORDER BY created_at DESC",
       [customer_id],
-    );
+    ) as Quotation[];
   }
 
   /**
    * Get quotations by status
    */
   findByStatus(status: string): Quotation[] {
-    return this.db.query<Quotation>(
+    return this.db.query(
       "SELECT * FROM quotations WHERE status = ? ORDER BY created_at DESC",
       [status],
-    );
+    ) as Quotation[];
   }
 
   /**
@@ -157,10 +156,9 @@ export class QuotationRepository {
    * Check if quotation exists
    */
   exists(id: string): boolean {
-    const result = this.db.get<Record<string, unknown>>(
-      "SELECT 1 FROM quotations WHERE id = ?",
-      [id],
-    );
+    const result = this.db.get("SELECT 1 FROM quotations WHERE id = ?", [
+      id,
+    ]) as Record<string, unknown>;
     return !!result;
   }
 
@@ -168,9 +166,9 @@ export class QuotationRepository {
    * Get quotation count
    */
   count(): number {
-    const result = this.db.get<Record<string, unknown>>(
+    const result = this.db.get(
       "SELECT COUNT(*) as count FROM quotations",
-    );
+    ) as Record<string, unknown>;
     return (result as Record<string, unknown>).count as number;
   }
 }

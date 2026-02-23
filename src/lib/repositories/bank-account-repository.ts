@@ -25,7 +25,7 @@ export interface UpdateBankAccountInput {
 }
 
 export class BankAccountRepository {
-  constructor(private db: SQLiteDatabase) {}
+  constructor(private db: unknown) {}
 
   /**
    * Create a new bank account
@@ -64,39 +64,37 @@ export class BankAccountRepository {
    * Get bank account by ID
    */
   findById(id: string): BankAccount | undefined {
-    return this.db.get<BankAccount>(
-      "SELECT * FROM bank_accounts WHERE id = ?",
-      [id],
-    );
+    return this.db.get("SELECT * FROM bank_accounts WHERE id = ?", [id]) as
+      | BankAccount
+      | undefined;
   }
 
   /**
    * Get bank account by account number
    */
   findByAccountNumber(account_number: string): BankAccount | undefined {
-    return this.db.get<BankAccount>(
-      "SELECT * FROM bank_accounts WHERE account_number = ?",
-      [account_number],
-    );
+    return this.db.get("SELECT * FROM bank_accounts WHERE account_number = ?", [
+      account_number,
+    ]) as BankAccount | undefined;
   }
 
   /**
    * Get all bank accounts
    */
   findAll(): BankAccount[] {
-    return this.db.query<BankAccount>(
+    return this.db.query(
       "SELECT * FROM bank_accounts ORDER BY created_at DESC",
-    );
+    ) as BankAccount[];
   }
 
   /**
    * Get bank account by name
    */
   findByName(name: string): BankAccount[] {
-    return this.db.query<BankAccount>(
+    return this.db.query(
       "SELECT * FROM bank_accounts WHERE name LIKE ? ORDER BY created_at DESC",
       [`%${name}%`],
-    );
+    ) as BankAccount[];
   }
 
   /**
@@ -164,10 +162,9 @@ export class BankAccountRepository {
    * Check if bank account exists
    */
   exists(id: string): boolean {
-    const result = this.db.get<Record<string, unknown>>(
-      "SELECT 1 FROM bank_accounts WHERE id = ?",
-      [id],
-    );
+    const result = this.db.get("SELECT 1 FROM bank_accounts WHERE id = ?", [
+      id,
+    ]) as Record<string, unknown>;
     return !!result;
   }
 
@@ -175,9 +172,9 @@ export class BankAccountRepository {
    * Get bank account count
    */
   count(): number {
-    const result = this.db.get<Record<string, unknown>>(
+    const result = this.db.get(
       "SELECT COUNT(*) as count FROM bank_accounts",
-    );
+    ) as Record<string, unknown>;
     return (result as Record<string, unknown>).count as number;
   }
 }

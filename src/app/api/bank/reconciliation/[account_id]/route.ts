@@ -2,8 +2,7 @@
  * GET /api/bank/reconciliation/[account_id]
  * Get reconciliation history for a bank account
  */
-import { NextRequest, NextResponse } from "next/server";
-import { dbManager } from "@/lib/database/database";
+import { NextResponse } from "next/server";
 import { getReconciliationHistory } from "@/lib/services/bank-reconciliation-service";
 
 export async function GET(

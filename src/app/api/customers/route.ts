@@ -2,10 +2,11 @@
  * GET /api/customers
  * Get all customers
  */
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { CustomerService } from "@/lib/services/customer-service";
 import { CustomerRepository } from "@/lib/repositories/customer-repository";
-import { dbManager } from "@/lib/database/database";
+import { dbManager } from "@/lib/database/database-server";
+import { createCustomerSchema } from "@/lib/validations/customer.validation";
 
 export async function GET() {
   try {

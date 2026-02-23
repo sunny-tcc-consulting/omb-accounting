@@ -69,7 +69,11 @@ export class DatabaseManagerImpl implements DatabaseInterface {
   ): { lastInsertRowid: number; changes: number } {
     const db = this.getDatabase();
     const stmt = db.prepare(sql);
-    return stmt.run(...params);
+    const result = stmt.run(...params);
+    return {
+      lastInsertRowid: Number(result.lastInsertRowid),
+      changes: result.changes,
+    };
   }
 
   /**

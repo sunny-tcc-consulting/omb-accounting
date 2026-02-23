@@ -27,7 +27,7 @@ export interface UpdateBankStatementInput {
 }
 
 export class BankStatementRepository {
-  constructor(private db: SQLiteDatabase) {}
+  constructor(private db: unknown) {}
 
   /**
    * Create a new bank statement
@@ -68,69 +68,68 @@ export class BankStatementRepository {
    * Get bank statement by ID
    */
   findById(id: string): BankStatement | undefined {
-    return this.db.get<BankStatement>(
-      "SELECT * FROM bank_statements WHERE id = ?",
-      [id],
-    );
+    return this.db.get("SELECT * FROM bank_statements WHERE id = ?", [id]) as
+      | BankStatement
+      | undefined;
   }
 
   /**
    * Get bank statement by number
    */
   findByNumber(statement_number: string): BankStatement | undefined {
-    return this.db.get<BankStatement>(
+    return this.db.get(
       "SELECT * FROM bank_statements WHERE statement_number = ?",
       [statement_number],
-    );
+    ) as BankStatement | undefined;
   }
 
   /**
    * Get all bank statements
    */
   findAll(): BankStatement[] {
-    return this.db.query<BankStatement>(
+    return this.db.query(
       "SELECT * FROM bank_statements ORDER BY statement_date DESC",
-    );
+    ) as BankStatement[];
   }
 
   /**
    * Get bank statements by bank account
    */
   findByBankAccount(bank_account_id: string): BankStatement[] {
-    return this.db.query<BankStatement>(
+    return this.db.query(
       "SELECT * FROM bank_statements WHERE bank_account_id = ? ORDER BY statement_date DESC",
       [bank_account_id],
-    );
+    ) as BankStatement[];
   }
 
   /**
    * Get bank statements by status
    */
   findByStatus(status: string): BankStatement[] {
-    return this.db.query<BankStatement>(
+    return this.db.query(
       "SELECT * FROM bank_statements WHERE status = ? ORDER BY statement_date DESC",
       [status],
-    );
+    ) as BankStatement[];
   }
 
   /**
    * Get bank statements by date range
    */
   findByDateRange(startDate: number, endDate: number): BankStatement[] {
-    return this.db.query<BankStatement>(
+    return this.db.query(
       "SELECT * FROM bank_statements WHERE statement_date >= ? AND statement_date <= ? ORDER BY statement_date DESC",
       [startDate, endDate],
-    );
+    ) as BankStatement[];
   }
 
   /**
    * Get bank statements by date
    */
   findByDate(statement_date: number): BankStatement[] {
-    return this.db.query<BankStatement>(
+    return this.db.query(
       "SELECT * FROM bank_statements WHERE statement_date = ? ORDER BY statement_date DESC",
       [statement_date],
-    );
+    ) as BankStatement[];
   }
 
   /**
@@ -199,10 +198,9 @@ export class BankStatementRepository {
    * Check if bank statement exists
    */
   exists(id: string): boolean {
-    const result = this.db.get<Record<string, unknown>>(
-      "SELECT 1 FROM bank_statements WHERE id = ?",
-      [id],
-    );
+    const result = this.db.get("SELECT 1 FROM bank_statements WHERE id = ?", [
+      id,
+    ]) as Record<string, unknown>;
     return !!result;
   }
 
@@ -210,9 +208,9 @@ export class BankStatementRepository {
    * Get bank statement count
    */
   count(): number {
-    const result = this.db.get<Record<string, unknown>>(
+    const result = this.db.get(
       "SELECT COUNT(*) as count FROM bank_statements",
-    );
+    ) as Record<string, unknown>;
     return (result as Record<string, unknown>).count as number;
   }
 }

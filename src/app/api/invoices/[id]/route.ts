@@ -5,7 +5,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { InvoiceService } from "@/lib/services/invoice-service";
 import { InvoiceRepository } from "@/lib/repositories/invoice-repository";
-import { dbManager } from "@/lib/database/database";
+import { dbManager } from "@/lib/database/database-server";
 import { updateInvoiceSchema } from "@/lib/validations/invoice.validation";
 
 export async function GET(

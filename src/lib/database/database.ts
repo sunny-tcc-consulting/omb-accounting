@@ -8,6 +8,8 @@
 
 import { DatabaseManagerStub } from "./database-stub";
 
+// Use unknown to avoid importing better-sqlite3 in client components
+// Server-side code should cast this to the appropriate type
 export type DatabaseConnection = unknown;
 
 export interface DatabaseConfig {

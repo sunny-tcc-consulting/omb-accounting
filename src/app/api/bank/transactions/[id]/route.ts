@@ -5,7 +5,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { BankTransactionService } from "@/lib/services/bank-transaction-service";
 import { BankTransactionRepository } from "@/lib/repositories/bank-transaction-repository";
-import { dbManager } from "@/lib/database/database";
+import { dbManager } from "@/lib/database/database-server";
 import { updateBankTransactionSchema } from "@/lib/validations/bank.validation";
 
 export async function GET(

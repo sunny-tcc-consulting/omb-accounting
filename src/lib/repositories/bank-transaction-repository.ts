@@ -29,7 +29,7 @@ export interface UpdateBankTransactionInput {
 }
 
 export class BankTransactionRepository {
-  constructor(private db: SQLiteDatabase) {}
+  constructor(private db: unknown) {}
 
   /**
    * Create a new bank transaction
@@ -70,48 +70,47 @@ export class BankTransactionRepository {
    * Get bank transaction by ID
    */
   findById(id: string): BankTransaction | undefined {
-    return this.db.get<BankTransaction>(
-      "SELECT * FROM bank_transactions WHERE id = ?",
-      [id],
-    );
+    return this.db.get("SELECT * FROM bank_transactions WHERE id = ?", [id]) as
+      | BankTransaction
+      | undefined;
   }
 
   /**
    * Get all bank transactions
    */
   findAll(): BankTransaction[] {
-    return this.db.query<BankTransaction>(
+    return this.db.query(
       "SELECT * FROM bank_transactions ORDER BY transaction_date DESC",
-    );
+    ) as BankTransaction[];
   }
 
   /**
    * Get bank transactions by statement
    */
   findByStatement(statement_id: string): BankTransaction[] {
-    return this.db.query<BankTransaction>(
+    return this.db.query(
       "SELECT * FROM bank_transactions WHERE statement_id = ? ORDER BY transaction_date ASC",
       [statement_id],
-    );
+    ) as BankTransaction[];
   }
 
   /**
    * Get bank transactions by status
    */
   findByStatus(status: string): BankTransaction[] {
-    return this.db.query<BankTransaction>(
+    return this.db.query(
       "SELECT * FROM bank_transactions WHERE status = ? ORDER BY transaction_date DESC",
       [status],
-    );
+    ) as BankTransaction[];
   }
 
   /**
    * Get unmatched bank transactions
    */
   findUnmatched(): BankTransaction[] {
-    return this.db.query<BankTransaction>(
+    return this.db.query(
       "SELECT * FROM bank_transactions WHERE status = 'unmatched' ORDER BY transaction_date DESC",
-    );
+    ) as BankTransaction[];
   }
 
   /**
@@ -184,10 +183,9 @@ export class BankTransactionRepository {
    * Check if bank transaction exists
    */
   exists(id: string): boolean {
-    const result = this.db.get<Record<string, unknown>>(
-      "SELECT 1 FROM bank_transactions WHERE id = ?",
-      [id],
-    );
+    const result = this.db.get("SELECT 1 FROM bank_transactions WHERE id = ?", [
+      id,
+    ]) as Record<string, unknown>;
     return !!result;
   }
 
@@ -195,9 +193,9 @@ export class BankTransactionRepository {
    * Get bank transaction count
    */
   count(): number {
-    const result = this.db.get<Record<string, unknown>>(
+    const result = this.db.get(
       "SELECT COUNT(*) as count FROM bank_transactions",
-    );
+    ) as Record<string, unknown>;
     return (result as Record<string, unknown>).count as number;
   }
 }

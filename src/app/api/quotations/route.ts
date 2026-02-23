@@ -2,10 +2,11 @@
  * GET /api/quotations
  * Get all quotations
  */
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { QuotationService } from "@/lib/services/quotation-service";
 import { QuotationRepository } from "@/lib/repositories/quotation-repository";
-import { dbManager } from "@/lib/database/database";
+import { dbManager } from "@/lib/database/database-server";
+import { createQuotationSchema } from "@/lib/validations/quotation.validation";
 
 export async function GET() {
   try {

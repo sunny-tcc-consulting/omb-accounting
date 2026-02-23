@@ -14,7 +14,7 @@ export interface CreateSessionInput {
 }
 
 export class SessionRepository {
-  constructor(private db: SQLiteDatabase) {}
+  constructor(private db: unknown) {}
 
   /**
    * Create a new session
@@ -46,19 +46,19 @@ export class SessionRepository {
    * Get session by token
    */
   findByToken(token: string): Session | undefined {
-    return this.db.get<Session>("SELECT * FROM sessions WHERE token = ?", [
-      token,
-    ]);
+    return this.db.get("SELECT * FROM sessions WHERE token = ?", [token]) as
+      | Session
+      | undefined;
   }
 
   /**
    * Get all sessions for a user
    */
   findByUserId(user_id: string): Session[] {
-    return this.db.query<Session>(
+    return this.db.query(
       "SELECT * FROM sessions WHERE user_id = ? ORDER BY created_at DESC",
       [user_id],
-    );
+    ) as Session[];
   }
 
   /**

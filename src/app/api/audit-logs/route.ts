@@ -5,7 +5,7 @@
 import { NextResponse } from "next/server";
 import { AuditLogService } from "@/lib/services/audit-log-service";
 import { AuditLogRepository } from "@/lib/repositories/audit-log-repository";
-import { dbManager } from "@/lib/database/database";
+import { dbManager } from "@/lib/database/database-server";
 
 export async function GET() {
   try {

@@ -5,7 +5,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { QuotationService } from "@/lib/services/quotation-service";
 import { QuotationRepository } from "@/lib/repositories/quotation-repository";
-import { dbManager } from "@/lib/database/database";
+import { dbManager } from "@/lib/database/database-server";
 import { updateQuotationSchema } from "@/lib/validations/quotation.validation";
 
 export async function GET(

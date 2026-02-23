@@ -333,12 +333,19 @@ export async function seedDatabase(config?: {
 
     const seedData = generateSeedData();
 
+    // Get typed database connection
+    const connection = db.getConnection() as unknown as {
+      prepare(sql: string): {
+        run(...params: unknown[]): void;
+        get<T = unknown>(...params: unknown[]): T;
+        all<T = unknown>(...params: unknown[]): T[];
+      };
+    };
+
     // Insert users
-    const insertUser = db
-      .getConnection()
-      .prepare(
-        "INSERT INTO users (id, name, email, password_hash, role, status, login_count, failed_login_attempts, two_factor_enabled, preferences, permissions, created_at, updated_at, last_login_at, password_changed_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      );
+    const insertUser = connection.prepare(
+      "INSERT INTO users (id, name, email, password_hash, role, status, login_count, failed_login_attempts, two_factor_enabled, preferences, permissions, created_at, updated_at, last_login_at, password_changed_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    );
 
     seedData.users.forEach((user) => {
       insertUser.run(
@@ -362,11 +369,9 @@ export async function seedDatabase(config?: {
     console.log(`Inserted ${seedData.users.length} users`);
 
     // Insert customers
-    const insertCustomer = db
-      .getConnection()
-      .prepare(
-        "INSERT INTO customers (id, name, email, phone, address, company, tax_id, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      );
+    const insertCustomer = connection.prepare(
+      "INSERT INTO customers (id, name, email, phone, address, company, tax_id, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    );
 
     seedData.customers.forEach((customer) => {
       insertCustomer.run(
@@ -385,11 +390,9 @@ export async function seedDatabase(config?: {
     console.log(`Inserted ${seedData.customers.length} customers`);
 
     // Insert quotations
-    const insertQuotation = db
-      .getConnection()
-      .prepare(
-        "INSERT INTO quotations (id, quotation_number, customer_id, customer_name, customer_email, items, currency, subtotal, tax, discount, total, validity_period, status, issued_date, notes, terms_and_conditions, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      );
+    const insertQuotation = connection.prepare(
+      "INSERT INTO quotations (id, quotation_number, customer_id, customer_name, customer_email, items, currency, subtotal, tax, discount, total, validity_period, status, issued_date, notes, terms_and_conditions, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    );
 
     seedData.quotations.forEach((quotation) => {
       insertQuotation.run(
@@ -416,11 +419,9 @@ export async function seedDatabase(config?: {
     console.log(`Inserted ${seedData.quotations.length} quotations`);
 
     // Insert invoices
-    const insertInvoice = db
-      .getConnection()
-      .prepare(
-        "INSERT INTO invoices (id, invoice_number, customer_id, customer_name, customer_email, items, currency, subtotal, tax, discount, total, payment_terms, due_date, status, issued_date, paid_date, amount_paid, amount_remaining, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      );
+    const insertInvoice = connection.prepare(
+      "INSERT INTO invoices (id, invoice_number, customer_id, customer_name, customer_email, items, currency, subtotal, tax, discount, total, payment_terms, due_date, status, issued_date, paid_date, amount_paid, amount_remaining, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    );
 
     seedData.invoices.forEach((invoice) => {
       insertInvoice.run(
@@ -450,11 +451,9 @@ export async function seedDatabase(config?: {
     console.log(`Inserted ${seedData.invoices.length} invoices`);
 
     // Insert bank accounts
-    const insertBankAccount = db
-      .getConnection()
-      .prepare(
-        "INSERT INTO bank_accounts (id, name, bank_name, account_number, account_type, currency, opening_balance, balance, is_primary, is_active, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      );
+    const insertBankAccount = connection.prepare(
+      "INSERT INTO bank_accounts (id, name, bank_name, account_number, account_type, currency, opening_balance, balance, is_primary, is_active, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    );
 
     seedData.bank_accounts.forEach((account) => {
       insertBankAccount.run(
@@ -475,11 +474,9 @@ export async function seedDatabase(config?: {
     console.log(`Inserted ${seedData.bank_accounts.length} bank accounts`);
 
     // Insert bank statements
-    const insertBankStatement = db
-      .getConnection()
-      .prepare(
-        "INSERT INTO bank_statements (id, bank_account_id, statement_number, start_date, end_date, closing_balance, currency, status, imported_at, reconciled_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      );
+    const insertBankStatement = connection.prepare(
+      "INSERT INTO bank_statements (id, bank_account_id, statement_number, start_date, end_date, closing_balance, currency, status, imported_at, reconciled_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    );
 
     seedData.bank_statements.forEach((statement) => {
       insertBankStatement.run(
@@ -500,11 +497,9 @@ export async function seedDatabase(config?: {
     console.log(`Inserted ${seedData.bank_statements.length} bank statements`);
 
     // Insert bank transactions
-    const insertBankTransaction = db
-      .getConnection()
-      .prepare(
-        "INSERT INTO bank_transactions (id, statement_id, transaction_date, description, amount, type, category, reference, status, matched_book_transaction_id, matched_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      );
+    const insertBankTransaction = connection.prepare(
+      "INSERT INTO bank_transactions (id, statement_id, transaction_date, description, amount, type, category, reference, status, matched_book_transaction_id, matched_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    );
 
     seedData.bank_transactions.forEach((transaction) => {
       insertBankTransaction.run(
@@ -540,8 +535,9 @@ export async function seedDatabase(config?: {
  * Check if database has been seeded
  */
 export function isDatabaseSeeded(db: SQLiteDatabase): boolean {
-  const result = db
-    .getConnection()
-    .get("SELECT COUNT(*) as count FROM users") as { count: number };
+  const dbConn = db.getConnection();
+  const result = dbConn.get<{ count: number }>(
+    "SELECT COUNT(*) as count FROM users",
+  );
   return result.count > 0;
 }

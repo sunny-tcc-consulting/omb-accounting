@@ -29,7 +29,7 @@ export interface UpdateInvoiceInput {
 }
 
 export class InvoiceRepository {
-  constructor(private db: SQLiteDatabase) {}
+  constructor(private db: unknown) {}
 
   /**
    * Create a new invoice
@@ -72,56 +72,57 @@ export class InvoiceRepository {
    * Get invoice by ID
    */
   findById(id: string): Invoice | undefined {
-    return this.db.get<Invoice>("SELECT * FROM invoices WHERE id = ?", [id]);
+    return this.db.get("SELECT * FROM invoices WHERE id = ?", [id]) as
+      | Invoice
+      | undefined;
   }
 
   /**
    * Get invoice by number
    */
   findByNumber(invoice_number: string): Invoice | undefined {
-    return this.db.get<Invoice>(
-      "SELECT * FROM invoices WHERE invoice_number = ?",
-      [invoice_number],
-    );
+    return this.db.get("SELECT * FROM invoices WHERE invoice_number = ?", [
+      invoice_number,
+    ]) as Invoice | undefined;
   }
 
   /**
    * Get all invoices
    */
   findAll(): Invoice[] {
-    return this.db.query<Invoice>(
+    return this.db.query(
       "SELECT * FROM invoices ORDER BY created_at DESC",
-    );
+    ) as Invoice[];
   }
 
   /**
    * Get invoices by customer
    */
   findByCustomer(customer_id: string): Invoice[] {
-    return this.db.query<Invoice>(
+    return this.db.query(
       "SELECT * FROM invoices WHERE customer_id = ? ORDER BY created_at DESC",
       [customer_id],
-    );
+    ) as Invoice[];
   }
 
   /**
    * Get invoices by status
    */
   findByStatus(status: string): Invoice[] {
-    return this.db.query<Invoice>(
+    return this.db.query(
       "SELECT * FROM invoices WHERE status = ? ORDER BY created_at DESC",
       [status],
-    );
+    ) as Invoice[];
   }
 
   /**
    * Get invoices by quotation
    */
   findByQuotation(quotation_id: string): Invoice[] {
-    return this.db.query<Invoice>(
+    return this.db.query(
       "SELECT * FROM invoices WHERE quotation_id = ? ORDER BY created_at DESC",
       [quotation_id],
-    );
+    ) as Invoice[];
   }
 
   /**
@@ -189,10 +190,9 @@ export class InvoiceRepository {
    * Check if invoice exists
    */
   exists(id: string): boolean {
-    const result = this.db.get<Record<string, unknown>>(
-      "SELECT 1 FROM invoices WHERE id = ?",
-      [id],
-    );
+    const result = this.db.get("SELECT 1 FROM invoices WHERE id = ?", [
+      id,
+    ]) as Record<string, unknown>;
     return !!result;
   }
 
@@ -200,9 +200,9 @@ export class InvoiceRepository {
    * Get invoice count
    */
   count(): number {
-    const result = this.db.get<Record<string, unknown>>(
+    const result = this.db.get(
       "SELECT COUNT(*) as count FROM invoices",
-    );
+    ) as Record<string, unknown>;
     return (result as Record<string, unknown>).count as number;
   }
 }

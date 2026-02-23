@@ -84,6 +84,7 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
   } = useForm<QuotationFormData>(
     {
       resolver: zodResolver(quotationSchema),
+      mode: "onBlur", // Only validate on blur/submit
       defaultValues: {
         items: [
           {
@@ -110,6 +111,12 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
     setIsSubmitting(true);
     try {
       const customers = getFilteredCustomers();
+
+      if (customers.length === 0) {
+        toast.error("No customers available. Please create a customer first.");
+        return;
+      }
+
       const customer = customers.find((c) => c.id === data.customerId);
 
       if (!customer) {
@@ -228,12 +235,18 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
             <SelectValue placeholder="Please select a customer" />
           </SelectTrigger>
           <SelectContent>
-            {getFilteredCustomers().map((customer) => (
-              <SelectItem key={customer.id} value={customer.id}>
-                {customer.name}
-                {customer.company && ` - ${customer.company}`}
-              </SelectItem>
-            ))}
+            {getFilteredCustomers().length > 0 ? (
+              getFilteredCustomers().map((customer) => (
+                <SelectItem key={customer.id} value={customer.id}>
+                  {customer.name}
+                  {customer.company && ` - ${customer.company}`}
+                </SelectItem>
+              ))
+            ) : (
+              <div className="p-4 text-sm text-gray-500">
+                No customers available. Please create a customer first.
+              </div>
+            )}
           </SelectContent>
         </Select>
         {errors.customerId && (

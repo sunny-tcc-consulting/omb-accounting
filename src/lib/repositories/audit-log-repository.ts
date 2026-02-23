@@ -19,7 +19,7 @@ export interface CreateAuditLogInput {
 }
 
 export class AuditLogRepository {
-  constructor(private db: SQLiteDatabase) {}
+  constructor(private db: unknown) {}
 
   /**
    * Create a new audit log
@@ -60,75 +60,77 @@ export class AuditLogRepository {
    * Get audit log by ID
    */
   findById(id: string): AuditLog | undefined {
-    return this.db.get<AuditLog>("SELECT * FROM audit_logs WHERE id = ?", [id]);
+    return this.db.get("SELECT * FROM audit_logs WHERE id = ?", [id]) as
+      | AuditLog
+      | undefined;
   }
 
   /**
    * Get all audit logs
    */
   findAll(): AuditLog[] {
-    return this.db.query<AuditLog>(
+    return this.db.query(
       "SELECT * FROM audit_logs ORDER BY created_at DESC",
-    );
+    ) as AuditLog[];
   }
 
   /**
    * Get audit logs by user
    */
   findByUser(user_id: string): AuditLog[] {
-    return this.db.query<AuditLog>(
+    return this.db.query(
       "SELECT * FROM audit_logs WHERE user_id = ? ORDER BY created_at DESC",
       [user_id],
-    );
+    ) as AuditLog[];
   }
 
   /**
    * Get audit logs by table
    */
   findByTable(table_name: string): AuditLog[] {
-    return this.db.query<AuditLog>(
+    return this.db.query(
       "SELECT * FROM audit_logs WHERE table_name = ? ORDER BY created_at DESC",
       [table_name],
-    );
+    ) as AuditLog[];
   }
 
   /**
    * Get audit logs by operation
    */
   findByOperation(operation: string): AuditLog[] {
-    return this.db.query<AuditLog>(
+    return this.db.query(
       "SELECT * FROM audit_logs WHERE operation = ? ORDER BY created_at DESC",
       [operation],
-    );
+    ) as AuditLog[];
   }
 
   /**
    * Get audit logs by date range
    */
   findByDateRange(startDate: number, endDate: number): AuditLog[] {
-    return this.db.query<AuditLog>(
+    return this.db.query(
       "SELECT * FROM audit_logs WHERE created_at >= ? AND created_at <= ? ORDER BY created_at DESC",
       [startDate, endDate],
-    );
+    ) as AuditLog[];
   }
 
   /**
    * Get audit logs by date
    */
   findByDate(created_at: number): AuditLog[] {
-    return this.db.query<AuditLog>(
+    return this.db.query(
       "SELECT * FROM audit_logs WHERE created_at = ? ORDER BY created_at DESC",
       [created_at],
-    );
+    ) as AuditLog[];
   }
 
   /**
    * Get audit log count
    */
   count(): number {
-    const result = this.db.get<Record<string, unknown>>(
+    const result = this.db.get(
       "SELECT COUNT(*) as count FROM audit_logs",
-    );
+    ) as Record<string, unknown>;
     return (result as Record<string, unknown>).count as number;
   }
 }

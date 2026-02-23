@@ -5,10 +5,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { BankStatementService } from "@/lib/services/bank-statement-service";
 import { BankStatementRepository } from "@/lib/repositories/bank-statement-repository";
-import { dbManager } from "@/lib/database/database";
+import { dbManager } from "@/lib/database/database-server";
 import { createBankStatementSchema } from "@/lib/validations/bank.validation";
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const db = dbManager.getDatabase();
     const bankStatementService = new BankStatementService(

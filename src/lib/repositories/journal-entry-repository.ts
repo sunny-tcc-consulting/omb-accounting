@@ -25,7 +25,7 @@ export interface UpdateJournalEntryInput {
 }
 
 export class JournalEntryRepository {
-  constructor(private db: SQLiteDatabase) {}
+  constructor(private db: unknown) {}
 
   /**
    * Create a new journal entry
@@ -62,49 +62,48 @@ export class JournalEntryRepository {
    * Get journal entry by ID
    */
   findById(id: string): JournalEntry | undefined {
-    return this.db.get<JournalEntry>(
-      "SELECT * FROM journal_entries WHERE id = ?",
-      [id],
-    );
+    return this.db.get("SELECT * FROM journal_entries WHERE id = ?", [id]) as
+      | JournalEntry
+      | undefined;
   }
 
   /**
    * Get all journal entries
    */
   findAll(): JournalEntry[] {
-    return this.db.query<JournalEntry>(
+    return this.db.query(
       "SELECT * FROM journal_entries ORDER BY transaction_date DESC",
-    );
+    ) as JournalEntry[];
   }
 
   /**
    * Get journal entries by account
    */
   findByAccount(account_id: string): JournalEntry[] {
-    return this.db.query<JournalEntry>(
+    return this.db.query(
       "SELECT * FROM journal_entries WHERE account_id = ? ORDER BY transaction_date DESC",
       [account_id],
-    );
+    ) as JournalEntry[];
   }
 
   /**
    * Get journal entries by date range
    */
   findByDateRange(startDate: number, endDate: number): JournalEntry[] {
-    return this.db.query<JournalEntry>(
+    return this.db.query(
       "SELECT * FROM journal_entries WHERE transaction_date >= ? AND transaction_date <= ? ORDER BY transaction_date DESC",
       [startDate, endDate],
-    );
+    ) as JournalEntry[];
   }
 
   /**
    * Get journal entries by date
    */
   findByDate(transaction_date: number): JournalEntry[] {
-    return this.db.query<JournalEntry>(
+    return this.db.query(
       "SELECT * FROM journal_entries WHERE transaction_date = ? ORDER BY transaction_date DESC",
       [transaction_date],
-    );
+    ) as JournalEntry[];
   }
 
   /**
@@ -166,10 +165,9 @@ export class JournalEntryRepository {
    * Check if journal entry exists
    */
   exists(id: string): boolean {
-    const result = this.db.get<Record<string, unknown>>(
-      "SELECT 1 FROM journal_entries WHERE id = ?",
-      [id],
-    );
+    const result = this.db.get("SELECT 1 FROM journal_entries WHERE id = ?", [
+      id,
+    ]) as Record<string, unknown>;
     return !!result;
   }
 
@@ -177,9 +175,9 @@ export class JournalEntryRepository {
    * Get journal entry count
    */
   count(): number {
-    const result = this.db.get<Record<string, unknown>>(
+    const result = this.db.get(
       "SELECT COUNT(*) as count FROM journal_entries",
-    );
+    ) as Record<string, unknown>;
     return (result as Record<string, unknown>).count as number;
   }
 }

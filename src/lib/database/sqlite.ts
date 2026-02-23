@@ -5,17 +5,15 @@
  * File-based database with ACID compliance.
  */
 
-import Database from "better-sqlite3";
+import DatabaseImpl from "better-sqlite3";
 import path from "path";
 import fs from "fs";
-import {
-  DatabaseInterface,
-  DatabaseConfig,
-  DatabaseConnection,
-} from "./database";
+import { DatabaseInterface, DatabaseConfig } from "./database";
+
+type DatabaseConnection = InstanceType<typeof DatabaseImpl> | unknown;
 
 export class SQLiteDatabase implements DatabaseInterface {
-  private connection: DatabaseConnection;
+  private connection: InstanceType<typeof DatabaseImpl>;
 
   constructor(config?: DatabaseConfig) {
     const dbPath =
@@ -33,7 +31,7 @@ export class SQLiteDatabase implements DatabaseInterface {
       options.memory = true;
     }
 
-    this.connection = new Database(dbPath, options);
+    this.connection = new DatabaseImpl(dbPath, options);
 
     // Enable foreign keys
     this.connection.pragma("foreign_keys = ON");
@@ -72,8 +70,8 @@ export class SQLiteDatabase implements DatabaseInterface {
     const stmt = this.connection.prepare(sql);
     const result = stmt.run(...(params || []));
     return {
-      lastInsertRowid: result.lastInsertRowid,
-      changes: result.changes,
+      lastInsertRowid: Number(result.lastInsertRowid),
+      changes: Number(result.changes),
     };
   }
 
@@ -96,6 +94,6 @@ export class SQLiteDatabase implements DatabaseInterface {
    * Get the underlying database connection
    */
   getConnection(): DatabaseConnection {
-    return this.connection;
+    return this.connection as DatabaseConnection;
   }
 }
