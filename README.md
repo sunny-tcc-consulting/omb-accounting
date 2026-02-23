@@ -1,7 +1,7 @@
 # omb-accounting 📊
 
 > A modern accounting web application for small and medium enterprises (SMEs).
-> Built with Next.js 14, TypeScript, and shadcn/ui.
+> Built with Next.js 16, TypeScript, and shadcn/ui.
 
 ---
 
@@ -481,21 +481,23 @@ The application uses SQLite with the following main tables:
 - Bank Reconciliation module
 - Permission system
 
-### Phase 5: Complete (78%) 🚧
+### Phase 5: Complete (100%) ✅
 
-| Task                           | Status     | Description                          |
-| ------------------------------ | ---------- | ------------------------------------ |
-| 5.1 Database Setup             | ✅         | SQLite schema, migrations, seed data |
-| 5.2 User Authentication        | ✅         | JWT, bcrypt, session management      |
-| 5.3 Customer Management        | ✅         | Customer CRUD, repository, API       |
-| 5.4 Quotation & Invoice        | ✅         | Quotation/Invoice persistence        |
-| 5.5 Journal Entry & Bank       | ✅         | Journal entry, bank reconciliation   |
-| 5.6 Audit Logging              | ✅         | Audit trail, logging middleware      |
-| 5.7 API Backward Compatibility | ✅         | Verify all existing APIs work        |
-| 5.8 Testing                    | ✅         | Unit and integration tests           |
-| 5.9 Documentation              | ⏳ Pending | API docs, database schema docs       |
+| Task                           | Status  | Description                          |
+| ------------------------------ | ------- | ------------------------------------ |
+| 5.1 Database Setup             | ✅ Done | SQLite schema, migrations, seed data |
+| 5.2 User Authentication        | ✅ Done | JWT, bcrypt, session management      |
+| 5.3 Customer Management        | ✅ Done | Customer CRUD, repository, API       |
+| 5.4 Quotation & Invoice        | ✅ Done | Quotation/Invoice persistence        |
+| 5.5 Journal Entry & Bank       | ✅ Done | Journal entry, bank reconciliation   |
+| 5.6 Audit Logging              | ✅ Done | Audit trail, logging middleware      |
+| 5.7 API Backward Compatibility | ✅ Done | Verify all existing APIs work        |
+| 5.8 Testing                    | ✅ Done | Unit and integration tests (239)     |
+| 5.9 Documentation              | ✅ Done | API docs, database schema docs       |
 
-**Progress**: 8/9 tasks complete (89%)
+**Progress**: 9/9 tasks complete (100%) 🎉
+
+**Latest Commit**: `4ffe3ba` - Phase 5.9 Documentation complete
 
 ---
 
