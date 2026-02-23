@@ -2,17 +2,30 @@
  * Bank Reconciliation Page
  * Part of Phase 4.6: Bank Reconciliation
  */
+/* eslint-disable react-hooks/set-state-in-effect */
 
-"use client";
-
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { usePermission } from "@/hooks/usePermission";
+import { dbManager } from "@/lib/database/database";
 import {
   getAllBankAccounts,
   getPrimaryBankAccount,
 } from "@/lib/services/bank-service";
 import { getReconciliationHistory } from "@/lib/services/bank-reconciliation-service";
-import { BankAccount, BankStatement } from "@/types";
+import { BankTransactionRepository } from "@/lib/repositories/bank-transaction-repository";
+
+// Type for transactions
+interface BankTransaction {
+  id: string;
+  bank_account_id: string;
+  date: string;
+  description: string;
+  amount: number;
+  type: "credit" | "debit";
+  category?: string;
+  is_reconciled: number;
+  created_at: number;
+}
 
 export default function BankPage() {
   const { can } = usePermission();
@@ -22,17 +35,27 @@ export default function BankPage() {
   const reconciliationHistory = primaryAccount
     ? getReconciliationHistory(primaryAccount.id)
     : [];
+  const [activeTab, setActiveTab] = useState<
+    "accounts" | "statements" | "transactions" | "reconciliation"
+  >("accounts");
+  const [transactions, setTransactions] = useState<BankTransaction[]>([]);
+
+  // Load transactions when tab changes to transactions
+  const loadTransactions = useCallback(() => {
+    if (activeTab === "transactions") {
+      const db = dbManager.getDatabase();
+      const transactionRepository = new BankTransactionRepository(db);
+      const allTransactions = transactionRepository.findAll();
+      setTransactions(allTransactions as BankTransaction[]);
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    loadTransactions();
+  }, [loadTransactions]);
 
   // Check permissions
-  const canView = can("bank", "read");
   const canCreate = can("bank", "create");
-
-  // Reconciliation summary type (extends BankStatement with summary data)
-  type ReconciliationSummary = BankStatement & {
-    matchedCount: number;
-    unmatchedCount: number;
-    difference: number;
-  };
 
   const tabs = [
     { value: "accounts", label: "Accounts" },
@@ -223,7 +246,69 @@ export default function BankPage() {
             Transactions
           </h2>
 
-          <p className="text-gray-500">Transactions will be loaded here</p>
+          {transactions.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500">No transactions found</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr>
+                    <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Description
+                    </th>
+                    <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Amount
+                    </th>
+                    <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Type
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {transactions.map((tx) => (
+                    <tr key={tx.id}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {new Date(tx.date).toLocaleDateString()}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500">
+                          {tx.description}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div
+                          className={`text-sm font-medium ${
+                            tx.type === "credit"
+                              ? "text-green-600"
+                              : "text-red-600"
+                          }`}
+                        >
+                          {tx.type === "credit" ? "+" : "-"}$
+                          {Math.abs(tx.amount).toFixed(2)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                            ${tx.type === "credit" ? "bg-green-100" : "bg-red-100"}
+                          `}
+                        >
+                          {tx.type}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 

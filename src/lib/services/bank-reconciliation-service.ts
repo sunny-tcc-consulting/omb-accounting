@@ -11,7 +11,6 @@ import { BankTransactionRepository } from "@/lib/repositories/bank-transaction-r
 import { QuotationRepository } from "@/lib/repositories/quotation-repository";
 import { InvoiceRepository } from "@/lib/repositories/invoice-repository";
 import { BankStatement, BankTransaction } from "@/lib/types/database";
-import { v4 as uuidv4 } from "uuid";
 
 export interface ReconciliationSummary {
   total_debit: number;
@@ -167,6 +166,11 @@ export class BankReconciliationService {
     const rejected_transactions = transactions.filter(
       (t) => t.status === "rejected",
     ).length;
+
+    // Log reconciliation stats
+    console.log(
+      `Reconciliation: ${matched_transactions}/${total_transactions} matched, ${unmatched_transactions} unmatched, ${rejected_transactions} rejected`,
+    );
 
     // Update statement status
     this.bankStatementRepository.update(statement_id, {
