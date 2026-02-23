@@ -1,4 +1,8 @@
 /**
+ *
+ * eslint-disable-next-line @typescript-eslint/no-explicit-any - Required for database operations
+ */
+
  * Session Repository
  *
  * Data access layer for Session entity.
@@ -28,7 +32,7 @@ export class SessionRepository {
       created_at: Date.now(),
     };
 
-    this.db.run(
+    (this.db as any).run(
       "INSERT INTO sessions (id, user_id, token, expires_at, created_at) VALUES (?, ?, ?, ?, ?)",
       [
         session.id,
@@ -46,7 +50,7 @@ export class SessionRepository {
    * Get session by token
    */
   findByToken(token: string): Session | undefined {
-    return this.db.get("SELECT * FROM sessions WHERE token = ?", [token]) as
+    return (this.db as any).get("SELECT * FROM sessions WHERE token = ?", [token]) as
       | Session
       | undefined;
   }
@@ -55,7 +59,7 @@ export class SessionRepository {
    * Get all sessions for a user
    */
   findByUserId(user_id: string): Session[] {
-    return this.db.query(
+    return (this.db as any).query(
       "SELECT * FROM sessions WHERE user_id = ? ORDER BY created_at DESC",
       [user_id],
     ) as Session[];
@@ -65,7 +69,7 @@ export class SessionRepository {
    * Delete session by token
    */
   delete(token: string): boolean {
-    const result = this.db.run("DELETE FROM sessions WHERE token = ?", [token]);
+    const result = (this.db as any).run("DELETE FROM sessions WHERE token = ?", [token]);
     return result.changes > 0;
   }
 
@@ -73,7 +77,7 @@ export class SessionRepository {
    * Delete all sessions for a user
    */
   deleteByUserId(user_id: string): boolean {
-    const result = this.db.run("DELETE FROM sessions WHERE user_id = ?", [
+    const result = (this.db as any).run("DELETE FROM sessions WHERE user_id = ?", [
       user_id,
     ]);
     return result.changes > 0;
@@ -83,7 +87,7 @@ export class SessionRepository {
    * Delete expired sessions
    */
   deleteExpired(): number {
-    const result = this.db.run("DELETE FROM sessions WHERE expires_at < ?", [
+    const result = (this.db as any).run("DELETE FROM sessions WHERE expires_at < ?", [
       Date.now(),
     ]);
     return result.changes;

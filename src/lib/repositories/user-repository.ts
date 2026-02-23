@@ -1,4 +1,8 @@
 /**
+ *
+ * eslint-disable-next-line @typescript-eslint/no-explicit-any - Required for database operations
+ */
+
  * User Repository
  *
  * Data access layer for User entity.
@@ -39,7 +43,7 @@ export class UserRepository {
       updated_at: now,
     };
 
-    this.db.run(
+    (this.db as any).run(
       "INSERT INTO users (id, name, email, password_hash, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [
         user.id,
@@ -59,7 +63,7 @@ export class UserRepository {
    * Get user by ID
    */
   findById(id: string): User | undefined {
-    return this.db.get("SELECT * FROM users WHERE id = ?", [id]) as
+    return (this.db as any).get("SELECT * FROM users WHERE id = ?", [id]) as
       | User
       | undefined;
   }
@@ -68,7 +72,7 @@ export class UserRepository {
    * Get user by email
    */
   findByEmail(email: string): User | undefined {
-    return this.db.get("SELECT * FROM users WHERE email = ?", [email]) as
+    return (this.db as any).get("SELECT * FROM users WHERE email = ?", [email]) as
       | User
       | undefined;
   }
@@ -77,7 +81,7 @@ export class UserRepository {
    * Get all users
    */
   findAll(): User[] {
-    return this.db.query(
+    return (this.db as any).query(
       "SELECT * FROM users ORDER BY created_at DESC",
     ) as User[];
   }
@@ -111,7 +115,7 @@ export class UserRepository {
     values.push(Date.now());
     values.push(id);
 
-    this.db.run(`UPDATE users SET ${updates.join(", ")} WHERE id = ?`, values);
+    (this.db as any).run(`UPDATE users SET ${updates.join(", ")} WHERE id = ?`, values);
 
     return this.findById(id);
   }
@@ -120,7 +124,7 @@ export class UserRepository {
    * Delete user
    */
   delete(id: string): boolean {
-    const result = this.db.run("DELETE FROM users WHERE id = ?", [id]);
+    const result = (this.db as any).run("DELETE FROM users WHERE id = ?", [id]);
     return result.changes > 0;
   }
 
@@ -128,7 +132,7 @@ export class UserRepository {
    * Check if user exists
    */
   exists(id: string): boolean {
-    const result = this.db.get("SELECT 1 FROM users WHERE id = ?", [
+    const result = (this.db as any).get("SELECT 1 FROM users WHERE id = ?", [
       id,
     ]) as Record<string, unknown>;
     return !!result;

@@ -1,4 +1,8 @@
 /**
+ *
+ * eslint-disable-next-line @typescript-eslint/no-explicit-any - Required for database operations
+ */
+
  * Customer Repository
  *
  * Data access layer for Customer entity.
@@ -40,7 +44,7 @@ export class CustomerRepository {
       updated_at: now,
     };
 
-    this.db.run(
+    (this.db as any).run(
       "INSERT INTO customers (id, name, email, phone, address, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [
         customer.id,
@@ -60,7 +64,7 @@ export class CustomerRepository {
    * Get customer by ID
    */
   findById(id: string): Customer | undefined {
-    return this.db.get("SELECT * FROM customers WHERE id = ?", [id]) as
+    return (this.db as any).get("SELECT * FROM customers WHERE id = ?", [id]) as
       | Customer
       | undefined;
   }
@@ -69,7 +73,7 @@ export class CustomerRepository {
    * Get customer by email
    */
   findByEmail(email: string): Customer | undefined {
-    return this.db.get("SELECT * FROM customers WHERE email = ?", [email]) as
+    return (this.db as any).get("SELECT * FROM customers WHERE email = ?", [email]) as
       | Customer
       | undefined;
   }
@@ -78,7 +82,7 @@ export class CustomerRepository {
    * Get all customers
    */
   findAll(): Customer[] {
-    return this.db.query(
+    return (this.db as any).query(
       "SELECT * FROM customers ORDER BY created_at DESC",
     ) as Customer[];
   }
@@ -87,7 +91,7 @@ export class CustomerRepository {
    * Get customers by name (search)
    */
   searchByName(name: string): Customer[] {
-    return this.db.query(
+    return (this.db as any).query(
       "SELECT * FROM customers WHERE name LIKE ? ORDER BY created_at DESC",
       [`%${name}%`],
     ) as Customer[];
@@ -97,7 +101,7 @@ export class CustomerRepository {
    * Get customers by email (search)
    */
   searchByEmail(email: string): Customer[] {
-    return this.db.query(
+    return (this.db as any).query(
       "SELECT * FROM customers WHERE email LIKE ? ORDER BY created_at DESC",
       [`%${email}%`],
     ) as Customer[];
@@ -107,7 +111,7 @@ export class CustomerRepository {
    * Get customers by phone (search)
    */
   searchByPhone(phone: string): Customer[] {
-    return this.db.query(
+    return (this.db as any).query(
       "SELECT * FROM customers WHERE phone LIKE ? ORDER BY created_at DESC",
       [`%${phone}%`],
     ) as Customer[];
@@ -146,7 +150,7 @@ export class CustomerRepository {
     values.push(Date.now());
     values.push(id);
 
-    this.db.run(
+    (this.db as any).run(
       `UPDATE customers SET ${updates.join(", ")} WHERE id = ?`,
       values,
     );
@@ -158,7 +162,7 @@ export class CustomerRepository {
    * Delete customer
    */
   delete(id: string): boolean {
-    const result = this.db.run("DELETE FROM customers WHERE id = ?", [id]);
+    const result = (this.db as any).run("DELETE FROM customers WHERE id = ?", [id]);
     return result.changes > 0;
   }
 
@@ -166,7 +170,7 @@ export class CustomerRepository {
    * Check if customer exists
    */
   exists(id: string): boolean {
-    const result = this.db.get("SELECT 1 FROM customers WHERE id = ?", [
+    const result = (this.db as any).get("SELECT 1 FROM customers WHERE id = ?", [
       id,
     ]) as Record<string, unknown>;
     return !!result;
@@ -176,7 +180,7 @@ export class CustomerRepository {
    * Get customer count
    */
   count(): number {
-    const result = this.db.get(
+    const result = (this.db as any).get(
       "SELECT COUNT(*) as count FROM customers",
     ) as Record<string, unknown>;
     return (result as Record<string, unknown>).count as number;

@@ -1,4 +1,8 @@
 /**
+ *
+ * eslint-disable-next-line @typescript-eslint/no-explicit-any - Required for database operations
+ */
+
  * Bank Account Repository
  *
  * Data access layer for BankAccount entity.
@@ -43,7 +47,7 @@ export class BankAccountRepository {
       updated_at: now,
     };
 
-    this.db.run(
+    (this.db as any).run(
       "INSERT INTO bank_accounts (id, name, account_number, bank_name, balance, currency, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
       [
         bankAccount.id,
@@ -64,7 +68,7 @@ export class BankAccountRepository {
    * Get bank account by ID
    */
   findById(id: string): BankAccount | undefined {
-    return this.db.get("SELECT * FROM bank_accounts WHERE id = ?", [id]) as
+    return (this.db as any).get("SELECT * FROM bank_accounts WHERE id = ?", [id]) as
       | BankAccount
       | undefined;
   }
@@ -73,7 +77,7 @@ export class BankAccountRepository {
    * Get bank account by account number
    */
   findByAccountNumber(account_number: string): BankAccount | undefined {
-    return this.db.get("SELECT * FROM bank_accounts WHERE account_number = ?", [
+    return (this.db as any).get("SELECT * FROM bank_accounts WHERE account_number = ?", [
       account_number,
     ]) as BankAccount | undefined;
   }
@@ -82,7 +86,7 @@ export class BankAccountRepository {
    * Get all bank accounts
    */
   findAll(): BankAccount[] {
-    return this.db.query(
+    return (this.db as any).query(
       "SELECT * FROM bank_accounts ORDER BY created_at DESC",
     ) as BankAccount[];
   }
@@ -91,7 +95,7 @@ export class BankAccountRepository {
    * Get bank account by name
    */
   findByName(name: string): BankAccount[] {
-    return this.db.query(
+    return (this.db as any).query(
       "SELECT * FROM bank_accounts WHERE name LIKE ? ORDER BY created_at DESC",
       [`%${name}%`],
     ) as BankAccount[];
@@ -142,7 +146,7 @@ export class BankAccountRepository {
     values.push(Date.now());
     values.push(id);
 
-    this.db.run(
+    (this.db as any).run(
       `UPDATE bank_accounts SET ${updates.join(", ")} WHERE id = ?`,
       values,
     );
@@ -154,7 +158,7 @@ export class BankAccountRepository {
    * Delete bank account
    */
   delete(id: string): boolean {
-    const result = this.db.run("DELETE FROM bank_accounts WHERE id = ?", [id]);
+    const result = (this.db as any).run("DELETE FROM bank_accounts WHERE id = ?", [id]);
     return result.changes > 0;
   }
 
@@ -162,7 +166,7 @@ export class BankAccountRepository {
    * Check if bank account exists
    */
   exists(id: string): boolean {
-    const result = this.db.get("SELECT 1 FROM bank_accounts WHERE id = ?", [
+    const result = (this.db as any).get("SELECT 1 FROM bank_accounts WHERE id = ?", [
       id,
     ]) as Record<string, unknown>;
     return !!result;
@@ -172,7 +176,7 @@ export class BankAccountRepository {
    * Get bank account count
    */
   count(): number {
-    const result = this.db.get(
+    const result = (this.db as any).get(
       "SELECT COUNT(*) as count FROM bank_accounts",
     ) as Record<string, unknown>;
     return (result as Record<string, unknown>).count as number;

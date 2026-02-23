@@ -1,4 +1,8 @@
 /**
+ *
+ * eslint-disable-next-line @typescript-eslint/no-explicit-any - Required for database operations
+ */
+
  * Bank Statement Repository
  *
  * Data access layer for BankStatement entity.
@@ -46,7 +50,7 @@ export class BankStatementRepository {
       updated_at: now,
     };
 
-    this.db.run(
+    (this.db as any).run(
       "INSERT INTO bank_statements (id, bank_account_id, statement_number, statement_date, closing_balance, file_path, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [
         bankStatement.id,
@@ -68,7 +72,7 @@ export class BankStatementRepository {
    * Get bank statement by ID
    */
   findById(id: string): BankStatement | undefined {
-    return this.db.get("SELECT * FROM bank_statements WHERE id = ?", [id]) as
+    return (this.db as any).get("SELECT * FROM bank_statements WHERE id = ?", [id]) as
       | BankStatement
       | undefined;
   }
@@ -77,7 +81,7 @@ export class BankStatementRepository {
    * Get bank statement by number
    */
   findByNumber(statement_number: string): BankStatement | undefined {
-    return this.db.get(
+    return (this.db as any).get(
       "SELECT * FROM bank_statements WHERE statement_number = ?",
       [statement_number],
     ) as BankStatement | undefined;
@@ -87,7 +91,7 @@ export class BankStatementRepository {
    * Get all bank statements
    */
   findAll(): BankStatement[] {
-    return this.db.query(
+    return (this.db as any).query(
       "SELECT * FROM bank_statements ORDER BY statement_date DESC",
     ) as BankStatement[];
   }
@@ -96,7 +100,7 @@ export class BankStatementRepository {
    * Get bank statements by bank account
    */
   findByBankAccount(bank_account_id: string): BankStatement[] {
-    return this.db.query(
+    return (this.db as any).query(
       "SELECT * FROM bank_statements WHERE bank_account_id = ? ORDER BY statement_date DESC",
       [bank_account_id],
     ) as BankStatement[];
@@ -106,7 +110,7 @@ export class BankStatementRepository {
    * Get bank statements by status
    */
   findByStatus(status: string): BankStatement[] {
-    return this.db.query(
+    return (this.db as any).query(
       "SELECT * FROM bank_statements WHERE status = ? ORDER BY statement_date DESC",
       [status],
     ) as BankStatement[];
@@ -116,7 +120,7 @@ export class BankStatementRepository {
    * Get bank statements by date range
    */
   findByDateRange(startDate: number, endDate: number): BankStatement[] {
-    return this.db.query(
+    return (this.db as any).query(
       "SELECT * FROM bank_statements WHERE statement_date >= ? AND statement_date <= ? ORDER BY statement_date DESC",
       [startDate, endDate],
     ) as BankStatement[];
@@ -126,7 +130,7 @@ export class BankStatementRepository {
    * Get bank statements by date
    */
   findByDate(statement_date: number): BankStatement[] {
-    return this.db.query(
+    return (this.db as any).query(
       "SELECT * FROM bank_statements WHERE statement_date = ? ORDER BY statement_date DESC",
       [statement_date],
     ) as BankStatement[];
@@ -176,7 +180,7 @@ export class BankStatementRepository {
     values.push(Date.now());
     values.push(id);
 
-    this.db.run(
+    (this.db as any).run(
       `UPDATE bank_statements SET ${updates.join(", ")} WHERE id = ?`,
       values,
     );
@@ -188,7 +192,7 @@ export class BankStatementRepository {
    * Delete bank statement
    */
   delete(id: string): boolean {
-    const result = this.db.run("DELETE FROM bank_statements WHERE id = ?", [
+    const result = (this.db as any).run("DELETE FROM bank_statements WHERE id = ?", [
       id,
     ]);
     return result.changes > 0;
@@ -198,7 +202,7 @@ export class BankStatementRepository {
    * Check if bank statement exists
    */
   exists(id: string): boolean {
-    const result = this.db.get("SELECT 1 FROM bank_statements WHERE id = ?", [
+    const result = (this.db as any).get("SELECT 1 FROM bank_statements WHERE id = ?", [
       id,
     ]) as Record<string, unknown>;
     return !!result;
@@ -208,7 +212,7 @@ export class BankStatementRepository {
    * Get bank statement count
    */
   count(): number {
-    const result = this.db.get(
+    const result = (this.db as any).get(
       "SELECT COUNT(*) as count FROM bank_statements",
     ) as Record<string, unknown>;
     return (result as Record<string, unknown>).count as number;

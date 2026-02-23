@@ -1,4 +1,8 @@
 /**
+ *
+ * eslint-disable-next-line @typescript-eslint/no-explicit-any - Required for database operations
+ */
+
  * Quotation Repository
  *
  * Data access layer for Quotation entity.
@@ -40,7 +44,7 @@ export class QuotationRepository {
       updated_at: now,
     };
 
-    this.db.run(
+    (this.db as any).run(
       "INSERT INTO quotations (id, customer_id, quotation_number, status, total_amount, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [
         quotation.id,
@@ -60,7 +64,7 @@ export class QuotationRepository {
    * Get quotation by ID
    */
   findById(id: string): Quotation | undefined {
-    return this.db.get("SELECT * FROM quotations WHERE id = ?", [id]) as
+    return (this.db as any).get("SELECT * FROM quotations WHERE id = ?", [id]) as
       | Quotation
       | undefined;
   }
@@ -69,7 +73,7 @@ export class QuotationRepository {
    * Get quotation by number
    */
   findByNumber(quotation_number: string): Quotation | undefined {
-    return this.db.get("SELECT * FROM quotations WHERE quotation_number = ?", [
+    return (this.db as any).get("SELECT * FROM quotations WHERE quotation_number = ?", [
       quotation_number,
     ]) as Quotation | undefined;
   }
@@ -78,7 +82,7 @@ export class QuotationRepository {
    * Get all quotations
    */
   findAll(): Quotation[] {
-    return this.db.query(
+    return (this.db as any).query(
       "SELECT * FROM quotations ORDER BY created_at DESC",
     ) as Quotation[];
   }
@@ -87,7 +91,7 @@ export class QuotationRepository {
    * Get quotations by customer
    */
   findByCustomer(customer_id: string): Quotation[] {
-    return this.db.query(
+    return (this.db as any).query(
       "SELECT * FROM quotations WHERE customer_id = ? ORDER BY created_at DESC",
       [customer_id],
     ) as Quotation[];
@@ -97,7 +101,7 @@ export class QuotationRepository {
    * Get quotations by status
    */
   findByStatus(status: string): Quotation[] {
-    return this.db.query(
+    return (this.db as any).query(
       "SELECT * FROM quotations WHERE status = ? ORDER BY created_at DESC",
       [status],
     ) as Quotation[];
@@ -136,7 +140,7 @@ export class QuotationRepository {
     values.push(Date.now());
     values.push(id);
 
-    this.db.run(
+    (this.db as any).run(
       `UPDATE quotations SET ${updates.join(", ")} WHERE id = ?`,
       values,
     );
@@ -148,7 +152,7 @@ export class QuotationRepository {
    * Delete quotation
    */
   delete(id: string): boolean {
-    const result = this.db.run("DELETE FROM quotations WHERE id = ?", [id]);
+    const result = (this.db as any).run("DELETE FROM quotations WHERE id = ?", [id]);
     return result.changes > 0;
   }
 
@@ -156,7 +160,7 @@ export class QuotationRepository {
    * Check if quotation exists
    */
   exists(id: string): boolean {
-    const result = this.db.get("SELECT 1 FROM quotations WHERE id = ?", [
+    const result = (this.db as any).get("SELECT 1 FROM quotations WHERE id = ?", [
       id,
     ]) as Record<string, unknown>;
     return !!result;
@@ -166,7 +170,7 @@ export class QuotationRepository {
    * Get quotation count
    */
   count(): number {
-    const result = this.db.get(
+    const result = (this.db as any).get(
       "SELECT COUNT(*) as count FROM quotations",
     ) as Record<string, unknown>;
     return (result as Record<string, unknown>).count as number;

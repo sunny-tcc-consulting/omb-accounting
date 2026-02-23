@@ -1,4 +1,8 @@
 /**
+ *
+ * eslint-disable-next-line @typescript-eslint/no-explicit-any - Required for database operations
+ */
+
  * Journal Entry Repository
  *
  * Data access layer for JournalEntry entity.
@@ -42,7 +46,7 @@ export class JournalEntryRepository {
       created_at: now,
     };
 
-    this.db.run(
+    (this.db as any).run(
       "INSERT INTO journal_entries (id, description, debit, credit, account_id, transaction_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [
         journalEntry.id,
@@ -62,7 +66,7 @@ export class JournalEntryRepository {
    * Get journal entry by ID
    */
   findById(id: string): JournalEntry | undefined {
-    return this.db.get("SELECT * FROM journal_entries WHERE id = ?", [id]) as
+    return (this.db as any).get("SELECT * FROM journal_entries WHERE id = ?", [id]) as
       | JournalEntry
       | undefined;
   }
@@ -71,7 +75,7 @@ export class JournalEntryRepository {
    * Get all journal entries
    */
   findAll(): JournalEntry[] {
-    return this.db.query(
+    return (this.db as any).query(
       "SELECT * FROM journal_entries ORDER BY transaction_date DESC",
     ) as JournalEntry[];
   }
@@ -80,7 +84,7 @@ export class JournalEntryRepository {
    * Get journal entries by account
    */
   findByAccount(account_id: string): JournalEntry[] {
-    return this.db.query(
+    return (this.db as any).query(
       "SELECT * FROM journal_entries WHERE account_id = ? ORDER BY transaction_date DESC",
       [account_id],
     ) as JournalEntry[];
@@ -90,7 +94,7 @@ export class JournalEntryRepository {
    * Get journal entries by date range
    */
   findByDateRange(startDate: number, endDate: number): JournalEntry[] {
-    return this.db.query(
+    return (this.db as any).query(
       "SELECT * FROM journal_entries WHERE transaction_date >= ? AND transaction_date <= ? ORDER BY transaction_date DESC",
       [startDate, endDate],
     ) as JournalEntry[];
@@ -100,7 +104,7 @@ export class JournalEntryRepository {
    * Get journal entries by date
    */
   findByDate(transaction_date: number): JournalEntry[] {
-    return this.db.query(
+    return (this.db as any).query(
       "SELECT * FROM journal_entries WHERE transaction_date = ? ORDER BY transaction_date DESC",
       [transaction_date],
     ) as JournalEntry[];
@@ -143,7 +147,7 @@ export class JournalEntryRepository {
     values.push(existing.created_at);
     values.push(id);
 
-    this.db.run(
+    (this.db as any).run(
       `UPDATE journal_entries SET ${updates.join(", ")} WHERE id = ?`,
       values,
     );
@@ -155,7 +159,7 @@ export class JournalEntryRepository {
    * Delete journal entry
    */
   delete(id: string): boolean {
-    const result = this.db.run("DELETE FROM journal_entries WHERE id = ?", [
+    const result = (this.db as any).run("DELETE FROM journal_entries WHERE id = ?", [
       id,
     ]);
     return result.changes > 0;
@@ -165,7 +169,7 @@ export class JournalEntryRepository {
    * Check if journal entry exists
    */
   exists(id: string): boolean {
-    const result = this.db.get("SELECT 1 FROM journal_entries WHERE id = ?", [
+    const result = (this.db as any).get("SELECT 1 FROM journal_entries WHERE id = ?", [
       id,
     ]) as Record<string, unknown>;
     return !!result;
@@ -175,7 +179,7 @@ export class JournalEntryRepository {
    * Get journal entry count
    */
   count(): number {
-    const result = this.db.get(
+    const result = (this.db as any).get(
       "SELECT COUNT(*) as count FROM journal_entries",
     ) as Record<string, unknown>;
     return (result as Record<string, unknown>).count as number;

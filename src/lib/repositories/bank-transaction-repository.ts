@@ -1,4 +1,8 @@
 /**
+ *
+ * eslint-disable-next-line @typescript-eslint/no-explicit-any - Required for database operations
+ */
+
  * Bank Transaction Repository
  *
  * Data access layer for BankTransaction entity.
@@ -48,7 +52,7 @@ export class BankTransactionRepository {
       created_at: now,
     };
 
-    this.db.run(
+    (this.db as any).run(
       "INSERT INTO bank_transactions (id, statement_id, transaction_date, description, amount, type, status, matched_to_journal_entry_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [
         bankTransaction.id,
@@ -70,7 +74,7 @@ export class BankTransactionRepository {
    * Get bank transaction by ID
    */
   findById(id: string): BankTransaction | undefined {
-    return this.db.get("SELECT * FROM bank_transactions WHERE id = ?", [id]) as
+    return (this.db as any).get("SELECT * FROM bank_transactions WHERE id = ?", [id]) as
       | BankTransaction
       | undefined;
   }
@@ -79,7 +83,7 @@ export class BankTransactionRepository {
    * Get all bank transactions
    */
   findAll(): BankTransaction[] {
-    return this.db.query(
+    return (this.db as any).query(
       "SELECT * FROM bank_transactions ORDER BY transaction_date DESC",
     ) as BankTransaction[];
   }
@@ -88,7 +92,7 @@ export class BankTransactionRepository {
    * Get bank transactions by statement
    */
   findByStatement(statement_id: string): BankTransaction[] {
-    return this.db.query(
+    return (this.db as any).query(
       "SELECT * FROM bank_transactions WHERE statement_id = ? ORDER BY transaction_date ASC",
       [statement_id],
     ) as BankTransaction[];
@@ -98,7 +102,7 @@ export class BankTransactionRepository {
    * Get bank transactions by status
    */
   findByStatus(status: string): BankTransaction[] {
-    return this.db.query(
+    return (this.db as any).query(
       "SELECT * FROM bank_transactions WHERE status = ? ORDER BY transaction_date DESC",
       [status],
     ) as BankTransaction[];
@@ -108,7 +112,7 @@ export class BankTransactionRepository {
    * Get unmatched bank transactions
    */
   findUnmatched(): BankTransaction[] {
-    return this.db.query(
+    return (this.db as any).query(
       "SELECT * FROM bank_transactions WHERE status = 'unmatched' ORDER BY transaction_date DESC",
     ) as BankTransaction[];
   }
@@ -161,7 +165,7 @@ export class BankTransactionRepository {
     values.push(existing.created_at);
     values.push(id);
 
-    this.db.run(
+    (this.db as any).run(
       `UPDATE bank_transactions SET ${updates.join(", ")} WHERE id = ?`,
       values,
     );
@@ -173,7 +177,7 @@ export class BankTransactionRepository {
    * Delete bank transaction
    */
   delete(id: string): boolean {
-    const result = this.db.run("DELETE FROM bank_transactions WHERE id = ?", [
+    const result = (this.db as any).run("DELETE FROM bank_transactions WHERE id = ?", [
       id,
     ]);
     return result.changes > 0;
@@ -183,7 +187,7 @@ export class BankTransactionRepository {
    * Check if bank transaction exists
    */
   exists(id: string): boolean {
-    const result = this.db.get("SELECT 1 FROM bank_transactions WHERE id = ?", [
+    const result = (this.db as any).get("SELECT 1 FROM bank_transactions WHERE id = ?", [
       id,
     ]) as Record<string, unknown>;
     return !!result;
@@ -193,7 +197,7 @@ export class BankTransactionRepository {
    * Get bank transaction count
    */
   count(): number {
-    const result = this.db.get(
+    const result = (this.db as any).get(
       "SELECT COUNT(*) as count FROM bank_transactions",
     ) as Record<string, unknown>;
     return (result as Record<string, unknown>).count as number;

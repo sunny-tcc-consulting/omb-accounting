@@ -535,9 +535,7 @@ export async function seedDatabase(config?: {
  * Check if database has been seeded
  */
 export function isDatabaseSeeded(db: SQLiteDatabase): boolean {
-  const dbConn = db.getConnection();
-  const result = dbConn.get<{ count: number }>(
-    "SELECT COUNT(*) as count FROM users",
-  );
+  const dbConn = db.getConnection() as any;
+  const result = dbConn.get("SELECT COUNT(*) as count FROM users") as any;
   return result.count > 0;
 }

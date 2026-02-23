@@ -2,11 +2,11 @@
  * GET /api/bank/reconciliation/[account_id]
  * Get reconciliation history for a bank account
  */
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getReconciliationHistory } from "@/lib/services/bank-reconciliation-service";
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ account_id: string }> },
 ) {
   try {
