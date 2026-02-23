@@ -54,7 +54,7 @@
 
 ### Core Framework
 
-- **Next.js 14** - App Router, Server Components
+- **Next.js 16** - App Router, Server Components
 - **TypeScript** - Type safety and developer experience
 - **React 18** - UI library
 
@@ -132,6 +132,32 @@ omb-accounting/
 ├── prisma/                      # Database schema (legacy)
 └── scripts/                     # Database scripts
 ```
+
+---
+
+## Quick Start ⏱️
+
+**Get up and running in 5 minutes:**
+
+```bash
+# 1. Clone and enter directory
+git clone https://github.com/sunny-tcc-consulting/omb-accounting.git
+cd omb-accounting
+
+# 2. Install dependencies
+npm install
+
+# 3. Initialize database (creates SQLite file at data/omb-accounting.db)
+npm run db:init
+
+# 4. Start development server
+npm run dev
+
+# 5. Open browser → http://localhost:3000
+#    Default login: admin / admin123
+```
+
+> ⚠️ **Note**: If bank page shows an error, run `npm run build` before `npm run dev` or restart the dev server.
 
 ---
 
