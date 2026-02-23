@@ -4,9 +4,10 @@
  */
 import { NextResponse } from "next/server";
 import { AuditLogService } from "@/lib/services/audit-log-service";
+import { AuditLogRepository } from "@/lib/repositories/audit-log-repository";
 import { dbManager } from "@/lib/database/database";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const db = dbManager.getDatabase();
     const auditLogService = new AuditLogService(new AuditLogRepository(db));

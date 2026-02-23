@@ -8,9 +8,13 @@
 import Database from "better-sqlite3";
 import path from "path";
 import fs from "fs";
-import { Database, DatabaseConfig, DatabaseConnection } from "./database";
+import {
+  Database as DatabaseInterface,
+  DatabaseConfig,
+  DatabaseConnection,
+} from "./database";
 
-export class SQLiteDatabase implements Database {
+export class SQLiteDatabase implements DatabaseInterface {
   private connection: DatabaseConnection;
 
   constructor(config?: DatabaseConfig) {

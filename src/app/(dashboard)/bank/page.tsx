@@ -33,10 +33,8 @@ export default function BankPage() {
     difference: number;
   }
 
-  // Load initial data
+  // Load initial data using lazy initialization
   const [accounts] = useState<BankAccount[]>(() => getAllBankAccounts());
-  const [statements, setStatements] = useState<ReconciliationSummary[]>([]);
-  const [showImportModal, setShowImportModal] = useState(false);
 
   // Load statements on mount
   useEffect(() => {
