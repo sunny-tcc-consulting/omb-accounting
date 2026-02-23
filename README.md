@@ -22,7 +22,7 @@
 
 ## Features
 
-### Completed (Phase 1-3) ✅
+### Completed (Phase 1-5) ✅
 
 | Module                   | Features                                                                          |
 | ------------------------ | --------------------------------------------------------------------------------- |
@@ -33,20 +33,20 @@
 | **Quotation → Invoice**  | One-click conversion with automatic data transfer                                 |
 | **Audit Reports**        | Trial Balance, Balance Sheet, P&L, General Ledger, Cash Flow                      |
 | **PDF Generation**       | Professional PDFs for all documents with company branding                         |
-| **UI/UX Polish**         | SummaryCards, ErrorDisplay, responsive design, accessibility                      |
+| **User & Roles**         | JWT authentication, role-based access control (admin/user/viewer/manager)         |
+| **Session Management**   | Auto-logout, session timeout warnings, activity logging                           |
+| **Bank Reconciliation**  | Bank account management, transaction import, statement matching                   |
+| **SQLite Backend**       | Local file-based database, repositories, services, audit logging                  |
 
-### Phase 4 (Planned) 🚧
+### Phase 6 (Planned) 🚧
 
-| Module                            | Status  |
-| --------------------------------- | ------- |
-| **Invoice Management (Enhanced)** | Pending |
-| **Dashboard & Analytics**         | Pending |
-| **Bank Reconciliation**           | Pending |
-| **Multi-currency Support**        | Pending |
-| **User & Roles**                  | Pending |
-| **Email/Notification System**     | Pending |
-| **Performance Optimization**      | Pending |
-| **Security Hardening**            | Pending |
+| Module                      | Status  |
+| --------------------------- | ------- |
+| **Advanced Reports**        | Pending |
+| **Data Export**             | Pending |
+| **Multi-company Support**   | Pending |
+| **Dashboard Customization** | Pending |
+| **API Documentation**       | Pending |
 
 ---
 
@@ -70,12 +70,14 @@
 - **React Context** - State management
 - **React Hook Form** - Form handling
 - **Zod** - Schema validation
+- **SQLite** - Local file-based database
 
 ### Utilities
 
 - **date-fns** - Date manipulation
 - **jsPDF + AutoTable** - PDF generation
-- **Faker.js** - Mock data generation
+- **bcrypt** - Password hashing
+- **jsonwebtoken** - JWT token management
 
 ### Quality Assurance
 
@@ -91,7 +93,8 @@
 omb-accounting/
 ├── .specify/                    # Spec-Kit documentation
 │   ├── specs/                   # Project specifications
-│   │   └── phase-4-modules/     # Phase 4 detailed specs
+│   │   ├── phase-4-modules/     # Phase 4 detailed specs
+│   │   └── phase-5-backend/     # Phase 5 backend specs
 │   └── memory/
 │       └── constitution.md      # Project governance
 ├── src/
@@ -102,10 +105,13 @@ omb-accounting/
 │   │   │   ├── customers/       # Customer pages
 │   │   │   ├── quotations/      # Quotation pages
 │   │   │   ├── invoices/        # Invoice pages
-│   │   │   └── reports/         # Audit reports
-│   │   └── api/                 # API routes
+│   │   │   ├── reports/         # Audit reports
+│   │   │   ├── bank/            # Bank reconciliation
+│   │   │   └── users/           # User management
+│   │   └── api/                 # API routes (13 endpoints)
 │   ├── components/
 │   │   ├── ui/                  # shadcn/ui components
+│   │   ├── auth/                # Authentication components
 │   │   ├── dashboard/           # Dashboard components
 │   │   ├── customers/           # Customer components
 │   │   ├── quotations/          # Quotation components
@@ -113,15 +119,18 @@ omb-accounting/
 │   │   ├── reports/             # Report components
 │   │   └── shared/              # Shared components
 │   ├── contexts/                # React Context providers
+│   ├── hooks/                   # Custom React hooks
 │   ├── lib/                     # Utility functions
-│   │   ├── pdf-generator.ts     # PDF generation
-│   │   ├── quotation-utils.ts   # Quotation conversion
-│   │   ├── validations.ts       # Zod schemas
-│   │   └── utils.ts             # Common utilities
-│   └── types/                   # TypeScript definitions
-├── prisma/                      # Database schema
-├── public/                      # Static assets
-└── package.json
+│   │   ├── database/            # SQLite database layer
+│   │   ├── repositories/        # Data access layer (10 entities)
+│   │   ├── services/            # Business logic layer (11 services)
+│   │   ├── validations/         # Zod schemas
+│   │   └── middleware/          # Auth & audit middleware
+│   ├── types/                   # TypeScript definitions
+│   └── utils/                   # Common utilities
+├── docs/                        # Documentation
+├── prisma/                      # Database schema (legacy)
+└── scripts/                     # Database scripts
 ```
 
 ---
@@ -143,6 +152,9 @@ cd omb-accounting
 # Install dependencies
 npm install
 
+# Initialize database
+npm run db:init
+
 # Start development server
 npm run dev
 
@@ -159,6 +171,8 @@ npm run test         # Run tests
 npm run test:watch   # Run tests in watch mode
 npm run lint         # Run ESLint
 npm run format       # Format code with Prettier
+npm run db:init      # Initialize database
+npm run db:seed      # Seed database with sample data
 ```
 
 ---
@@ -204,6 +218,21 @@ View financial overview, key metrics, and recent transactions. Navigate to diffe
 2. Select report type (Trial Balance, Balance Sheet, P&L, etc.)
 3. Set date range filters
 4. View or export to PDF
+
+### Bank Reconciliation
+
+1. Go to **Bank** menu
+2. View bank accounts and balances
+3. Import bank statements
+4. Match transactions automatically
+5. Reconcile differences
+
+### User Management (Admin)
+
+1. Go to **Users** menu (admin only)
+2. Create new users
+3. Assign roles (admin, user, viewer, manager)
+4. View session activity logs
 
 ---
 
@@ -257,6 +286,7 @@ This project uses [Spec-Kit](https://clawhub.com) for structured development:
 | `tasks.md`          | Implementation tasks          |
 
 **View Phase 4 specs**: [`.specify/specs/phase-4-modules/`](.specify/specs/phase-4-modules/)
+**View Phase 5 specs**: [`.specify/specs/phase-5-backend/`](.specify/specs/phase-5-backend/)
 
 ---
 
@@ -272,27 +302,125 @@ src/
 │   ├── report-context.test.tsx
 │   └── InvoiceContext.test.tsx
 ├── components/
-│   └── ui/
-│       └── __tests__/      # Component tests
-│           ├── empty-state.test.tsx
-│           ├── skeleton.test.tsx
-│           └── notification.test.tsx
-└── lib/
-    └── __tests__/          # Library tests
-        └── a11y.test.ts
+│   ├── ui/
+│   │   └── __tests__/      # Component tests
+│   │       ├── empty-state.test.tsx
+│   │       ├── skeleton.test.tsx
+│   │       └── notification.test.tsx
+│   └── layout/
+│       └── __tests__/      # Layout tests
+│           └── navigation.test.tsx
+├── lib/
+│   ├── __tests__/          # Library tests
+│   │   ├── a11y.test.ts
+│   │   ├── api-backward-compatibility.test.ts
+│   │   └── report-generator.test.ts
+│   ├── repositories/
+│   │   └── __tests__/      # Repository tests
+│   │       └── repository-validation.test.ts
+│   ├── services/
+│   │   └── __tests__/      # Service tests
+│   │       └── service-validation.test.ts
+│   └── repositories/
+│       └── __tests__/      # API integration tests
+│           └── api-integration.test.ts
+└── app/
+    └── api/
+        └── __tests__/      # API tests
+            └── api-integration.test.ts
 ```
 
 ### Test Coverage
 
-| Module              | Coverage |
-| ------------------- | -------- |
-| PDF Generator       | 100%     |
-| Quotation Utils     | 100%     |
-| Invoice Context     | 100%     |
-| Report Context      | 100%     |
-| Accessibility Utils | 100%     |
+| Module              | Tests | Coverage |
+| ------------------- | ----- | -------- |
+| PDF Generator       | 6     | 100%     |
+| Quotation Utils     | 21    | 100%     |
+| Invoice Context     | 30    | 100%     |
+| Report Context      | 7     | 100%     |
+| Accessibility Utils | 7     | 100%     |
+| API Integration     | 30    | 100%     |
+| Repository Layer    | 17    | 100%     |
+| Service Layer       | 18    | 100%     |
 
-**Current**: 174/174 tests passing ✅
+**Current**: 239/239 tests passing ✅
+
+---
+
+## API Endpoints
+
+### Authentication
+
+| Method | Endpoint           | Description       |
+| ------ | ------------------ | ----------------- |
+| POST   | /api/auth/login    | User login        |
+| POST   | /api/auth/register | User registration |
+| POST   | /api/auth/logout   | User logout       |
+| GET    | /api/auth/me       | Get current user  |
+
+### Customers
+
+| Method | Endpoint           | Description        |
+| ------ | ------------------ | ------------------ |
+| GET    | /api/customers     | List all customers |
+| POST   | /api/customers     | Create customer    |
+| GET    | /api/customers/:id | Get customer by ID |
+| PUT    | /api/customers/:id | Update customer    |
+| DELETE | /api/customers/:id | Delete customer    |
+
+### Quotations
+
+| Method | Endpoint            | Description         |
+| ------ | ------------------- | ------------------- |
+| GET    | /api/quotations     | List all quotations |
+| POST   | /api/quotations     | Create quotation    |
+| GET    | /api/quotations/:id | Get quotation by ID |
+| PUT    | /api/quotations/:id | Update quotation    |
+| DELETE | /api/quotations/:id | Delete quotation    |
+
+### Invoices
+
+| Method | Endpoint          | Description       |
+| ------ | ----------------- | ----------------- |
+| GET    | /api/invoices     | List all invoices |
+| POST   | /api/invoices     | Create invoice    |
+| GET    | /api/invoices/:id | Get invoice by ID |
+| PUT    | /api/invoices/:id | Update invoice    |
+| DELETE | /api/invoices/:id | Delete invoice    |
+
+### Bank
+
+| Method | Endpoint                     | Description                |
+| ------ | ---------------------------- | -------------------------- |
+| GET    | /api/bank/accounts           | List bank accounts         |
+| GET    | /api/bank/overview           | Bank overview & summary    |
+| GET    | /api/bank/transactions       | List transactions          |
+| GET    | /api/bank/reconciliation/:id | Get reconciliation history |
+
+### Audit Logs
+
+| Method | Endpoint        | Description                  |
+| ------ | --------------- | ---------------------------- |
+| GET    | /api/audit-logs | List audit logs with filters |
+
+---
+
+## Database Schema
+
+The application uses SQLite with the following main tables:
+
+| Table               | Description                    |
+| ------------------- | ------------------------------ |
+| `users`             | User accounts and roles        |
+| `customers`         | Customer records               |
+| `quotations`        | Quotation documents            |
+| `invoices`          | Invoice documents              |
+| `journal_entries`   | General ledger entries         |
+| `bank_accounts`     | Bank account information       |
+| `bank_statements`   | Bank statement records         |
+| `bank_transactions` | Individual bank transactions   |
+| `audit_logs`        | Audit trail for all operations |
+| `sessions`          | User session management        |
 
 ---
 
@@ -305,13 +433,13 @@ src/
 ### Developer Documentation
 
 - [Developer Guide](docs/developer-guide.md) - Technical documentation
-- [API Reference](docs/api-reference.md) - API endpoints
-- [Data Model](docs/data-model.md) - Database schema
+- [Database Schema](docs/DATABASE_SETUP.md) - SQLite schema and setup
 
 ### Phase Documentation
 
 - [Phase 1-3 Summary](docs/phase-1-3-summary.md)
 - [Phase 4 Specs](.specify/specs/phase-4-modules/)
+- [Phase 5 Backend Specs](.specify/specs/phase-5-backend/)
 
 ---
 
@@ -344,11 +472,30 @@ src/
 - Audit Reports (Trial Balance, Balance Sheet, P&L, GL, Cash Flow)
 - PDF generation
 - UI/UX improvements
-- 174 tests passing
 
-### Phase 4: In Planning 🚧
+### Phase 4: Complete ✅
 
-See [`.specify/specs/phase-4-modules/`](.specify/specs/phase-4-modules/) for detailed plans.
+- User & Roles management with JWT authentication
+- Role-based access control (admin, user, viewer, manager)
+- Session management with auto-logout
+- Bank Reconciliation module
+- Permission system
+
+### Phase 5: Complete (78%) 🚧
+
+| Task                           | Status     | Description                          |
+| ------------------------------ | ---------- | ------------------------------------ |
+| 5.1 Database Setup             | ✅         | SQLite schema, migrations, seed data |
+| 5.2 User Authentication        | ✅         | JWT, bcrypt, session management      |
+| 5.3 Customer Management        | ✅         | Customer CRUD, repository, API       |
+| 5.4 Quotation & Invoice        | ✅         | Quotation/Invoice persistence        |
+| 5.5 Journal Entry & Bank       | ✅         | Journal entry, bank reconciliation   |
+| 5.6 Audit Logging              | ✅         | Audit trail, logging middleware      |
+| 5.7 API Backward Compatibility | ✅         | Verify all existing APIs work        |
+| 5.8 Testing                    | ✅         | Unit and integration tests           |
+| 5.9 Documentation              | ⏳ Pending | API docs, database schema docs       |
+
+**Progress**: 8/9 tasks complete (89%)
 
 ---
 
@@ -364,6 +511,7 @@ MIT License - see [LICENSE](LICENSE) file.
 - [shadcn/ui](https://ui.shadcn.com/) - UI components
 - [Lucide](https://lucide.dev/) - Icons
 - [Spec-Kit](https://clawhub.com) - Structured development
+- [SQLite](https://www.sqlite.org/) - Embedded database
 - All contributors and users
 
 ---
