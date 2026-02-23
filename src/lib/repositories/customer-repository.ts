@@ -4,7 +4,7 @@
  * Data access layer for Customer entity.
  */
 
-import { SQLiteDatabase } from "../sqlite";
+import { SQLiteDatabase } from "../database/sqlite";
 import { Customer } from "@/lib/types/database";
 import { v4 as uuidv4 } from "uuid";
 
@@ -33,9 +33,9 @@ export class CustomerRepository {
     const customer: Customer = {
       id: uuidv4(),
       name: data.name,
-      email: data.email || null,
-      phone: data.phone || null,
-      address: data.address || null,
+      email: data.email,
+      phone: data.phone,
+      address: data.address,
       created_at: now,
       updated_at: now,
     };

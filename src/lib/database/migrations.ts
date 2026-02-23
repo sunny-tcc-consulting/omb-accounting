@@ -291,7 +291,7 @@ export async function runMigrations(config?: {
 export function getDatabaseVersion(db: SQLiteDatabase): number {
   const result = db.get(
     "SELECT value FROM sqlite_master WHERE type='table' AND name='schema_version'",
-  );
+  ) as { value: number } | undefined;
   return result?.value || 0;
 }
 

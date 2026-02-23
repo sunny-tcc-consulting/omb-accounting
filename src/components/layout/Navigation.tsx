@@ -19,9 +19,8 @@ import { SkipLink } from "@/components/ui/skip-link";
 const routeConfig: Record<string, { label: string; parent?: string }> = {
   "/": { label: "Home" },
   "/dashboard": { label: "Analytics Dashboard", parent: "/" },
-  "/transactions": { label: "Transactions", parent: "/" },
+  "/bank": { label: "Bank Reconciliation", parent: "/" },
   "/reports": { label: "Reports", parent: "/" },
-  "/categories": { label: "Categories", parent: "/" },
   "/customers": { label: "Customers", parent: "/" },
   "/customers/new": { label: "New Customer", parent: "/customers" },
   "/quotations": { label: "Quotations", parent: "/" },
@@ -115,9 +114,8 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { href: "/", label: "Dashboard", icon: Home },
-  { href: "/transactions", label: "Transactions", icon: "Receipt" },
+  { href: "/bank", label: "Bank Reconciliation", icon: "Receipt" },
   { href: "/reports", label: "Reports", icon: "BarChart" },
-  { href: "/categories", label: "Categories", icon: "Tag" },
   { href: "/customers", label: "Customers", icon: "Users" },
   { href: "/quotations", label: "Quotations", icon: "FileText" },
   { href: "/invoices", label: "Invoices", icon: "FileText2" },

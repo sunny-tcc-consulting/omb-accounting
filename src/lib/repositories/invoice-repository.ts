@@ -4,7 +4,7 @@
  * Data access layer for Invoice entity.
  */
 
-import { SQLiteDatabase } from "../sqlite";
+import { SQLiteDatabase } from "../database/sqlite";
 import { Invoice } from "@/lib/types/database";
 import { v4 as uuidv4 } from "uuid";
 
@@ -40,7 +40,7 @@ export class InvoiceRepository {
       id: uuidv4(),
       customer_id: data.customer_id,
       invoice_number: data.invoice_number,
-      quotation_id: data.quotation_id || null,
+      quotation_id: data.quotation_id,
       status: data.status || "pending",
       total_amount: data.total_amount,
       amount_paid: data.amount_paid,

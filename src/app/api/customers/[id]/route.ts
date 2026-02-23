@@ -2,8 +2,9 @@
  * GET /api/customers/[id]
  * Get customer by ID
  */
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { CustomerService } from "@/lib/services/customer-service";
+import { CustomerRepository } from "@/lib/repositories/customer-repository";
 import { dbManager } from "@/lib/database/database";
 import { updateCustomerSchema } from "@/lib/validations/customer.validation";
 
@@ -64,7 +65,7 @@ export async function PUT(
         {
           success: false,
           error: "Validation failed",
-          details: validation.error.errors,
+          details: validation.error.issues,
         },
         { status: 400 },
       );

@@ -4,7 +4,7 @@
  * Business logic layer for bank reconciliation.
  */
 
-import { dbManager } from "@/lib/database/database";
+import { dbManager } from "@/lib/database/database-server";
 import { JournalEntryRepository } from "@/lib/repositories/journal-entry-repository";
 import { BankStatementRepository } from "@/lib/repositories/bank-statement-repository";
 import { BankTransactionRepository } from "@/lib/repositories/bank-transaction-repository";
@@ -116,7 +116,7 @@ export class BankReconciliationService {
     // Update transaction
     this.bankTransactionRepository.update(transaction_id, {
       status: "rejected",
-      matched_to_journal_entry_id: null,
+      matched_to_journal_entry_id: undefined,
     });
 
     return true;
@@ -135,7 +135,7 @@ export class BankReconciliationService {
     // Update transaction
     this.bankTransactionRepository.update(transaction_id, {
       status: "unmatched",
-      matched_to_journal_entry_id: null,
+      matched_to_journal_entry_id: undefined,
     });
 
     return true;

@@ -77,9 +77,10 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
     clearErrors,
-    trigger,
   } = useForm<QuotationFormData>(
     {
       resolver: zodResolver(quotationSchema),
@@ -97,6 +98,8 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
       },
     } as any /* eslint-disable-line @typescript-eslint/no-explicit-any */,
   );
+
+  const customerId = watch("customerId");
 
   const handleBlur = (fieldName: string) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -176,7 +179,7 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
     }
   };
 
-  const updateItem = (index: number, field: string, value: number) => {
+  const updateItem = (index: number, field: string, value: string | number) => {
     const newItems = [...items];
     newItems[index] = { ...newItems[index], [field]: value };
     setItems(newItems);
@@ -202,7 +205,12 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
         <Label htmlFor="customerId">
           Customer <span className="text-red-500">*</span>
         </Label>
-        <Select>
+        <Select
+          value={customerId || ""}
+          onValueChange={(value) => {
+            setValue("customerId", value, { shouldValidate: true });
+          }}
+        >
           <SelectTrigger
             onBlur={() => handleBlur("customerId")}
             className={
@@ -250,11 +258,7 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
                     placeholder="Enter item description"
                     value={item.description}
                     onChange={(e) =>
-                      updateItem(
-                        index,
-                        "description",
-                        e.target.value as unknown as number,
-                      )
+                      updateItem(index, "description", e.target.value)
                     }
                     onBlur={() => handleBlur(`items.${index}.description`)}
                     className={
@@ -459,7 +463,7 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
   );
 }
 
-// Debounce utility function
+// Debounce utility function (kept for future use)
 function debounce<T extends (...args: unknown[]) => void>(
   func: T,
   wait: number,

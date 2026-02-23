@@ -4,7 +4,7 @@
  * Data access layer for BankStatement entity.
  */
 
-import { SQLiteDatabase } from "../sqlite";
+import { SQLiteDatabase } from "../database/sqlite";
 import { BankStatement } from "@/lib/types/database";
 import { v4 as uuidv4 } from "uuid";
 
@@ -40,7 +40,7 @@ export class BankStatementRepository {
       statement_number: data.statement_number,
       statement_date: data.statement_date,
       closing_balance: data.closing_balance,
-      file_path: data.file_path || null,
+      file_path: data.file_path,
       status: data.status || "pending",
       created_at: now,
       updated_at: now,

@@ -4,7 +4,7 @@
  * Data access layer for BankAccount entity.
  */
 
-import { SQLiteDatabase } from "../sqlite";
+import { SQLiteDatabase } from "../database/sqlite";
 import { BankAccount } from "@/lib/types/database";
 import { v4 as uuidv4 } from "uuid";
 
@@ -36,7 +36,7 @@ export class BankAccountRepository {
       id: uuidv4(),
       name: data.name,
       account_number: data.account_number,
-      bank_name: data.bank_name || null,
+      bank_name: data.bank_name,
       balance: data.balance || 0,
       currency: data.currency || "HKD",
       created_at: now,

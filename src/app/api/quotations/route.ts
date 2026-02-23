@@ -4,10 +4,10 @@
  */
 import { NextResponse } from "next/server";
 import { QuotationService } from "@/lib/services/quotation-service";
+import { QuotationRepository } from "@/lib/repositories/quotation-repository";
 import { dbManager } from "@/lib/database/database";
-import { createQuotationSchema } from "@/lib/validations/quotation.validation";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const db = dbManager.getDatabase();
     const quotationService = new QuotationService(new QuotationRepository(db));
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: "Validation failed",
-          details: validation.error.errors,
+          details: validation.error.issues,
         },
         { status: 400 },
       );

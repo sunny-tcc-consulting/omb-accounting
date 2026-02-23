@@ -2,8 +2,9 @@
  * GET /api/invoices/[id]
  * Get invoice by ID
  */
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { InvoiceService } from "@/lib/services/invoice-service";
+import { InvoiceRepository } from "@/lib/repositories/invoice-repository";
 import { dbManager } from "@/lib/database/database";
 import { updateInvoiceSchema } from "@/lib/validations/invoice.validation";
 
@@ -64,7 +65,7 @@ export async function PUT(
         {
           success: false,
           error: "Validation failed",
-          details: validation.error.errors,
+          details: validation.error.issues,
         },
         { status: 400 },
       );

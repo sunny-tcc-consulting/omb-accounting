@@ -4,9 +4,10 @@
  */
 import { NextResponse } from "next/server";
 import { CustomerService } from "@/lib/services/customer-service";
+import { CustomerRepository } from "@/lib/repositories/customer-repository";
 import { dbManager } from "@/lib/database/database";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const db = dbManager.getDatabase();
     const customerService = new CustomerService(new CustomerRepository(db));
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: "Validation failed",
-          details: validation.error.errors,
+          details: validation.error.issues,
         },
         { status: 400 },
       );

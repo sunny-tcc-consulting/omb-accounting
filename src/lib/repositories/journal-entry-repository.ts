@@ -4,7 +4,7 @@
  * Data access layer for JournalEntry entity.
  */
 
-import { SQLiteDatabase } from "../sqlite";
+import { SQLiteDatabase } from "../database/sqlite";
 import { JournalEntry } from "@/lib/types/database";
 import { v4 as uuidv4 } from "uuid";
 

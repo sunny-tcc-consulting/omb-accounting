@@ -4,7 +4,6 @@
  */
 
 import { BankStatement, BankTransaction } from "@/types";
-import { BankStatement, BankTransaction } from "@/types";
 import {
   getBankStatementById,
   getBankTransactionsByStatementId,

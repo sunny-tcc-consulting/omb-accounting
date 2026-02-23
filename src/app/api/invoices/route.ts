@@ -4,10 +4,10 @@
  */
 import { NextResponse } from "next/server";
 import { InvoiceService } from "@/lib/services/invoice-service";
+import { InvoiceRepository } from "@/lib/repositories/invoice-repository";
 import { dbManager } from "@/lib/database/database";
-import { createInvoiceSchema } from "@/lib/validations/invoice.validation";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const db = dbManager.getDatabase();
     const invoiceService = new InvoiceService(new InvoiceRepository(db));
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: "Validation failed",
-          details: validation.error.errors,
+          details: validation.error.issues,
         },
         { status: 400 },
       );

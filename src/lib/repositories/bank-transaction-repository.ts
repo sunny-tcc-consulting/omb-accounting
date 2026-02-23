@@ -4,7 +4,7 @@
  * Data access layer for BankTransaction entity.
  */
 
-import { SQLiteDatabase } from "../sqlite";
+import { SQLiteDatabase } from "../database/sqlite";
 import { BankTransaction } from "@/lib/types/database";
 import { v4 as uuidv4 } from "uuid";
 
@@ -44,7 +44,7 @@ export class BankTransactionRepository {
       amount: data.amount,
       type: data.type,
       status: data.status || "unmatched",
-      matched_to_journal_entry_id: data.matched_to_journal_entry_id || null,
+      matched_to_journal_entry_id: data.matched_to_journal_entry_id,
       created_at: now,
     };
 

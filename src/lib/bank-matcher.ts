@@ -3,7 +3,7 @@
  * Part of Phase 4.6: Bank Reconciliation
  */
 
-import { BankTransaction, ConfidenceScore } from "@/types";
+import { BankTransaction, JournalEntry, Invoice } from "@/types";
 import {
   getUnmatchedBankTransactions,
   getBankTransactionById,

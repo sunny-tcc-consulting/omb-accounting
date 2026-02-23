@@ -4,7 +4,7 @@
  * Data access layer for AuditLog entity.
  */
 
-import { SQLiteDatabase } from "../sqlite";
+import { SQLiteDatabase } from "../database/sqlite";
 import { AuditLog } from "@/lib/types/database";
 import { v4 as uuidv4 } from "uuid";
 
@@ -28,13 +28,13 @@ export class AuditLogRepository {
     const now = Date.now();
     const auditLog: AuditLog = {
       id: uuidv4(),
-      user_id: data.user_id || null,
+      user_id: data.user_id || "system",
       operation: data.operation,
       table_name: data.table_name,
       record_id: data.record_id,
-      changes: data.changes || null,
-      ip_address: data.ip_address || null,
-      user_agent: data.user_agent || null,
+      changes: data.changes,
+      ip_address: data.ip_address,
+      user_agent: data.user_agent,
       created_at: now,
     };
 

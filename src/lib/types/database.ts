@@ -97,6 +97,8 @@ export interface BankTransaction {
   type: "credit" | "debit";
   status: "unmatched" | "matched" | "rejected";
   matched_to_journal_entry_id?: string;
+  created_at: number;
+  updated_at?: number;
 }
 
 // Audit Log types

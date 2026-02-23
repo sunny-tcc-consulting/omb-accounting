@@ -2,7 +2,7 @@
  * GET /api/bank/transactions/[id]
  * Get bank transaction by ID
  */
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { BankTransactionService } from "@/lib/services/bank-transaction-service";
 import { BankTransactionRepository } from "@/lib/repositories/bank-transaction-repository";
 import { dbManager } from "@/lib/database/database";

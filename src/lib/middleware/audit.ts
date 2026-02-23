@@ -4,10 +4,9 @@
  * Provides audit logging utilities for API routes.
  */
 
-import { NextRequest, NextResponse } from "next/server";
 import { AuditLogService } from "@/lib/services/audit-log-service";
 import { AuditLogRepository } from "@/lib/repositories/audit-log-repository";
-import { dbManager } from "@/lib/database/database";
+import { dbManager } from "@/lib/database/database-server";
 
 /**
  * Log audit entry
@@ -26,7 +25,7 @@ export async function logAuditEntry(
   const auditLogService = new AuditLogService(auditLogRepository);
 
   auditLogService.create({
-    user_id,
+    user_id: user_id || "system",
     operation,
     table_name,
     record_id,

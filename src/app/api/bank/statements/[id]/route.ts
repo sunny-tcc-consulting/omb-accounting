@@ -2,7 +2,7 @@
  * GET /api/bank/statements/[id]
  * Get bank statement by ID
  */
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { BankStatementService } from "@/lib/services/bank-statement-service";
 import { BankStatementRepository } from "@/lib/repositories/bank-statement-repository";
 import { dbManager } from "@/lib/database/database";

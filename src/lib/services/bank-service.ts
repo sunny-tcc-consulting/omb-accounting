@@ -4,7 +4,7 @@
  * Business logic layer for Bank Reconciliation.
  */
 
-import { dbManager } from "@/lib/database/database";
+import { dbManager } from "@/lib/database/database-server";
 import { BankAccountRepository } from "@/lib/repositories/bank-account-repository";
 import { BankStatementRepository } from "@/lib/repositories/bank-statement-repository";
 import { BankTransactionRepository } from "@/lib/repositories/bank-transaction-repository";
@@ -56,7 +56,7 @@ export class BankService {
    * Get bank statements for an account
    */
   getBankStatements(bank_account_id: string): BankStatement[] {
-    return this.bankStatementRepository.findByAccount(bank_account_id);
+    return this.bankStatementRepository.findByBankAccount(bank_account_id);
   }
 
   /**
@@ -77,7 +77,8 @@ export class BankService {
    * Get bank transactions by type
    */
   getBankTransactionsByType(type: string): BankTransaction[] {
-    return this.bankTransactionRepository.findByType(type);
+    const all = this.bankTransactionRepository.findAll();
+    return all.filter((t) => t.type === type);
   }
 
   /**
@@ -85,7 +86,7 @@ export class BankService {
    */
   getBankTransactionsByAccount(bank_account_id: string): BankTransaction[] {
     const statements =
-      this.bankStatementRepository.findByAccount(bank_account_id);
+      this.bankStatementRepository.findByBankAccount(bank_account_id);
     const transactionIds = statements.map((s) => s.id);
     return this.bankTransactionRepository.findByStatement(
       transactionIds.join(","),
@@ -97,7 +98,7 @@ export class BankService {
    */
   getReconciliationSummary(bank_account_id: string): BankReconciliationResult {
     const statements =
-      this.bankStatementRepository.findByAccount(bank_account_id);
+      this.bankStatementRepository.findByBankAccount(bank_account_id);
     const transactionIds = statements.map((s) => s.id);
     const transactions = this.bankTransactionRepository.findByStatement(
       transactionIds.join(","),
@@ -132,7 +133,8 @@ export class BankService {
     id: string,
     status: "matched" | "unmatched" | "rejected",
   ): boolean {
-    return this.bankTransactionRepository.update(id, { status }).exists;
+    const result = this.bankTransactionRepository.update(id, { status });
+    return result !== undefined;
   }
 
   /**
@@ -142,16 +144,18 @@ export class BankService {
     id: string,
     matched_to_journal_entry_id: string,
   ): boolean {
-    return this.bankTransactionRepository.update(id, {
+    const result = this.bankTransactionRepository.update(id, {
       matched_to_journal_entry_id,
-    }).exists;
+    });
+    return result !== undefined;
   }
 
   /**
    * Update statement status
    */
   updateStatementStatus(id: string, status: "pending" | "processed"): boolean {
-    return this.bankStatementRepository.update(id, { status }).exists;
+    const result = this.bankStatementRepository.update(id, { status });
+    return result !== undefined;
   }
 
   /**

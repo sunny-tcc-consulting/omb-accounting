@@ -4,7 +4,7 @@
  * Data access layer for Session entity.
  */
 
-import { SQLiteDatabase } from "../sqlite";
+import { SQLiteDatabase } from "../database/sqlite";
 import { Session } from "@/lib/types/database";
 import { v4 as uuidv4 } from "uuid";
 

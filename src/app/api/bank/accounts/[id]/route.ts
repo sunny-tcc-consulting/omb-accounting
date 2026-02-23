@@ -2,7 +2,7 @@
  * GET /api/bank/accounts/[id]
  * Get bank account by ID
  */
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { BankAccountService } from "@/lib/services/bank-account-service";
 import { BankAccountRepository } from "@/lib/repositories/bank-account-repository";
 import { dbManager } from "@/lib/database/database";
