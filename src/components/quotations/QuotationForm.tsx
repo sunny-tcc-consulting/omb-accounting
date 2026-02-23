@@ -183,6 +183,14 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
     const newItems = [...items];
     newItems[index] = { ...newItems[index], [field]: value };
     setItems(newItems);
+
+    // Sync to form state for validation
+    const currentItems = watch("items") || [];
+    const updatedItems = [...currentItems];
+    if (updatedItems[index]) {
+      updatedItems[index] = { ...updatedItems[index], [field]: value };
+      setValue("items", updatedItems, { shouldValidate: true });
+    }
   };
 
   const calculateItemTotal = (item: QuotationItem) => {
@@ -461,24 +469,4 @@ export function QuotationForm({ onSubmit, onCancel }: QuotationFormProps) {
       </div>
     </form>
   );
-}
-
-// Debounce utility function (kept for future use)
-function debounce<T extends (...args: unknown[]) => void>(
-  func: T,
-  wait: number,
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null;
-
-  return function executedFunction(...args: Parameters<T>) {
-    const later = () => {
-      timeout = null;
-      func(...args);
-    };
-
-    if (timeout) {
-      clearTimeout(timeout);
-    }
-    timeout = setTimeout(later, wait);
-  };
 }
