@@ -1,11 +1,9 @@
 /**
- *
- * eslint-disable-next-line @typescript-eslint/no-explicit-any - Required for database operations
- */
-
  * Invoice Repository
  *
  * Data access layer for Invoice entity.
+ *
+ * eslint-disable-next-line @typescript-eslint/no-explicit-any - Required for database operations
  */
 
 import { SQLiteDatabase } from "../database/sqlite";

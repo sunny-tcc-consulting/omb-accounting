@@ -1,11 +1,9 @@
 /**
- *
- * eslint-disable-next-line @typescript-eslint/no-explicit-any - Required for database operations
- */
-
  * Bank Transaction Repository
  *
  * Data access layer for BankTransaction entity.
+ *
+ * eslint-disable-next-line @typescript-eslint/no-explicit-any - Required for database operations
  */
 
 import { SQLiteDatabase } from "../database/sqlite";

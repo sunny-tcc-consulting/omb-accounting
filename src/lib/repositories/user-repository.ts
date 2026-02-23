@@ -1,11 +1,9 @@
 /**
- *
- * eslint-disable-next-line @typescript-eslint/no-explicit-any - Required for database operations
- */
-
  * User Repository
  *
  * Data access layer for User entity.
+ *
+ * eslint-disable-next-line @typescript-eslint/no-explicit-any - Required for database operations
  */
 
 import { SQLiteDatabase } from "../database/sqlite";

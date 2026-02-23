@@ -1,11 +1,9 @@
 /**
- *
- * eslint-disable-next-line @typescript-eslint/no-explicit-any - Required for database operations
- */
-
  * Quotation Repository
  *
  * Data access layer for Quotation entity.
+ *
+ * eslint-disable-next-line @typescript-eslint/no-explicit-any - Required for database operations
  */
 
 import { SQLiteDatabase } from "../database/sqlite";
