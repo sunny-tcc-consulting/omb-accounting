@@ -2,7 +2,7 @@
  * GET /api/bank/accounts
  * Get all bank accounts
  */
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { BankAccountService } from "@/lib/services/bank-account-service";
 import { BankAccountRepository } from "@/lib/repositories/bank-account-repository";
 import { dbManager } from "@/lib/database/database";
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: "Validation failed",
-          details: validation.error.errors,
+          details: validation.error.issues,
         },
         { status: 400 },
       );

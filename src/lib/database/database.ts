@@ -10,7 +10,7 @@ import { Database as SQLiteDatabase } from "better-sqlite3";
 
 export type DatabaseConnection = SQLiteDatabase;
 
-export interface Database {
+export interface DatabaseInterface {
   /**
    * Execute a SQL query and return all rows
    */
@@ -38,27 +38,17 @@ export interface Database {
    * Close the database connection
    */
   close(): void;
-
-  /**
-   * Get the underlying database connection
-   */
-  getConnection(): DatabaseConnection;
 }
 
-export interface DatabaseConfig {
-  path?: string;
-  inMemory?: boolean;
-}
-
-/**
- * Database connection manager
- */
-export class DatabaseManager {
+export class DatabaseManager implements DatabaseInterface {
   private static instance: DatabaseManager;
-  private db: Database | null = null;
+  private db: SQLiteDatabase | null = null;
 
   private constructor() {}
 
+  /**
+   * Get singleton instance
+   */
   static getInstance(): DatabaseManager {
     if (!DatabaseManager.instance) {
       DatabaseManager.instance = new DatabaseManager();
@@ -67,25 +57,46 @@ export class DatabaseManager {
   }
 
   /**
-   * Initialize the database connection
+   * Initialize the database
    */
-  async initialize(config?: DatabaseConfig): Promise<Database> {
+  initialize(config?: DatabaseConfig): SQLiteDatabase {
     if (this.db) {
       return this.db;
     }
 
-    // Import here to avoid circular dependencies
-    const { SQLiteDatabase } = await import("./sqlite");
+    const dbPath = config?.path || process.cwd() + "/data/omb-accounting.db";
 
-    this.db = new SQLiteDatabase(config);
-    console.log("Database initialized successfully");
+    // Create data directory if it doesn't exist
+    const dataDir = dbPath.substring(0, dbPath.lastIndexOf("/"));
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+
+    // Open or create database
+    const options: Record<string, unknown> = { verbose: false };
+    if (config?.inMemory) {
+      options.memory = true;
+    }
+
+    this.db = new SQLiteDatabase(dbPath, options);
+
+    // Enable foreign keys
+    this.db.pragma("foreign_keys = ON");
+
+    // Set busy timeout (milliseconds)
+    this.db.pragma("busy_timeout = 5000");
+
+    console.log(
+      `Database connected: ${config?.inMemory ? "in-memory" : dbPath}`,
+    );
+
     return this.db;
   }
 
   /**
    * Get the database instance
    */
-  getDatabase(): Database {
+  getDatabase(): SQLiteDatabase {
     if (!this.db) {
       throw new Error("Database not initialized. Call initialize() first.");
     }
@@ -95,7 +106,7 @@ export class DatabaseManager {
   /**
    * Close the database connection
    */
-  async close(): Promise<void> {
+  close(): void {
     if (this.db) {
       this.db.close();
       this.db = null;

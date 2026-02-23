@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
     optimizeCss: true,
     // Optimize package imports
     optimizePackageImports: ["lucide-react", "sonner", "zod"],
+    // Allow better-sqlite3 in client components
+    serverComponentsExternalPackages: ["better-sqlite3"],
   },
 
   // Image optimization configuration

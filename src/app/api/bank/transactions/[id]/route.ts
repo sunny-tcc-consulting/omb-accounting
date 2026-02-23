@@ -10,10 +10,10 @@ import { updateBankTransactionSchema } from "@/lib/validations/bank.validation";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const db = dbManager.getDatabase();
     const bankTransactionService = new BankTransactionService(
@@ -54,10 +54,10 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
 
     // Validate input
@@ -67,7 +67,7 @@ export async function PUT(
         {
           success: false,
           error: "Validation failed",
-          details: validation.error.errors,
+          details: validation.error.issues,
         },
         { status: 400 },
       );
@@ -123,10 +123,10 @@ export async function PUT(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const db = dbManager.getDatabase();
     const bankTransactionService = new BankTransactionService(

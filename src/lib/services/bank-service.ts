@@ -4,6 +4,7 @@
  * Business logic layer for Bank Reconciliation.
  */
 
+import { dbManager } from "@/lib/database/database";
 import { BankAccountRepository } from "@/lib/repositories/bank-account-repository";
 import { BankStatementRepository } from "@/lib/repositories/bank-statement-repository";
 import { BankTransactionRepository } from "@/lib/repositories/bank-transaction-repository";
@@ -34,6 +35,14 @@ export class BankService {
    */
   getAllBankAccounts(): BankAccount[] {
     return this.bankAccountRepository.findAll();
+  }
+
+  /**
+   * Get primary bank account (first account with balance > 0)
+   */
+  getPrimaryBankAccount(): BankAccount | undefined {
+    const accounts = this.getAllBankAccounts();
+    return accounts.find((a) => a.balance > 0) || accounts[0];
   }
 
   /**
@@ -177,4 +186,32 @@ export class BankService {
         (t) => t.transaction_date >= startDate && t.transaction_date <= endDate,
       );
   }
+}
+
+/**
+ * Standalone function to get all bank accounts
+ */
+export function getAllBankAccounts(): BankAccount[] {
+  const db = dbManager.getDatabase();
+  const bankAccountRepository = new BankAccountRepository(db);
+  const bankAccountService = new BankService(
+    bankAccountRepository,
+    new BankStatementRepository(db),
+    new BankTransactionRepository(db),
+  );
+  return bankAccountService.getAllBankAccounts();
+}
+
+/**
+ * Standalone function to get primary bank account
+ */
+export function getPrimaryBankAccount(): BankAccount | undefined {
+  const db = dbManager.getDatabase();
+  const bankAccountRepository = new BankAccountRepository(db);
+  const bankAccountService = new BankService(
+    bankAccountRepository,
+    new BankStatementRepository(db),
+    new BankTransactionRepository(db),
+  );
+  return bankAccountService.getPrimaryBankAccount();
 }

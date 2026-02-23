@@ -4,13 +4,13 @@
  * Business logic layer for bank reconciliation.
  */
 
+import { dbManager } from "@/lib/database/database";
 import { JournalEntryRepository } from "@/lib/repositories/journal-entry-repository";
 import { BankStatementRepository } from "@/lib/repositories/bank-statement-repository";
 import { BankTransactionRepository } from "@/lib/repositories/bank-transaction-repository";
 import { QuotationRepository } from "@/lib/repositories/quotation-repository";
 import { InvoiceRepository } from "@/lib/repositories/invoice-repository";
-import { BankStatement } from "@/lib/types/database";
-import { BankTransaction } from "@/lib/types/database";
+import { BankStatement, BankTransaction } from "@/lib/types/database";
 import { v4 as uuidv4 } from "uuid";
 
 export interface ReconciliationSummary {
@@ -198,4 +198,22 @@ export class BankReconciliationService {
   getAllUnmatchedTransactions(): BankTransaction[] {
     return this.bankTransactionRepository.findUnmatched();
   }
+}
+
+/**
+ * Standalone function to get reconciliation history for a bank account
+ */
+export function getReconciliationHistory(
+  bank_account_id: string,
+): BankStatement[] {
+  const db = dbManager.getDatabase();
+  const bankStatementRepository = new BankStatementRepository(db);
+  const bankReconciliationService = new BankReconciliationService(
+    new JournalEntryRepository(db),
+    bankStatementRepository,
+    new BankTransactionRepository(db),
+    new QuotationRepository(db),
+    new InvoiceRepository(db),
+  );
+  return bankReconciliationService.getReconciliationHistory(bank_account_id);
 }
