@@ -1,0 +1,221 @@
+
+> omb-accounting@0.1.0 test
+> jest --passWithNoTests
+
+PASS src/components/layout/__tests__/navigation.test.tsx
+PASS src/components/ui/__tests__/empty-state.test.tsx
+PASS src/__tests__/pdf-generator.test.ts
+PASS src/components/ui/__tests__/skeleton.test.tsx
+PASS src/components/shared/__tests__/loading-spinner.test.tsx
+PASS src/__tests__/InvoiceContext.test.tsx
+PASS src/components/ui/__tests__/notification.test.tsx
+PASS src/__tests__/report-context.test.tsx
+PASS src/__tests__/report-generator.test.ts
+PASS src/components/ui/__tests__/error-boundary.test.tsx
+  ● Console
+
+    console.error
+      Error: Test error
+          at ThrowError (/home/tcc/.openclaw/workspace/omb-accounting/src/components/ui/__tests__/error-boundary.test.tsx:6:9)
+          at Object.react_stack_bottom_frame (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+          at renderWithHooks (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+          at updateFunctionComponent (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+          at beginWork (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+          at runWithFiberInDEV (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+          at performUnitOfWork (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+          at workLoopSync (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+          at renderRootSync (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+          at performWorkOnRoot (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/react-dom/cjs/react-dom-client.development.js:16583:35)
+          at performWorkOnRootViaSchedulerTask (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+          at flushActQueue (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/react/cjs/react.development.js:590:34)
+          at process.env.NODE_ENV.exports.act (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/react/cjs/react.development.js:884:10)
+          at /home/tcc/.openclaw/workspace/omb-accounting/node_modules/@testing-library/react/dist/act-compat.js:46:25
+          at renderRoot (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/@testing-library/react/dist/pure.js:189:26)
+          at render (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/@testing-library/react/dist/pure.js:291:10)
+          at Object.<anonymous> (/home/tcc/.openclaw/workspace/omb-accounting/src/components/ui/__tests__/error-boundary.test.tsx:20:11)
+          at Promise.finally.completed (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+          at _callCircusTest (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+          at _runTest (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+          at /home/tcc/.openclaw/workspace/omb-accounting/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+          at _runTestsForDescribeBlock (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+          at _runTestsForDescribeBlock (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+          at run (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+          at runAndTransformResultsToJestFormat (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+          at jestAdapter (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/jest-circus/build/runner.js:101:19)
+          at runTestInternal (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/jest-runner/build/index.js:275:16)
+          at runTest (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/jest-runner/build/index.js:343:7) {
+        [stack]: [Getter/Setter],
+        [message]: 'Test error'
+      }
+      
+      The above error occurred in the <ThrowError> component.
+      
+      React will try to recreate this component tree from scratch using the error boundary you provided, ErrorBoundary.
+
+      18 |
+      19 |   it("catches errors and renders fallback", () => {
+    > 20 |     render(
+         |           ^
+      21 |       <ErrorBoundary>
+      22 |         <ThrowError />
+      23 |       </ErrorBoundary>,
+
+      at defaultOnCaughtError (node_modules/react-dom/cjs/react-dom-client.development.js:9410:17)
+      at logCaughtError (node_modules/react-dom/cjs/react-dom-client.development.js:9446:9)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at ErrorBoundary.inst.componentDidCatch.update.callback (node_modules/react-dom/cjs/react-dom-client.development.js:9493:11)
+      at callCallback (node_modules/react-dom/cjs/react-dom-client.development.js:7423:16)
+      at commitCallbacks (node_modules/react-dom/cjs/react-dom-client.development.js:7443:11)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at commitClassCallbacks (node_modules/react-dom/cjs/react-dom-client.development.js:13377:11)
+      at commitLayoutEffectOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:14026:25)
+      at recursivelyTraverseLayoutEffects (node_modules/react-dom/cjs/react-dom-client.development.js:15159:11)
+      at commitLayoutEffectOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:14031:11)
+      at flushLayoutEffects (node_modules/react-dom/cjs/react-dom-client.development.js:18138:15)
+      at commitRoot (node_modules/react-dom/cjs/react-dom-client.development.js:17954:9)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16667:15)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:590:34)
+      at process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:884:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at Object.<anonymous> (src/components/ui/__tests__/error-boundary.test.tsx:20:11)
+
+    console.error
+      Error caught by ErrorBoundary: Error: Test error
+          at ThrowError (/home/tcc/.openclaw/workspace/omb-accounting/src/components/ui/__tests__/error-boundary.test.tsx:6:9)
+          at Object.react_stack_bottom_frame (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+          at renderWithHooks (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+          at updateFunctionComponent (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+          at beginWork (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+          at runWithFiberInDEV (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+          at performUnitOfWork (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+          at workLoopSync (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+          at renderRootSync (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/react-dom/cjs/react-dom-client.development.js:17450:11)
+          at performWorkOnRoot (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/react-dom/cjs/react-dom-client.development.js:16583:35)
+          at performWorkOnRootViaSchedulerTask (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+          at flushActQueue (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/react/cjs/react.development.js:590:34)
+          at process.env.NODE_ENV.exports.act (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/react/cjs/react.development.js:884:10)
+          at /home/tcc/.openclaw/workspace/omb-accounting/node_modules/@testing-library/react/dist/act-compat.js:46:25
+          at renderRoot (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/@testing-library/react/dist/pure.js:189:26)
+          at render (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/@testing-library/react/dist/pure.js:291:10)
+          at Object.<anonymous> (/home/tcc/.openclaw/workspace/omb-accounting/src/components/ui/__tests__/error-boundary.test.tsx:20:11)
+          at Promise.finally.completed (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+          at _callCircusTest (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+          at _runTest (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+          at /home/tcc/.openclaw/workspace/omb-accounting/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+          at _runTestsForDescribeBlock (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+          at _runTestsForDescribeBlock (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+          at run (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+          at runAndTransformResultsToJestFormat (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+          at jestAdapter (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/jest-circus/build/runner.js:101:19)
+          at runTestInternal (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/jest-runner/build/index.js:275:16)
+          at runTest (/home/tcc/.openclaw/workspace/omb-accounting/node_modules/jest-runner/build/index.js:343:7) {
+        componentStack: '\n' +
+          '    at ThrowError (/home/tcc/.openclaw/workspace/omb-accounting/src/components/ui/__tests__/error-boundary.test.tsx:6:9)\n' +
+          '    at ErrorBoundary (/home/tcc/.openclaw/workspace/omb-accounting/src/components/ui/error-boundary.tsx:22:5)'
+      }
+
+      35 |   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+      36 |     // Log error to console for debugging
+    > 37 |     console.error('Error caught by ErrorBoundary:', error, errorInfo);
+         |             ^
+      38 |     this.setState({ errorInfo });
+      39 |   }
+      40 |
+
+      at ErrorBoundary.error [as componentDidCatch] (src/components/ui/error-boundary.tsx:37:13)
+      at Object.react_stack_bottom_frame (node_modules/react-dom/cjs/react-dom-client.development.js:25959:20)
+      at ErrorBoundary.inst.componentDidCatch.update.callback (node_modules/react-dom/cjs/react-dom-client.development.js:9504:11)
+      at callCallback (node_modules/react-dom/cjs/react-dom-client.development.js:7423:16)
+      at commitCallbacks (node_modules/react-dom/cjs/react-dom-client.development.js:7443:11)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at commitClassCallbacks (node_modules/react-dom/cjs/react-dom-client.development.js:13377:11)
+      at commitLayoutEffectOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:14026:25)
+      at recursivelyTraverseLayoutEffects (node_modules/react-dom/cjs/react-dom-client.development.js:15159:11)
+      at commitLayoutEffectOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:14031:11)
+      at flushLayoutEffects (node_modules/react-dom/cjs/react-dom-client.development.js:18138:15)
+      at commitRoot (node_modules/react-dom/cjs/react-dom-client.development.js:17954:9)
+      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:16667:15)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:18957:7)
+      at flushActQueue (node_modules/react/cjs/react.development.js:590:34)
+      at process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:884:10)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at Object.<anonymous> (src/components/ui/__tests__/error-boundary.test.tsx:20:11)
+
+PASS src/app/api/__tests__/api-integration.test.ts
+PASS src/lib/services/__tests__/service-validation.test.ts
+PASS src/__tests__/quotation-utils.test.ts
+  ● Console
+
+    console.error
+      Quotation is required for conversion
+
+      152 | export function validateQuotationForConversion(quotation: Quotation): boolean {
+      153 |   if (!quotation) {
+    > 154 |     console.error('Quotation is required for conversion');
+          |             ^
+      155 |     return false;
+      156 |   }
+      157 |
+
+      at error (src/lib/quotation-utils.ts:154:13)
+      at Object.<anonymous> (src/__tests__/quotation-utils.test.ts:189:52)
+
+    console.error
+      Quotation must have a customer
+
+      157 |
+      158 |   if (!quotation.customerId) {
+    > 159 |     console.error('Quotation must have a customer');
+          |             ^
+      160 |     return false;
+      161 |   }
+      162 |
+
+      at error (src/lib/quotation-utils.ts:159:13)
+      at Object.<anonymous> (src/__tests__/quotation-utils.test.ts:196:52)
+
+    console.error
+      Quotation must have at least one item
+
+      162 |
+      163 |   if (!quotation.items || quotation.items.length === 0) {
+    > 164 |     console.error('Quotation must have at least one item');
+          |             ^
+      165 |     return false;
+      166 |   }
+      167 |
+
+      at error (src/lib/quotation-utils.ts:164:13)
+      at Object.<anonymous> (src/__tests__/quotation-utils.test.ts:203:52)
+
+    console.error
+      Quotation must have a quotation number
+
+      167 |
+      168 |   if (!quotation.quotationNumber) {
+    > 169 |     console.error('Quotation must have a quotation number');
+          |             ^
+      170 |     return false;
+      171 |   }
+      172 |
+
+      at error (src/lib/quotation-utils.ts:169:13)
+      at Object.<anonymous> (src/__tests__/quotation-utils.test.ts:210:52)
+
+PASS src/lib/repositories/__tests__/repository-validation.test.ts
+PASS src/lib/__tests__/a11y.test.ts
+
+Test Suites: 15 passed, 15 total
+Tests:       239 passed, 239 total
+Snapshots:   0 total
+Time:        1.233 s
+Ran all test suites.
