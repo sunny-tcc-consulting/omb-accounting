@@ -89,3 +89,73 @@ test.describe('Customer New Page', () => {
     // May or may not navigate depending on router.back() behavior
   });
 });
+
+test.describe('Quotations Page', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/quotations');
+    await waitForApp(page);
+  });
+
+  test('should load quotations list', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: /Quotations/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Create Quotation/i })).toBeVisible();
+  });
+
+  test('should navigate to new quotation form', async ({ page }) => {
+    await page.getByRole('link', { name: /Create Quotation/i }).click();
+    await waitForApp(page);
+    
+    await expect(page).toHaveURL(/quotations\/new/);
+    await expect(page.getByRole('heading', { name: /Create Quotation/i })).toBeVisible();
+  });
+});
+
+test.describe('Dashboard Page', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    await waitForApp(page);
+  });
+
+  test('should load dashboard successfully', async ({ page }) => {
+    await expect(page).toHaveTitle(/omb-accounting/);
+    
+    // Check main heading
+    await expect(page.getByRole('heading', { name: /Financial Overview/i })).toBeVisible();
+    
+    // Check navigation exists
+    await expect(page.locator('nav').first()).toBeVisible();
+    
+    // Take screenshot
+    await page.screenshot({ 
+      path: `screenshots/dashboard-${Date.now()}.png`,
+      fullPage: true 
+    });
+  });
+
+  test('should be responsive on mobile', async ({ page }) => {
+    // Set mobile viewport
+    await page.setViewportSize({ width: 375, height: 667 });
+    await waitForApp(page);
+    
+    // Dashboard should still be usable
+    await expect(page.getByRole('heading', { name: /Financial Overview/i })).toBeVisible();
+    
+    await page.screenshot({ 
+      path: `screenshots/dashboard-mobile-${Date.now()}.png`,
+      fullPage: true 
+    });
+  });
+});
+
+test.describe('Accessibility', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    await waitForApp(page);
+  });
+
+  test('should have skip link for accessibility', async ({ page }) => {
+    // Check for skip link (it should be visible on focus)
+    const skipLink = page.getByRole('link', { name: /Skip to main content/i });
+    await expect(skipLink).toBeInViewport();
+  });
+});
