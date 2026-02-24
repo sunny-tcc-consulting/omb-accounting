@@ -142,11 +142,24 @@ export function QuotationProvider({ children }: { children: React.ReactNode }) {
   };
 
   const generateQuotationNumber = (): string => {
-    const lastNumber = quotations.length > 0
-      ? parseInt(quotations[0].quotationNumber.split('-')[1])
-      : 0;
-    const newNumber = lastNumber + 1;
-    return `QT-${String(newNumber).padStart(6, '0')}`;
+    // Get the year for the quotation number
+    const year = new Date().getFullYear();
+
+    // Find the highest existing number for this year
+    let maxNumber = 0;
+    quotations.forEach((q) => {
+      // Format: QT-2025-00001
+      const parts = q.quotationNumber.split('-');
+      if (parts.length === 3 && parseInt(parts[1]) === year) {
+        const num = parseInt(parts[2]);
+        if (num > maxNumber) {
+          maxNumber = num;
+        }
+      }
+    });
+
+    const newNumber = maxNumber + 1;
+    return `QT-${year}-${String(newNumber).padStart(5, '0')}`;
   };
 
   const convertToInvoice = (quotationId: string): Invoice | undefined => {

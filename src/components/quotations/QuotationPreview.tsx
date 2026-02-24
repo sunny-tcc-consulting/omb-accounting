@@ -59,13 +59,13 @@ export function QuotationPreview({ quotation }: QuotationPreviewProps) {
         y,
       );
       doc.text(
-        `   小計: ${formatCurrency(calculateItemTotal(item))}`,
+        `   Subtotal: ${formatCurrency(calculateItemTotal(item))}`,
         20,
         y + 8,
       );
-      doc.text(`   折扣: ${item.discount || 0}%`, 20, y + 16);
+      doc.text(`   Discount: ${item.discount || 0}%`, 20, y + 16);
       doc.text(
-        `   稅金: ${formatCurrency(calculateItemTotal(item) * (item.taxRate || 0.1))}`,
+        `   Tax: ${formatCurrency(calculateItemTotal(item) * (item.taxRate || 0.1))}`,
         20,
         y + 24,
       );
