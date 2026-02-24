@@ -15,6 +15,17 @@ export interface CreateQuotationInput {
   quotation_number: string;
   status?: "draft" | "sent" | "accepted" | "rejected";
   total_amount?: number;
+  customer_name?: string;
+  customer_email?: string;
+  customer_phone?: string;
+  currency?: string;
+  subtotal?: number;
+  tax?: number;
+  items?: string; // JSON string
+  validity_period?: number;
+  issued_date?: number;
+  terms_and_conditions?: string;
+  notes?: string;
 }
 
 export interface UpdateQuotationInput {
@@ -22,6 +33,17 @@ export interface UpdateQuotationInput {
   quotation_number?: string;
   status?: "draft" | "sent" | "accepted" | "rejected";
   total_amount?: number;
+  customer_name?: string;
+  customer_email?: string;
+  customer_phone?: string;
+  currency?: string;
+  subtotal?: number;
+  tax?: number;
+  items?: string; // JSON string
+  validity_period?: number;
+  issued_date?: number;
+  terms_and_conditions?: string;
+  notes?: string;
 }
 
 export class QuotationRepository {
@@ -38,18 +60,45 @@ export class QuotationRepository {
       quotation_number: data.quotation_number,
       status: data.status || "draft",
       total_amount: data.total_amount || 0,
+      customer_name: data.customer_name || null,
+      customer_email: data.customer_email || null,
+      customer_phone: data.customer_phone || null,
+      currency: data.currency || "CNY",
+      subtotal: data.subtotal || 0,
+      tax: data.tax || 0,
+      items: data.items || null,
+      validity_period: data.validity_period || null,
+      issued_date: data.issued_date || null,
+      terms_and_conditions: data.terms_and_conditions || null,
+      notes: data.notes || null,
       created_at: now,
       updated_at: now,
     };
 
     (this.db as any).run(
-      "INSERT INTO quotations (id, customer_id, quotation_number, status, total_amount, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      `INSERT INTO quotations (
+        id, customer_id, quotation_number, status, total_amount,
+        customer_name, customer_email, customer_phone, currency, subtotal, tax,
+        items, validity_period, issued_date, terms_and_conditions, notes,
+        created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         quotation.id,
         quotation.customer_id,
         quotation.quotation_number,
         quotation.status,
         quotation.total_amount,
+        quotation.customer_name,
+        quotation.customer_email,
+        quotation.customer_phone,
+        quotation.currency,
+        quotation.subtotal,
+        quotation.tax,
+        quotation.items,
+        quotation.validity_period,
+        quotation.issued_date,
+        quotation.terms_and_conditions,
+        quotation.notes,
         quotation.created_at,
         quotation.updated_at,
       ],

@@ -14,13 +14,13 @@ export default function EditQuotationPage() {
   if (!quotation) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">報價單不存在</p>
+        <p className="text-gray-500">Quotation not found</p>
       </div>
     );
   }
 
   const handleSuccess = (updatedQuotation: any) => {
-    toast.success('報價單已更新');
+    toast.success('Quotation updated successfully');
     router.push(`/quotations/${quotation.id}`);
   };
 
@@ -30,7 +30,7 @@ export default function EditQuotationPage() {
 
   return (
     <div className="max-w-4xl mx-auto py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">編輯報價單</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">Edit Quotation</h1>
       <QuotationForm onSubmit={handleSuccess} onCancel={handleCancel} />
     </div>
   );

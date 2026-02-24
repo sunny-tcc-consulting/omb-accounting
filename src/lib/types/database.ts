@@ -33,6 +33,18 @@ export interface Quotation {
   quotation_number: string;
   status: "draft" | "sent" | "accepted" | "rejected";
   total_amount: number;
+  // Additional fields
+  customer_name?: string | null;
+  customer_email?: string | null;
+  customer_phone?: string | null;
+  currency?: string | null;
+  subtotal?: number | null;
+  tax?: number | null;
+  items?: string | null; // JSON string
+  validity_period?: number | null;
+  issued_date?: number | null;
+  terms_and_conditions?: string | null;
+  notes?: string | null;
   created_at: number;
   updated_at: number;
 }

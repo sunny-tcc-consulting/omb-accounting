@@ -17,18 +17,18 @@ export default function QuotationDetailPage() {
   if (!quotation) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">報價單不存在</p>
+        <p className="text-gray-500">Quotation not found</p>
         <Button variant="outline" className="mt-4" onClick={() => router.push('/quotations')}>
-          返回列表
+          Back to List
         </Button>
       </div>
     );
   }
 
   const handleDelete = () => {
-    if (confirm(`確定要刪除此報價單嗎？`)) {
+    if (confirm(`Are you sure you want to delete this quotation?`)) {
       // Delete logic would go here
-      toast.success('報價單已刪除');
+      toast.success('Quotation deleted successfully');
       router.push('/quotations');
     }
   };
@@ -42,7 +42,7 @@ export default function QuotationDetailPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">報價單詳情</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Quotation Details</h1>
             <p className="text-gray-600">{quotation.quotationNumber}</p>
           </div>
         </div>
@@ -50,18 +50,18 @@ export default function QuotationDetailPage() {
           <Link href={`/quotations/${quotation.id}/edit`}>
             <Button variant="outline">
               <Edit className="h-4 w-4 mr-2" />
-              編輯
+              Edit
             </Button>
           </Link>
           <Link href={`/quotations/${quotation.id}/convert`}>
             <Button variant="default" className="bg-blue-600 hover:bg-blue-700">
               <ArrowRightCircle className="h-4 w-4 mr-2" />
-              轉換為發票
+              Convert to Invoice
             </Button>
           </Link>
           <Button variant="destructive" onClick={handleDelete}>
             <Trash2 className="h-4 w-4 mr-2" />
-            刪除
+            Delete
           </Button>
         </div>
       </div>

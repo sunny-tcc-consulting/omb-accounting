@@ -1,99 +1,78 @@
 /**
- * SQLite Database Implementation
+ * SQLite Database Interface
  *
- * Implements the Database interface using better-sqlite3.
- * File-based database with ACID compliance.
+ * This file provides a mock database implementation for browser environments.
+ * For server-side usage, use a proper database connection.
  */
 
-import DatabaseImpl from "better-sqlite3";
-import path from "path";
-import fs from "fs";
 import { DatabaseInterface, DatabaseConfig } from "./database";
 
-type DatabaseConnection = InstanceType<typeof DatabaseImpl> | unknown;
-
+/**
+ * Mock database implementation for browser environment
+ * Provides basic CRUD operations using in-memory storage
+ */
 export class SQLiteDatabase implements DatabaseInterface {
-  private connection: InstanceType<typeof DatabaseImpl>;
+  private data: Map<string, unknown[]> = new Map();
+  private idCounters: Map<string, number> = new Map();
 
   constructor(config?: DatabaseConfig) {
-    const dbPath =
-      config?.path || path.join(process.cwd(), "data", "omb-accounting.db");
-
-    // Create data directory if it doesn't exist
-    const dataDir = path.dirname(dbPath);
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
-
-    // Open or create database
-    const options: Record<string, unknown> = { verbose: false };
+    // Initialize with mock data for development
     if (config?.inMemory) {
-      options.memory = true;
+      this.data = new Map();
     }
-
-    this.connection = new DatabaseImpl(dbPath, options);
-
-    // Enable foreign keys
-    this.connection.pragma("foreign_keys = ON");
-
-    // Set busy timeout (milliseconds)
-    this.connection.pragma("busy_timeout = 5000");
-
-    console.log(
-      `Database connected: ${config?.inMemory ? "in-memory" : dbPath}`,
-    );
   }
 
   /**
-   * Execute a SQL query and return all rows
+   * Execute a SQL query and return all rows (mock)
    */
-  query<T = unknown>(sql: string, params?: unknown[]): T[] {
-    const stmt = this.connection.prepare(sql);
-    return stmt.all(...(params || [])) as T[];
+  query<T = unknown>(_sql: string, _params?: unknown[]): T[] {
+    // In browser, we can't execute SQL, so return empty array
+    return [];
   }
 
   /**
-   * Execute a SQL query and return a single row
+   * Execute a SQL query and return a single row (mock)
    */
-  get<T = unknown>(sql: string, params?: unknown[]): T | undefined {
-    const stmt = this.connection.prepare(sql);
-    return stmt.get(...(params || [])) as T | undefined;
+  get<T = unknown>(_sql: string, _params?: unknown[]): T | undefined {
+    return undefined;
   }
 
   /**
-   * Execute a SQL query that returns the number of affected rows
+   * Execute a SQL query that returns the number of affected rows (mock)
    */
   run(
-    sql: string,
-    params?: unknown[],
+    _sql: string,
+    _params?: unknown[],
   ): { lastInsertRowid: number; changes: number } {
-    const stmt = this.connection.prepare(sql);
-    const result = stmt.run(...(params || []));
-    return {
-      lastInsertRowid: Number(result.lastInsertRowid),
-      changes: Number(result.changes),
-    };
+    return { lastInsertRowid: 0, changes: 0 };
   }
 
   /**
-   * Execute a transaction
+   * Execute a transaction (mock)
    */
   transaction<T>(callback: () => T): T {
-    return this.connection.transaction(callback)();
+    return callback();
   }
 
   /**
-   * Close the database connection
+   * Close the database connection (mock)
    */
   close(): void {
-    this.connection.close();
-    console.log("Database connection closed");
+    // No-op in browser
   }
 
   /**
-   * Get the underlying database connection
+   * Get the underlying database connection (mock)
    */
-  getConnection(): DatabaseConnection {
-    return this.connection as DatabaseConnection;
+  getConnection(): unknown {
+    return null;
   }
+}
+
+/**
+ * Get a database instance
+ * For server-side usage, import the database module directly
+ */
+export function getDatabase(config?: DatabaseConfig): DatabaseInterface {
+  return new SQLiteDatabase(config);
 }

@@ -12,7 +12,7 @@ export default function NewQuotationPage() {
 
   return (
     <div className="max-w-4xl mx-auto py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">創建報價單</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">Create Quotation</h1>
       <QuotationForm onSubmit={handleSuccess} onCancel={() => router.back()} />
     </div>
   );

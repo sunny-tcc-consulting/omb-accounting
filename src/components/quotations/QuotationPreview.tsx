@@ -17,17 +17,17 @@ export function QuotationPreview({ quotation }: QuotationPreviewProps) {
 
   const handlePrint = () => {
     window.print();
-    toast.success("正在打印報價單...");
+    toast.success("Printing quotation...");
   };
 
   const handleDownload = () => {
     try {
       // Using export function for PDF generation
       exportQuotationPDF(quotation);
-      toast.success("報價單 PDF 下載成功！");
+      toast.success("Quotation PDF downloaded successfully!");
     } catch (error) {
       console.error("Error generating PDF:", error);
-      toast.error("PDF 生成失敗，請重試");
+      toast.error("PDF generation failed, please try again");
     }
   };
 
@@ -35,20 +35,20 @@ export function QuotationPreview({ quotation }: QuotationPreviewProps) {
   const exportQuotationPDF = (quotationData: Quotation) => {
     const doc = new jsPDF();
     doc.setFontSize(22);
-    doc.text("報價單", 20, 20);
+    doc.text("QUOTATION", 20, 20);
     doc.setFontSize(10);
-    doc.text(`報價單號: ${quotationData.quotationNumber}`, 20, 30);
-    doc.text(`日期: ${formatDate(quotationData.issuedDate)}`, 20, 38);
-    doc.text(`有效期至: ${formatDate(quotationData.validityPeriod)}`, 20, 46);
-    doc.text(`客戶: ${quotationData.customerName}`, 20, 54);
-    doc.text(`客戶電郵: ${quotationData.customerEmail}`, 20, 62);
+    doc.text(`Quotation #: ${quotationData.quotationNumber}`, 20, 30);
+    doc.text(`Date: ${formatDate(quotationData.issuedDate)}`, 20, 38);
+    doc.text(`Valid Until: ${formatDate(quotationData.validityPeriod)}`, 20, 46);
+    doc.text(`Customer: ${quotationData.customerName}`, 20, 54);
+    doc.text(`Email: ${quotationData.customerEmail}`, 20, 62);
     if (quotationData.customerPhone) {
-      doc.text(`客戶電話: ${quotationData.customerPhone}`, 20, 70);
+      doc.text(`Phone: ${quotationData.customerPhone}`, 20, 70);
     }
-    doc.text(`備註: ${quotationData.notes || "無"}`, 20, 78);
+    doc.text(`Notes: ${quotationData.notes || "None"}`, 20, 78);
 
     doc.setFontSize(14);
-    doc.text("商品明細:", 20, 95);
+    doc.text("Line Items:", 20, 95);
 
     let y = 105;
     quotationData.items.forEach((item: QuotationItem, _index: number) => {
@@ -74,10 +74,10 @@ export function QuotationPreview({ quotation }: QuotationPreviewProps) {
 
     const total = calculateTotal(quotationData);
     doc.setFontSize(14);
-    doc.text("總計:", 20, y + 10);
-    doc.text(`報價總額: ${formatCurrency(total)}`, 20, y + 20);
-    doc.text(`稅金: ${formatCurrency(total * 0.1)}`, 20, y + 28);
-    doc.text(`總計: ${formatCurrency(total * 1.1)}`, 20, y + 36);
+    doc.text("Total:", 20, y + 10);
+    doc.text(`Quotation Total: ${formatCurrency(total)}`, 20, y + 20);
+    doc.text(`Tax: ${formatCurrency(total * 0.1)}`, 20, y + 28);
+    doc.text(`Grand Total: ${formatCurrency(total * 1.1)}`, 20, y + 36);
 
     doc.save(`quotation-${quotationData.quotationNumber}.pdf`);
   };
@@ -100,15 +100,15 @@ export function QuotationPreview({ quotation }: QuotationPreviewProps) {
       <div className="border-b pb-6 mb-8">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">報價單</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">QUOTATION</h1>
             <p className="text-gray-600">{quotation.quotationNumber}</p>
           </div>
           <div className="text-right">
             <p className="text-sm text-gray-600">
-              日期: {formatDate(quotation.issuedDate)}
+              Date: {formatDate(quotation.issuedDate)}
             </p>
             <p className="text-sm text-gray-600">
-              有效期至: {formatDate(quotation.validityPeriod)}
+              Valid Until: {formatDate(quotation.validityPeriod)}
             </p>
           </div>
         </div>
@@ -117,7 +117,7 @@ export function QuotationPreview({ quotation }: QuotationPreviewProps) {
       {/* Customer Info */}
       <div className="grid grid-cols-2 gap-8 mb-8">
         <div>
-          <h3 className="font-semibold text-gray-900 mb-2">客戶信息</h3>
+          <h3 className="font-semibold text-gray-900 mb-2">Customer Info</h3>
           <p className="text-gray-600">{quotation.customerName}</p>
           <p className="text-sm text-gray-500">{quotation.customerEmail}</p>
           {quotation.customerPhone && (
@@ -126,7 +126,7 @@ export function QuotationPreview({ quotation }: QuotationPreviewProps) {
         </div>
 
         <div className="text-right">
-          <h3 className="font-semibold text-gray-900 mb-2">公司信息</h3>
+          <h3 className="font-semibold text-gray-900 mb-2">Company Info</h3>
           <p className="text-gray-600">OMB Accounting</p>
           <p className="text-sm text-gray-500">
             123 Business Street, City, Country
@@ -141,19 +141,19 @@ export function QuotationPreview({ quotation }: QuotationPreviewProps) {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                描述
+                Description
               </th>
               <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                數量
+                Qty
               </th>
               <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                單價
+                Unit Price
               </th>
               <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                折扣
+                Discount
               </th>
               <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                小計
+                Subtotal
               </th>
             </tr>
           </thead>
@@ -185,19 +185,19 @@ export function QuotationPreview({ quotation }: QuotationPreviewProps) {
       <div className="flex justify-end mb-8">
         <div className="w-64 space-y-2">
           <div className="flex justify-between text-sm">
-            <span className="text-gray-600">小計:</span>
+            <span className="text-gray-600">Subtotal:</span>
             <span className="text-gray-900">
               {formatCurrency(quotation.subtotal || 0)}
             </span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-gray-600">稅費 (10%):</span>
+            <span className="text-gray-600">Tax (10%):</span>
             <span className="text-gray-900">
               {formatCurrency((quotation.subtotal || 0) * 0.1)}
             </span>
           </div>
           <div className="flex justify-between text-xl font-bold border-t pt-2">
-            <span className="text-gray-900">總計:</span>
+            <span className="text-gray-900">Total:</span>
             <span className="text-green-600">
               {formatCurrency(quotation.total || 0)}
             </span>
@@ -208,7 +208,7 @@ export function QuotationPreview({ quotation }: QuotationPreviewProps) {
       {/* Terms */}
       {quotation.termsAndConditions && (
         <div className="border-t pt-6">
-          <h3 className="font-semibold text-gray-900 mb-2">付款條件</h3>
+          <h3 className="font-semibold text-gray-900 mb-2">Payment Terms</h3>
           <p className="text-sm text-gray-600">
             {quotation.termsAndConditions}
           </p>
@@ -218,7 +218,7 @@ export function QuotationPreview({ quotation }: QuotationPreviewProps) {
       {/* Notes */}
       {quotation.notes && (
         <div className="border-t pt-6">
-          <h3 className="font-semibold text-gray-900 mb-2">備註</h3>
+          <h3 className="font-semibold text-gray-900 mb-2">Notes</h3>
           <p className="text-sm text-gray-600">{quotation.notes}</p>
         </div>
       )}
@@ -227,11 +227,11 @@ export function QuotationPreview({ quotation }: QuotationPreviewProps) {
       <div className="flex gap-3 mt-8 pt-6 border-t">
         <Button variant="outline" onClick={handlePrint}>
           <Printer className="h-4 w-4 mr-2" />
-          打印
+          Print
         </Button>
         <Button variant="outline" onClick={handleDownload}>
           <Download className="h-4 w-4 mr-2" />
-          下載 PDF
+          Download PDF
         </Button>
       </div>
     </div>

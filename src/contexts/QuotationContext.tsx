@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Quotation, QuotationFilters, Invoice } from '@/types';
+import { Quotation, QuotationFilters, Invoice, QuotationItem } from '@/types';
 import { generateQuotations } from '@/lib/mock-data';
 import { convertQuotationToInvoice, validateQuotationForConversion } from '@/lib/quotation-utils';
 
@@ -24,37 +24,94 @@ export const QuotationContext = createContext<QuotationContextType | undefined>(
 export function QuotationProvider({ children }: { children: React.ReactNode }) {
   const [quotations, setQuotations] = useState<Quotation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
-  // Load initial data
+  // Load initial data only once
   useEffect(() => {
-    loadInitialData();
-  }, []);
+    if (!initialized) {
+      loadInitialData();
+      setInitialized(true);
+    }
+  }, [initialized]);
 
   const loadInitialData = () => {
     setLoading(true);
     try {
-      // Generate mock quotations
-      const newQuotations = generateQuotations(20);
-      setQuotations(newQuotations);
+      // Load from localStorage first
+      const savedQuotations = typeof window !== 'undefined'
+        ? localStorage.getItem('quotations')
+        : null;
+
+      if (savedQuotations) {
+        const parsed = JSON.parse(savedQuotations);
+        setQuotations(parsed.map((q: any) => ({
+          ...q,
+          issuedDate: new Date(q.issuedDate),
+          validityPeriod: new Date(q.validityPeriod),
+          createdAt: new Date(q.createdAt),
+          updatedAt: new Date(q.updatedAt),
+        })));
+      } else {
+        // Generate mock quotations if none exist
+        const newQuotations = generateQuotations(10);
+        setQuotations(newQuotations);
+        // Save to localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('quotations', JSON.stringify(newQuotations));
+        }
+      }
     } catch (error) {
       console.error('Failed to load initial data:', error);
+      // Fallback to mock data on error
+      const newQuotations = generateQuotations(10);
+      setQuotations(newQuotations);
     } finally {
       setLoading(false);
     }
   };
 
   const addQuotation = (quotation: Quotation) => {
-    setQuotations((prev) => [quotation, ...prev]);
+    const updatedQuotations = [quotation, ...quotations];
+    setQuotations(updatedQuotations);
+
+    // Save to localStorage
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('quotations', JSON.stringify(updatedQuotations));
+      } catch (error) {
+        console.error('Failed to save to localStorage:', error);
+      }
+    }
   };
 
   const updateQuotation = (id: string, updates: Partial<Quotation>) => {
-    setQuotations((prev) =>
-      prev.map((q) => (q.id === id ? { ...q, ...updates } : q))
+    const updatedQuotations = quotations.map((q) =>
+      q.id === id ? { ...q, ...updates, updatedAt: new Date() } : q
     );
+    setQuotations(updatedQuotations);
+
+    // Save to localStorage
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('quotations', JSON.stringify(updatedQuotations));
+      } catch (error) {
+        console.error('Failed to save to localStorage:', error);
+      }
+    }
   };
 
   const deleteQuotation = (id: string) => {
-    setQuotations((prev) => prev.filter((q) => q.id !== id));
+    const updatedQuotations = quotations.filter((q) => q.id !== id);
+    setQuotations(updatedQuotations);
+
+    // Save to localStorage
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('quotations', JSON.stringify(updatedQuotations));
+      } catch (error) {
+        console.error('Failed to save to localStorage:', error);
+      }
+    }
   };
 
   const getFilteredQuotations = (filters?: QuotationFilters): Quotation[] => {

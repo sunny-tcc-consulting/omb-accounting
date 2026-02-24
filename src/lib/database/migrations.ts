@@ -250,9 +250,43 @@ export const migration_001_initial: Migration = {
 };
 
 /**
+ * Migration 002: Add missing quotation fields
+ */
+export const migration_002_add_quotation_fields: Migration = {
+  version: 2,
+  name: "add_quotation_fields",
+  up: (db: SQLiteDatabase) => {
+    console.log("Running migration: add_quotation_fields");
+
+    // Add missing columns to quotations table
+    db.run("ALTER TABLE quotations ADD COLUMN customer_name TEXT");
+    db.run("ALTER TABLE quotations ADD COLUMN customer_email TEXT");
+    db.run("ALTER TABLE quotations ADD COLUMN customer_phone TEXT");
+    db.run("ALTER TABLE quotations ADD COLUMN currency TEXT DEFAULT 'CNY'");
+    db.run("ALTER TABLE quotations ADD COLUMN subtotal REAL DEFAULT 0");
+    db.run("ALTER TABLE quotations ADD COLUMN tax REAL DEFAULT 0");
+    db.run("ALTER TABLE quotations ADD COLUMN items TEXT");
+    db.run("ALTER TABLE quotations ADD COLUMN validity_period INTEGER");
+    db.run("ALTER TABLE quotations ADD COLUMN issued_date INTEGER");
+    db.run("ALTER TABLE quotations ADD COLUMN terms_and_conditions TEXT");
+    db.run("ALTER TABLE quotations ADD COLUMN notes TEXT");
+
+    console.log("Migration completed successfully");
+  },
+  down: (db: SQLiteDatabase) => {
+    console.log("Rolling back migration: add_quotation_fields");
+    // Note: SQLite doesn't support DROP COLUMN, so we can't easily rollback
+    // In production, you'd need to recreate the table
+  },
+};
+
+/**
  * Get all migrations
  */
-export const migrations: Migration[] = [migration_001_initial];
+export const migrations: Migration[] = [
+  migration_001_initial,
+  migration_002_add_quotation_fields,
+];
 
 /**
  * Run migrations to initialize database

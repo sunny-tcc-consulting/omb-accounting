@@ -12,7 +12,7 @@ export default function NewCustomerPage() {
 
   return (
     <div className="max-w-3xl mx-auto py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">創建新客戶</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">Create New Customer</h1>
       <CustomerForm onSubmit={handleSuccess} onCancel={() => router.back()} />
     </div>
   );

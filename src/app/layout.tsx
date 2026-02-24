@@ -5,8 +5,8 @@ import { Providers } from "./providers";
 import { SessionTimeoutWarning } from "@/components/auth";
 
 export const metadata: Metadata = {
-  title: "omb-accounting - 财务管理",
-  description: "专为中小企业设计的财务管理应用",
+  title: "omb-accounting - Financial Management",
+  description: "Financial management application designed for small and medium enterprises",
 };
 
 export default function RootLayout({
@@ -15,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="zh-CN">
+    <html lang="en">
       <body className="font-sans">
         <Providers>
           {children}
