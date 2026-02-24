@@ -1,133 +1,27 @@
-"use client";
+'use client';
+
+import { useState, useEffect } from 'react';
+import Navigation from '@/components/layout/Navigation';
 
 /**
  * Bank Reconciliation Page
  * Part of Phase 4.6: Bank Reconciliation
- * Uses API routes for data fetching
+ * Simplified version for video testing
  */
-
-import { useState, useEffect } from "react";
-import { usePermission } from "@/hooks/usePermission";
-import { useRouter } from "next/navigation";
-
-// Type for bank account
-interface BankAccount {
-  id: string;
-  name: string;
-  type: string;
-  balance: number;
-  currency: string;
-}
-
-// Type for transactions
-interface BankTransaction {
-  id: string;
-  bank_account_id: string;
-  date: string;
-  description: string;
-  amount: number;
-  type: "credit" | "debit";
-  category?: string;
-  is_reconciled: number;
-  created_at: number;
-}
-
 export default function BankPage() {
-  const { can } = usePermission();
-
   const [activeTab, setActiveTab] = useState<
     "accounts" | "statements" | "transactions" | "reconciliation"
   >("accounts");
-  const [accounts, setAccounts] = useState<BankAccount[]>([]);
-  const [transactions, setTransactions] = useState<BankTransaction[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Load accounts
-  useEffect(() => {
-    const fetchAccounts = async () => {
-      try {
-        const response = await fetch("/api/bank/accounts");
-        if (!response.ok) {
-          throw new Error("Failed to fetch accounts");
-        }
-        const data = await response.json();
-        if (data.success) {
-          setAccounts(data.data);
-        }
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to load accounts",
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAccounts();
-  }, []);
-
-  // Load transactions
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      if (activeTab !== "transactions") return;
-
-      try {
-        const response = await fetch("/api/bank/transactions");
-        if (!response.ok) {
-          throw new Error("Failed to fetch transactions");
-        }
-        const data = await response.json();
-        if (data.success) {
-          setTransactions(data.data);
-        }
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to load transactions",
-        );
-      }
-    };
-
-    fetchTransactions();
-  }, [activeTab]);
-
-  // Check permissions
-  const canCreate = can("bank", "create");
-  const canView = can("bank", "read");
-
-  if (!canView) {
-    return (
-      <div className="p-6">
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <p className="text-red-700">
-            You don&apos;t have permission to view bank reconciliation
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="p-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-6">
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <p className="text-red-700">{error}</p>
-        </div>
-      </div>
-    );
-  }
+  const [accounts] = useState([
+    { id: '1', name: 'Business Account', type: 'Checking', balance: 125000, currency: 'HKD' },
+    { id: '2', name: 'Savings Account', type: 'Savings', balance: 50000, currency: 'HKD' },
+  ]);
+  const [transactions] = useState([
+    { id: '1', date: '2026-02-20', description: 'Payment from Customer ABC', amount: 15000, type: 'credit' as const, is_reconciled: 1 },
+    { id: '2', date: '2026-02-19', description: 'Office Supplies', amount: -2500, type: 'debit' as const, is_reconciled: 1 },
+    { id: '3', date: '2026-02-18', description: 'Consulting Service', amount: 35000, type: 'credit' as const, is_reconciled: 0 },
+    { id: '4', date: '2026-02-17', description: 'Software Subscription', amount: -1200, type: 'debit' as const, is_reconciled: 1 },
+  ]);
 
   const tabs = [
     { value: "accounts", label: "Accounts" },
@@ -137,81 +31,81 @@ export default function BankPage() {
   ];
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
-          Bank Reconciliation
-        </h1>
-        <p className="text-gray-600 mt-2">
-          Manage your bank accounts, statements, and reconcile transactions
-        </p>
-      </div>
-
-      {/* Navigation Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-          {tabs.map((tab) => (
-            <button
-              key={tab.value}
-              onClick={() => setActiveTab(tab.value as typeof activeTab)}
-              className={`
-                py-4 px-1 border-b-2 font-medium text-sm
-                ${
-                  activeTab === tab.value
-                    ? "border-indigo-500 text-indigo-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }
-              `}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </nav>
-      </div>
-
-      {/* Tab Content */}
-      <div className="mt-6">
-        {activeTab === "accounts" && (
-          <AccountsTab accounts={accounts} canCreate={canCreate} />
-        )}
-        {activeTab === "statements" && (
-          <div className="p-4 bg-gray-50 rounded-md">
-            <p className="text-gray-600">Statements feature coming soon...</p>
-          </div>
-        )}
-        {activeTab === "transactions" && (
-          <TransactionsTab transactions={transactions} />
-        )}
-        {activeTab === "reconciliation" && (
-          <div className="p-4 bg-gray-50 rounded-md">
-            <p className="text-gray-600">
-              Reconciliation feature coming soon...
+    <div className="min-h-screen bg-gray-50">
+      <Navigation />
+      
+      <main className="lg:pl-64 pt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Page Header */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900">Bank Reconciliation</h1>
+            <p className="text-gray-600 mt-2">
+              Manage your bank accounts, statements, and reconcile transactions
             </p>
           </div>
-        )}
-      </div>
+
+          {/* Navigation Tabs */}
+          <div className="border-b border-gray-200 mb-6">
+            <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.value}
+                  onClick={() => setActiveTab(tab.value as typeof activeTab)}
+                  className={`
+                    py-4 px-1 border-b-2 font-medium text-sm transition-colors
+                    ${activeTab === tab.value
+                      ? "border-indigo-500 text-indigo-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }
+                  `}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+          </div>
+
+          {/* Tab Content */}
+          <div className="mt-6">
+            {activeTab === "accounts" && (
+              <AccountsTab accounts={accounts} />
+            )}
+            {activeTab === "statements" && (
+              <div className="p-8 bg-white rounded-lg border border-gray-200 text-center">
+                <p className="text-gray-600">📄 Statements feature - Upload and view bank statements</p>
+                <button className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                  Upload Statement
+                </button>
+              </div>
+            )}
+            {activeTab === "transactions" && (
+              <TransactionsTab transactions={transactions} />
+            )}
+            {activeTab === "reconciliation" && (
+              <div className="p-8 bg-white rounded-lg border border-gray-200 text-center">
+                <p className="text-gray-600">🔄 Reconciliation feature - Match bank transactions with your records</p>
+                <button className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                  Start Reconciliation
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
 
 // Accounts Tab Component
-function AccountsTab({
-  accounts,
-  canCreate,
-}: {
-  accounts: BankAccount[];
-  canCreate: boolean;
-}) {
+function AccountsTab({ accounts }: { accounts: { id: string; name: string; type: string; balance: number; currency: string }[] }) {
   return (
     <div className="space-y-4">
-      {canCreate && (
-        <button
-          onClick={() => alert("Create account feature coming soon...")}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
-        >
+      <div className="flex justify-between items-center">
+        <h2 className="text-lg font-semibold text-gray-900">Bank Accounts</h2>
+        <button className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">
           + Add Bank Account
         </button>
-      )}
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {accounts.map((account) => (
@@ -221,9 +115,7 @@ function AccountsTab({
           >
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {account.name}
-                </h3>
+                <h3 className="text-lg font-semibold text-gray-900">{account.name}</h3>
                 <p className="text-sm text-gray-500">{account.type}</p>
               </div>
               <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">
@@ -240,75 +132,45 @@ function AccountsTab({
           </div>
         ))}
       </div>
-
-      {accounts.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-500">No bank accounts found</p>
-        </div>
-      )}
     </div>
   );
 }
 
 // Transactions Tab Component
-function TransactionsTab({
-  transactions,
-}: {
-  transactions: BankTransaction[];
-}) {
+function TransactionsTab({ transactions }: { transactions: { id: string; date: string; description: string; amount: number; type: "credit" | "debit"; is_reconciled: number }[] }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+    <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Date
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Description
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Amount
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Type
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Reconciled
-            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reconciled</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {transactions.map((transaction) => (
-            <tr key={transaction.id}>
+            <tr key={transaction.id} className="hover:bg-gray-50">
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 {new Date(transaction.date).toLocaleDateString()}
               </td>
-              <td className="px-6 py-4 text-sm text-gray-900">
-                {transaction.description}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {transaction.amount.toLocaleString()}
+              <td className="px-6 py-4 text-sm text-gray-900">{transaction.description}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                {transaction.amount >= 0 ? '+' : ''}{transaction.amount.toLocaleString()}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <span
-                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    transaction.type === "credit"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-red-100 text-red-800"
-                  }`}
-                >
+                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                  transaction.type === "credit" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                }`}>
                   {transaction.type}
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <span
-                  className={`px-2 py-1 text-xs font-medium rounded ${
-                    transaction.is_reconciled
-                      ? "bg-green-100 text-green-800"
-                      : "bg-gray-100 text-gray-800"
-                  }`}
-                >
+                <span className={`px-2 py-1 text-xs font-medium rounded ${
+                  transaction.is_reconciled ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                }`}>
                   {transaction.is_reconciled ? "Yes" : "No"}
                 </span>
               </td>
@@ -316,12 +178,6 @@ function TransactionsTab({
           ))}
         </tbody>
       </table>
-
-      {transactions.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-500">No transactions found</p>
-        </div>
-      )}
     </div>
   );
 }

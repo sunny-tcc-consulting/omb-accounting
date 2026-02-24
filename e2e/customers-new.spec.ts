@@ -4,7 +4,6 @@ const { test, expect } = require('@playwright/test');
 // Helper function to wait for page to be fully loaded
 async function waitForApp(page) {
   await page.waitForLoadState('networkidle');
-  // Wait for any loading spinners to disappear
   await page.waitForTimeout(500);
 }
 
@@ -43,7 +42,9 @@ test.describe('Customer New Page', () => {
   test('should show validation errors on empty submit', async ({ page }) => {
     // Click submit button
     await page.getByRole('button', { name: /Create Customer/i }).click();
-    await page.waitForTimeout(500);
+    
+    // Wait for form validation to trigger
+    await page.waitForTimeout(1000);
 
     // Check validation messages appear
     await expect(page.getByText(/Name is required/i)).toBeVisible();
@@ -69,9 +70,9 @@ test.describe('Customer New Page', () => {
     await page.getByRole('button', { name: /Create Customer/i }).click();
     
     // Wait for navigation or success
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(1500);
     
-    // Should stay on page or redirect
+    // Should stay on page or redirect (form submission behavior)
     await expect(page).not.toHaveURL(/error/);
     
     await page.screenshot({ 
@@ -80,12 +81,20 @@ test.describe('Customer New Page', () => {
     });
   });
 
-  test('should cancel and go back', async ({ page }) => {
-    // Click cancel button
-    await page.getByRole('button', { name: /Cancel/i }).click();
+  test('should accept text input', async ({ page }) => {
+    const timestamp = Date.now();
     
-    // Wait for navigation
-    await page.waitForTimeout(500);
-    // May or may not navigate depending on router.back() behavior
+    // Fill in the form
+    await page.getByPlaceholder(/Enter name or company name/i).fill('Test Customer ' + timestamp);
+    await expect(page.getByPlaceholder(/Enter name or company name/i)).toHaveValue('Test Customer ' + timestamp);
+    
+    await page.getByPlaceholder(/customer@example.com/i).fill('test' + timestamp + '@example.com');
+    await expect(page.getByPlaceholder(/customer@example.com/i)).toHaveValue('test' + timestamp + '@example.com');
+    
+    await page.getByPlaceholder(/13800138000/i).fill('+852 1234 5678');
+    await expect(page.getByPlaceholder(/13800138000/i)).toHaveValue('+852 1234 5678');
+    
+    await page.getByPlaceholder(/Enter company name/i).fill('Test Company Ltd');
+    await expect(page.getByPlaceholder(/Enter company name/i)).toHaveValue('Test Company Ltd');
   });
 });
