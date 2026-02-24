@@ -13,6 +13,8 @@ import {
   ReportConfig,
 } from "@/types/report";
 import { format } from "date-fns";
+import fs from "fs";
+import path from "path";
 
 // =============================================================================
 // CHINESE FONT SUPPORT
@@ -25,11 +27,32 @@ async function loadChineseFont(): Promise<string> {
   if (chineseFontData) return chineseFontData;
 
   try {
-    const response = await fetch("/fonts/noto-sans-tc-regular.woff");
-    const arrayBuffer = await response.arrayBuffer();
-    const base64 = Buffer.from(arrayBuffer).toString("base64");
-    chineseFontData = `data:font/woff2;base64,${base64}`;
-    return chineseFontData!;
+    // Try to load from filesystem first (Node.js environment)
+    const fontPath = path.join(
+      process.cwd(),
+      "public",
+      "fonts",
+      "noto-sans-tc-regular.woff",
+    );
+
+    if (fs.existsSync(fontPath)) {
+      const fontBuffer = fs.readFileSync(fontPath);
+      const base64 = fontBuffer.toString("base64");
+      chineseFontData = `data:font/woff2;base64,${base64}`;
+      return chineseFontData;
+    }
+
+    // Fallback: try fetch for browser environment
+    if (typeof fetch !== "undefined") {
+      const response = await fetch("/fonts/noto-sans-tc-regular.woff");
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const b64 = buffer.toString("base64");
+      chineseFontData = `data:font/woff2;base64,${b64}`;
+      return chineseFontData;
+    }
+
+    return "";
   } catch (error) {
     console.error("Failed to load Chinese font:", error);
     return "";
@@ -41,7 +64,8 @@ async function registerChineseFont(doc: jsPDF): Promise<void> {
   try {
     const fontData = await loadChineseFont();
     if (fontData) {
-      doc.addFileToVFS("NotoSansTC-Regular.ttf", fontData.split(",")[1]);
+      const base64Data = fontData.split(",")[1];
+      doc.addFileToVFS("NotoSansTC-Regular.ttf", base64Data);
       doc.addFont("NotoSansTC-Regular.ttf", "NotoSansTC", "normal");
       doc.setFont("NotoSansTC");
     }
