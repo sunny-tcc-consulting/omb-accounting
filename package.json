@@ -13,6 +13,10 @@
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
     "e2e:report": "playwright test --reporter=html",
+    "e2e:video": "playwright test e2e/video.spec.ts --project=chromium",
+    "e2e:video:record": "node scripts/record-video.js",
+    "e2e:video:upload": "node scripts/record-video.js --send",
+    "e2e:video:list": "node scripts/record-video.js --list",
     "prepare": "husky"
   },
   "lint-staged": {

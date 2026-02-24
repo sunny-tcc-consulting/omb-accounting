@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import path from 'path';
 
 export default defineConfig({
   testDir: './e2e',
@@ -13,13 +14,26 @@ export default defineConfig({
     ['list']
   ],
   use: {
-  trace: 'on-first-retry',
-  baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:3000',
+    // Enable video recording
+    video: 'on',
+    videoSize: { width: 1280, height: 720 },
+    videoSaveOnFailure: 'always',
+    // Enable trace for debugging
+    trace: 'on-first-retry',
   },
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'chromium-video',
+      use: { 
+        ...devices['Desktop Chrome'],
+        video: 'on',
+      },
+      testMatch: '**/video.spec.ts',
     },
     {
       name: 'mobile-chrome',
