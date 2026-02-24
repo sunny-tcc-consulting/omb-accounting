@@ -15,6 +15,42 @@ import {
 import { format } from "date-fns";
 
 // =============================================================================
+// CHINESE FONT SUPPORT
+// =============================================================================
+
+// Load Noto Sans TC font for Chinese character support
+let chineseFontData: string | null = null;
+
+async function loadChineseFont(): Promise<string> {
+  if (chineseFontData) return chineseFontData;
+
+  try {
+    const response = await fetch("/fonts/noto-sans-tc-regular.woff");
+    const arrayBuffer = await response.arrayBuffer();
+    const base64 = Buffer.from(arrayBuffer).toString("base64");
+    chineseFontData = `data:font/woff2;base64,${base64}`;
+    return chineseFontData!;
+  } catch (error) {
+    console.error("Failed to load Chinese font:", error);
+    return "";
+  }
+}
+
+// Register font with jsPDF
+async function registerChineseFont(doc: jsPDF): Promise<void> {
+  try {
+    const fontData = await loadChineseFont();
+    if (fontData) {
+      doc.addFileToVFS("NotoSansTC-Regular.ttf", fontData.split(",")[1]);
+      doc.addFont("NotoSansTC-Regular.ttf", "NotoSansTC", "normal");
+      doc.setFont("NotoSansTC");
+    }
+  } catch (error) {
+    console.error("Failed to register Chinese font:", error);
+  }
+}
+
+// =============================================================================
 // CONFIGURATION
 // =============================================================================
 
@@ -50,6 +86,10 @@ abstract class ReportPDF {
       unit: "mm",
       format: "a4",
     });
+
+    // Register Chinese font for CJK support
+    registerChineseFont(this.doc);
+
     this.addFooter();
   }
 
@@ -276,10 +316,12 @@ export class TrialBalancePDF extends ReportPDF {
         fillColor: [COLORS.primary[0], COLORS.primary[1], COLORS.primary[2]],
         textColor: [255, 255, 255],
         fontStyle: "bold",
+        font: "NotoSansTC",
       },
       styles: {
         fontSize: 9,
         cellPadding: 3,
+        font: "NotoSansTC",
       },
       columnStyles: {
         0: { cellWidth: 25 },
@@ -302,6 +344,7 @@ export class TrialBalancePDF extends ReportPDF {
           COLORS.totalRowBg[2],
         ],
         fontStyle: "bold",
+        font: "NotoSansTC",
       },
     });
 
@@ -744,10 +787,12 @@ export class GeneralLedgerPDF extends ReportPDF {
         fillColor: [COLORS.primary[0], COLORS.primary[1], COLORS.primary[2]],
         textColor: [255, 255, 255],
         fontStyle: "bold",
+        font: "NotoSansTC",
       },
       styles: {
         fontSize: 9,
         cellPadding: 3,
+        font: "NotoSansTC",
       },
       columnStyles: {
         0: { cellWidth: 25 },
