@@ -15,10 +15,6 @@ export default defineConfig({
   ],
   use: {
     baseURL: 'http://localhost:3000',
-    // Enable video recording
-    video: 'on',
-    videoSize: { width: 1280, height: 720 },
-    videoSaveOnFailure: 'always',
     // Enable trace for debugging
     trace: 'on-first-retry',
   },
