@@ -1,13 +1,19 @@
 import { test, expect } from '@playwright/test';
 
+// Helper function for random delay between 1-3 seconds
+function randomDelay(page: any) {
+  const delay = Math.floor(Math.random() * 2000) + 1000; // 1000-3000ms
+  return page.waitForTimeout(delay);
+}
+
 test.describe('E2E Video Tests - omb-accounting', () => {
   
   test('1. Create Quotation Page - Form Structure', async ({ page }) => {
     await page.goto('/quotations/new');
     await page.waitForLoadState('domcontentloaded');
     
-    // Wait for content to load
-    await page.waitForTimeout(2000);
+    // Wait for content to load with random delay
+    await randomDelay(page);
     
     // Check main heading exists somewhere on page
     await expect(page.locator('h1').first()).toBeVisible();
@@ -22,8 +28,8 @@ test.describe('E2E Video Tests - omb-accounting', () => {
     await page.goto('/quotations');
     await page.waitForLoadState('domcontentloaded');
     
-    // Wait for content to load
-    await page.waitForTimeout(2000);
+    // Wait for content to load with random delay
+    await randomDelay(page);
     
     // Check main heading exists
     await expect(page.locator('h1').first()).toBeVisible();
@@ -38,8 +44,8 @@ test.describe('E2E Video Tests - omb-accounting', () => {
     await page.goto('/invoices');
     await page.waitForLoadState('domcontentloaded');
     
-    // Wait for content to load
-    await page.waitForTimeout(2000);
+    // Wait for content to load with random delay
+    await randomDelay(page);
     
     // Check main heading exists
     await expect(page.locator('h1').first()).toBeVisible();
@@ -54,7 +60,9 @@ test.describe('E2E Video Tests - omb-accounting', () => {
     // Start from Dashboard
     await page.goto('/');
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(2000);
+    
+    // Random delay to show full page
+    await randomDelay(page);
     
     // Check page has content (any text visible)
     await expect(page.locator('body').first()).toContainText('omb');
@@ -63,7 +71,9 @@ test.describe('E2E Video Tests - omb-accounting', () => {
     // Navigate to Customers
     await page.goto('/customers');
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(2000);
+    
+    // Random delay
+    await randomDelay(page);
     
     // Check Customers page
     await expect(page.locator('body').first()).toContainText('Customer');
@@ -72,7 +82,9 @@ test.describe('E2E Video Tests - omb-accounting', () => {
     // Navigate to Quotations
     await page.goto('/quotations');
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(2000);
+    
+    // Random delay
+    await randomDelay(page);
     
     // Check Quotations page
     await expect(page.locator('body').first()).toContainText('Quotation');
@@ -81,7 +93,9 @@ test.describe('E2E Video Tests - omb-accounting', () => {
     // Navigate to Invoices
     await page.goto('/invoices');
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(2000);
+    
+    // Random delay
+    await randomDelay(page);
     
     // Check Invoices page
     await expect(page.locator('body').first()).toContainText('Invoice');
@@ -90,7 +104,9 @@ test.describe('E2E Video Tests - omb-accounting', () => {
     // Navigate to Bank
     await page.goto('/bank');
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(3000);
+    
+    // Random delay (slightly longer for bank page)
+    await randomDelay(page);
     
     // Check Bank page - use body text check
     await expect(page.locator('body').first()).toContainText('Bank');
@@ -99,7 +115,9 @@ test.describe('E2E Video Tests - omb-accounting', () => {
     // Navigate to Settings (if exists)
     await page.goto('/settings');
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(2000);
+    
+    // Random delay
+    await randomDelay(page);
     
     // Check Settings page
     await expect(page.locator('body').first()).toContainText('Setting');
