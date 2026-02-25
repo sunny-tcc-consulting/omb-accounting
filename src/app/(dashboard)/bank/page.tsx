@@ -1,12 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Navigation from '@/components/layout/Navigation';
+import { useState } from 'react';
 
 /**
  * Bank Reconciliation Page
- * Part of Phase 4.6: Bank Reconciliation
- * Simplified version for video testing
+ * Simplified self-contained version for video testing
  */
 export default function BankPage() {
   const [activeTab, setActiveTab] = useState<
@@ -31,67 +29,61 @@ export default function BankPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      
-      <main className="lg:pl-64 pt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Page Header */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Bank Reconciliation</h1>
-            <p className="text-gray-600 mt-2">
-              Manage your bank accounts, statements, and reconcile transactions
-            </p>
-          </div>
+    <div className="min-h-screen bg-gray-50 p-8">
+      {/* Page Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Bank Reconciliation</h1>
+        <p className="text-gray-600 mt-2">
+          Manage your bank accounts, statements, and reconcile transactions
+        </p>
+      </div>
 
-          {/* Navigation Tabs */}
-          <div className="border-b border-gray-200 mb-6">
-            <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.value}
-                  onClick={() => setActiveTab(tab.value as typeof activeTab)}
-                  className={`
-                    py-4 px-1 border-b-2 font-medium text-sm transition-colors
-                    ${activeTab === tab.value
-                      ? "border-indigo-500 text-indigo-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                    }
-                  `}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </nav>
-          </div>
+      {/* Navigation Tabs */}
+      <div className="border-b border-gray-200 mb-6">
+        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+          {tabs.map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setActiveTab(tab.value as typeof activeTab)}
+              className={`
+                py-4 px-1 border-b-2 font-medium text-sm transition-colors
+                ${activeTab === tab.value
+                  ? "border-indigo-500 text-indigo-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }
+              `}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+      </div>
 
-          {/* Tab Content */}
-          <div className="mt-6">
-            {activeTab === "accounts" && (
-              <AccountsTab accounts={accounts} />
-            )}
-            {activeTab === "statements" && (
-              <div className="p-8 bg-white rounded-lg border border-gray-200 text-center">
-                <p className="text-gray-600">📄 Statements feature - Upload and view bank statements</p>
-                <button className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
-                  Upload Statement
-                </button>
-              </div>
-            )}
-            {activeTab === "transactions" && (
-              <TransactionsTab transactions={transactions} />
-            )}
-            {activeTab === "reconciliation" && (
-              <div className="p-8 bg-white rounded-lg border border-gray-200 text-center">
-                <p className="text-gray-600">🔄 Reconciliation feature - Match bank transactions with your records</p>
-                <button className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
-                  Start Reconciliation
-                </button>
-              </div>
-            )}
+      {/* Tab Content */}
+      <div className="mt-6">
+        {activeTab === "accounts" && (
+          <AccountsTab accounts={accounts} />
+        )}
+        {activeTab === "statements" && (
+          <div className="p-8 bg-white rounded-lg border border-gray-200 text-center">
+            <p className="text-gray-600">Statements feature - Upload and view bank statements</p>
+            <button className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+              Upload Statement
+            </button>
           </div>
-        </div>
-      </main>
+        )}
+        {activeTab === "transactions" && (
+          <TransactionsTab transactions={transactions} />
+        )}
+        {activeTab === "reconciliation" && (
+          <div className="p-8 bg-white rounded-lg border border-gray-200 text-center">
+            <p className="text-gray-600">Reconciliation feature - Match bank transactions with your records</p>
+            <button className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+              Start Reconciliation
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
