@@ -12,7 +12,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Search, Plus, FileText, DollarSign, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { toast } from 'sonner';
-import { InvoiceListSkeleton } from '@/components/skeletons/InvoiceListSkeleton';
 import { getStatusInfo } from '@/lib/invoice-utils';
 
 export const InvoiceList: React.FC = () => {
@@ -88,8 +87,15 @@ export const InvoiceList: React.FC = () => {
     paidAmount: invoices.filter((inv) => inv.status === 'paid').reduce((sum, inv) => sum + (inv.amountPaid || 0), 0),
   };
 
-  if (loading) {
-    return <InvoiceListSkeleton />;
+  // Show inline loading if still loading and no data
+  if (loading && invoices.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div className="h-32 flex items-center justify-center border rounded-lg bg-white">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
   }
 
   if (error) {

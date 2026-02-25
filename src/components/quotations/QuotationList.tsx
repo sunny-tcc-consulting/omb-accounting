@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { QuotationListSkeleton } from '@/components/skeletons/QuotationListSkeleton';
 
 export function QuotationList() {
   const { getFilteredQuotations, quotations, loading } = useQuotations();
@@ -40,8 +39,32 @@ export function QuotationList() {
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
-  if (loading) {
-    return <QuotationListSkeleton />;
+  // Show loading indicator inline if still loading
+  if (loading && quotations.length === 0) {
+    return (
+      <div className="space-y-4">
+        <div className="flex gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search by customer name or quotation number..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Link href="/quotations/new">
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Quotation
+            </Button>
+          </Link>
+        </div>
+        <div className="h-32 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
   }
 
   return (
