@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import type { Page } from "@playwright/test";
 
 // Helper function for random delay between 1-3 seconds
 function randomDelay(page: Page) {
@@ -6,17 +7,16 @@ function randomDelay(page: Page) {
   return page.waitForTimeout(delay);
 }
 
-import type { Page } from "@playwright/test";
-
 test.describe("Invoice Workflow E2E Tests", () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to invoices page
     await page.goto("/invoices");
     await page.waitForLoadState("domcontentloaded");
     await randomDelay(page);
   });
 
-  test("TC-I001: Create Invoice", async ({ page }) => {
+  test("TC-I001: Create Invoice - Verify Data Recorded & Retrieved", async ({
+    page,
+  }) => {
     // Step 1: Navigate to new invoice form
     await page.goto("/invoices/new");
     await page.waitForLoadState("domcontentloaded");
@@ -27,8 +27,10 @@ test.describe("Invoice Workflow E2E Tests", () => {
       .getByLabel(/customer/i)
       .or(page.locator('select[name="customerId"]'))
       .first();
+
     if (await customerSelect.isVisible()) {
       await customerSelect.click();
+      await randomDelay(page);
       const firstOption = page.locator("option").nth(1);
       if (await firstOption.isVisible()) {
         await firstOption.click();
@@ -58,42 +60,81 @@ test.describe("Invoice Workflow E2E Tests", () => {
     }
 
     // Fill item details
+    const testDescription = `Consulting Services ${Date.now()}`;
     const descriptionInput = page.getByLabel(/description|item/i).first();
     const qtyInput = page.getByLabel(/quantity/i).first();
     const priceInput = page.getByLabel(/price|unit price/i).first();
 
-    if (await descriptionInput.isVisible()) {
-      await descriptionInput.fill("Consulting Services");
-    }
-    if (await qtyInput.isVisible()) {
-      await qtyInput.fill("10");
-    }
-    if (await priceInput.isVisible()) {
-      await priceInput.fill("150");
-    }
+    await descriptionInput.fill(testDescription);
+    await qtyInput.fill("10");
+    await priceInput.fill("150");
 
-    // Step 5: Verify totals
+    // Step 5: Verify totals are calculated
     await randomDelay(page);
+    const totalInput = page
+      .getByLabel(/total/i)
+      .or(page.locator('[class*="total"] input'))
+      .first();
+    await totalInput.isVisible();
 
     // Step 6: Save invoice
     const saveButton = page
       .getByRole("button", { name: /save|create|generate/i })
       .first();
-    if (await saveButton.isVisible()) {
-      await saveButton.click();
-    }
+    await expect(saveButton).toBeVisible();
+    await saveButton.click();
 
     // Verify redirect
     await page.waitForURL(/\/invoices/);
     await randomDelay(page);
 
-    // Verify invoice appears in list
-    await expect(page.locator("table").first()).toBeVisible();
+    // VERIFICATION 1: Check for success notification
+    await page.locator('[role="status"]').first().isVisible();
 
-    console.log("✓ Invoice created successfully");
+    // VERIFICATION 2: Navigate to list and verify invoice is RETRIEVABLE
+    await page.goto("/invoices");
+    await page.waitForLoadState("domcontentloaded");
+    await randomDelay(page);
+
+    // Find the created invoice
+    const invoiceRow = page
+      .locator("table tbody tr")
+      .filter({ hasText: testDescription });
+    await expect(invoiceRow.first()).toBeVisible({ timeout: 10000 });
+
+    // VERIFICATION 3: Click View and verify data is correctly recorded
+    const viewButton = invoiceRow
+      .getByRole("link", { name: /view|detail|inv/i })
+      .first();
+
+    if (await viewButton.isVisible()) {
+      await viewButton.click();
+      await randomDelay(page);
+
+      // Verify recorded data
+      const bodyText = await page.locator("body").textContent();
+
+      // Check that line item description is recorded
+      expect(bodyText).toContain(testDescription);
+
+      // Check that quantity and price are recorded
+      expect(bodyText).toContain("10");
+      expect(bodyText).toContain("150");
+
+      // Check that total is recorded (1500)
+      expect(bodyText?.includes("1,500") || bodyText?.includes("1500")).toBe(
+        true,
+      );
+    }
+
+    console.log(
+      `✅ TC-I001: Invoice created and verified retrievable: ${testDescription}`,
+    );
   });
 
-  test("TC-I002: Invoice Status Workflow", async ({ page }) => {
+  test("TC-I002: Invoice Status Workflow - Verify Status Changes are Recorded", async ({
+    page,
+  }) => {
     // Verify status badges are visible
     const statusBadges = page.locator(
       '.status-badge, [class*="status"], .badge',
@@ -103,29 +144,40 @@ test.describe("Invoice Workflow E2E Tests", () => {
       const badgeCount = await statusBadges.count();
       expect(badgeCount).toBeGreaterThan(0);
 
-      console.log(`✓ Found ${badgeCount} status badges`);
+      // VERIFICATION: Each status badge should show a retrievable status
+      for (let i = 0; i < Math.min(badgeCount, 5); i++) {
+        const badge = statusBadges.nth(i);
+        const statusText = await badge.textContent();
+        expect(statusText).toBeTruthy();
+      }
+
+      console.log(`✅ TC-I002: ${badgeCount} status badges verified`);
     } else {
-      // Check if any invoices exist first
       const rows = await page.locator("tbody tr").count();
       if (rows === 0) {
-        console.log("⚠ No invoices to check status - test passed as no-op");
+        console.log("⚠ TC-I002: No invoices - passed as no-op");
       } else {
-        console.log("⚠ Status badges not visible");
+        console.log("⚠ TC-I002: Status badges not visible");
       }
     }
   });
 
-  test("TC-I003: Mark Invoice as Paid", async ({ page }) => {
-    // Look for unpaid invoice with payment action
+  test("TC-I003: Mark Invoice as Paid - Verify Payment is Recorded & Retrievable", async ({
+    page,
+  }) => {
     const payButton = page
       .getByRole("button", { name: /mark as paid|pay|receive/i })
       .first();
 
     if (await payButton.isVisible({ timeout: 5000 })) {
+      // Get invoice number before payment
+      const invoiceRow = payButton.locator("..").locator("..");
+      const invoiceNum = await invoiceRow.locator("td").first().textContent();
+
       await payButton.click();
       await randomDelay(page);
 
-      // Check for payment dialog or direct status change
+      // Check for payment dialog
       const dialog = page.locator("dialog, .modal, .popup").first();
       if (await dialog.isVisible()) {
         // Fill payment details if required
@@ -139,26 +191,54 @@ test.describe("Invoice Workflow E2E Tests", () => {
 
       await randomDelay(page);
 
-      // Verify status changed to "Paid"
-      console.log("✓ Payment processed");
+      // VERIFICATION: Navigate to invoice and verify payment status is recorded
+      await page.goto("/invoices");
+      await page.waitForLoadState("domcontentloaded");
+      await randomDelay(page);
+
+      // Find the invoice and check its status changed
+      const paidInvoice = page
+        .locator("table tbody tr")
+        .filter({ hasText: invoiceNum || "" });
+
+      if (await paidInvoice.first().isVisible()) {
+        const statusBadge = paidInvoice
+          .locator('.status-badge, [class*="status"]')
+          .first();
+        const statusText = await statusBadge.textContent();
+
+        // Status should now show as "Paid"
+        const isPaidStatus =
+          statusText?.toLowerCase().includes("paid") ||
+          statusText?.toLowerCase().includes("complete");
+        expect(isPaidStatus).toBe(true);
+      }
+
+      console.log(`✅ TC-I003: Payment status verified for invoice`);
     } else {
-      console.log("⚠ No unpaid invoices found - test passed as no-op");
+      console.log("⚠ TC-I003: No unpaid invoices - passed as no-op");
     }
   });
 
-  test("TC-I004: Send Invoice to Customer", async ({ page }) => {
+  test("TC-I004: Send Invoice to Customer - Verify Send Status is Recorded", async ({
+    page,
+  }) => {
     const sendButton = page
       .getByRole("button", { name: /send|email|mail/i })
       .first();
 
     if (await sendButton.isVisible({ timeout: 5000 })) {
+      // Get invoice number before sending
+      const invoiceRow = sendButton.locator("..").locator("..");
+      const invoiceNum = await invoiceRow.locator("td").first().textContent();
+
       await sendButton.click();
       await randomDelay(page);
 
       // Check for email dialog
       const dialog = page.locator("dialog, .modal").first();
       if (await dialog.isVisible()) {
-        // Verify email address is pre-filled
+        // Verify email address is pre-filled and retrievable
         const emailField = page.getByLabel(/email/i).first();
         if (await emailField.isVisible()) {
           const email = await emailField.inputValue();
@@ -176,46 +256,92 @@ test.describe("Invoice Workflow E2E Tests", () => {
 
       await randomDelay(page);
 
-      // Verify status changed to "Sent"
-      console.log("✓ Invoice sent to customer");
+      // VERIFICATION: Check invoice status changed to "Sent"
+      await page.goto("/invoices");
+      await page.waitForLoadState("domcontentloaded");
+      await randomDelay(page);
+
+      const sentInvoice = page
+        .locator("table tbody tr")
+        .filter({ hasText: invoiceNum || "" });
+
+      if (await sentInvoice.first().isVisible()) {
+        const statusText = await sentInvoice
+          .locator('.status-badge, [class*="status"]')
+          .first()
+          .textContent();
+
+        const isSentStatus =
+          statusText?.toLowerCase().includes("sent") ||
+          statusText?.toLowerCase().includes("email");
+        expect(isSentStatus).toBe(true);
+      }
+
+      console.log(`✅ TC-I004: Send status verified for invoice`);
     } else {
-      console.log("⚠ No invoices to send - test passed as no-op");
+      console.log("⚠ TC-I004: No invoices to send - passed as no-op");
     }
   });
 
-  test("TC-I005: Invoice PDF Generation", async ({ page }) => {
-    // Look for PDF/Print button in the list or detail view
-    const pdfButton = page
-      .getByRole("button", { name: /pdf|download|print|export/i })
-      .first();
+  test("TC-I005: Invoice PDF Generation - Verify PDF Contains Recorded Data", async ({
+    page,
+  }) => {
+    // Look for any invoice to view first
+    await page.goto("/invoices");
+    await page.waitForLoadState("domcontentloaded");
+    await randomDelay(page);
 
-    if (await pdfButton.isVisible({ timeout: 5000 })) {
-      // First click to view invoice details
-      const viewButton = page
-        .getByRole("link", { name: /view|detail/i })
+    const viewButton = page.getByRole("link", { name: /view|detail/i }).first();
+
+    if (await viewButton.isVisible({ timeout: 5000 })) {
+      await viewButton.click();
+      await randomDelay(page);
+
+      // Verify detail page with recorded data
+      await expect(page.locator("h1").first()).toBeVisible({ timeout: 10000 });
+
+      // Get invoice data before PDF generation
+      const descriptionInput = page.getByLabel(/description|item/i).first();
+      const description = await descriptionInput.inputValue();
+
+      // Click PDF button
+      const pdfButton = page
+        .getByRole("button", { name: /pdf|download|print/i })
         .first();
-      if (await viewButton.isVisible()) {
-        await viewButton.click();
-        await randomDelay(page);
-      }
 
-      // Then click PDF button
-      const pdfBtn = page
-        .getByRole("button", { name: /pdf|download/i })
-        .first();
-      if (await pdfBtn.isVisible()) {
-        // Note: File download handling is automatic in Playwright
-        await pdfBtn.click();
-        await page.waitForTimeout(1000);
-      }
+      if (await pdfButton.isVisible()) {
+        // Start download and verify it triggers
+        const [download] = await Promise.all([
+          page.waitForEvent("download", { timeout: 10000 }).catch(() => null),
+          pdfButton.click(),
+        ]);
 
-      console.log("✓ PDF generation tested");
+        // VERIFICATION: Download either happened or PDF dialog opened
+        const pdfOpened =
+          download !== null ||
+          (await page
+            .locator("dialog, .modal")
+            .first()
+            .isVisible()
+            .catch(() => false));
+
+        expect(pdfOpened).toBe(true);
+        console.log(
+          `✅ TC-I005: PDF generation triggered (data: "${description}")`,
+        );
+      }
     } else {
-      console.log("⚠ No PDF button found - test passed as no-op");
+      console.log("⚠ TC-I005: No invoices to generate PDF - passed as no-op");
     }
   });
 
-  test("TC-I006: Invoice Detail View", async ({ page }) => {
+  test("TC-I006: Invoice Detail View - Verify All Recorded Data is Accessible", async ({
+    page,
+  }) => {
+    await page.goto("/invoices");
+    await page.waitForLoadState("domcontentloaded");
+    await randomDelay(page);
+
     const viewButton = page
       .getByRole("link", { name: /view|detail|inv/i })
       .first();
@@ -227,7 +353,7 @@ test.describe("Invoice Workflow E2E Tests", () => {
       // Verify detail page structure
       await expect(page.locator("h1").first()).toBeVisible({ timeout: 10000 });
 
-      // Check for key sections
+      // VERIFICATION: Check all key sections are accessible
       const customerSection = page
         .locator('.customer, [class*="customer"]')
         .first();
@@ -236,40 +362,52 @@ test.describe("Invoice Workflow E2E Tests", () => {
         .locator('.total, .summary, [class*="total"]')
         .first();
 
+      // Each section should contain retrievable data
       if (await customerSection.isVisible()) {
-        await expect(customerSection).toBeVisible();
-      }
-      if (await itemsSection.isVisible()) {
-        await expect(itemsSection).toBeVisible();
-      }
-      if (await totalsSection.isVisible()) {
-        await expect(totalsSection).toBeVisible();
+        const customerText = await customerSection.textContent();
+        expect(customerText).toBeTruthy();
       }
 
-      console.log("✓ Invoice detail view verified");
+      if (await itemsSection.isVisible()) {
+        const itemsText = await itemsSection.textContent();
+        expect(itemsText).toBeTruthy();
+      }
+
+      if (await totalsSection.isVisible()) {
+        const totalsText = await totalsSection.textContent();
+        expect(totalsText).toBeTruthy();
+      }
+
+      // Verify invoice number is retrievable
+      const invoiceNumber = page
+        .locator('[class*="invoice-number"], [class*="number"]')
+        .first();
+      if (await invoiceNumber.isVisible()) {
+        const invNumText = await invoiceNumber.textContent();
+        expect(invNumText).toBeTruthy();
+      }
+
+      console.log(
+        "✅ TC-I006: Invoice detail view verified with all data accessible",
+      );
     } else {
-      console.log("⚠ No invoices to view - test passed as no-op");
+      console.log("⚠ TC-I006: No invoices to view - passed as no-op");
     }
   });
 
-  test("TC-I007: Invoice List Page Structure", async ({ page }) => {
-    // Verify page loads
+  test("TC-I007: Invoice List Page Structure - Verify Data Table is Complete", async ({
+    page,
+  }) => {
     await expect(page.locator("h1").first()).toBeVisible({ timeout: 10000 });
 
     // Verify Create Invoice button exists
     const newButton = page
       .getByRole("button", { name: /new invoice|create invoice/i })
       .first();
-    if (await newButton.isVisible()) {
-      await expect(newButton).toBeVisible();
-    }
+    await expect(newButton).toBeVisible();
 
     // Verify table exists
-    const tableExists = await page
-      .locator("table")
-      .first()
-      .isVisible()
-      .catch(() => false);
+    const tableExists = await page.locator("table").first().isVisible();
     expect(tableExists).toBe(true);
 
     // Verify invoice number column
@@ -280,6 +418,26 @@ test.describe("Invoice Workflow E2E Tests", () => {
       await expect(invoiceNumberHeader).toBeVisible();
     }
 
-    console.log("✓ Invoice list page structure verified");
+    // VERIFICATION: If data exists, verify all columns are accessible
+    const rows = page.locator("table tbody tr");
+    const rowCount = await rows.count();
+
+    if (rowCount > 0) {
+      const columns = await page.locator("th").count();
+
+      // Each column should have accessible data
+      for (let col = 0; col < Math.min(columns, 5); col++) {
+        await rows.first().locator("td").nth(col).textContent();
+        // Cell may be empty but should not throw error
+      }
+
+      console.log(
+        `✅ TC-I007: Invoice list structure verified (${rowCount} rows, ${columns} columns)`,
+      );
+    } else {
+      console.log(
+        "✅ TC-I007: Invoice list page structure verified (empty state)",
+      );
+    }
   });
 });

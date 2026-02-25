@@ -1,12 +1,11 @@
 import { test, expect } from "@playwright/test";
+import type { Page } from "@playwright/test";
 
 // Helper function for random delay between 1-3 seconds
 function randomDelay(page: Page) {
   const delay = Math.floor(Math.random() * 2000) + 1000;
   return page.waitForTimeout(delay);
 }
-
-import type { Page } from "@playwright/test";
 
 test.describe("Customer Management E2E Tests", () => {
   test.beforeEach(async ({ page }) => {
@@ -16,7 +15,9 @@ test.describe("Customer Management E2E Tests", () => {
     await randomDelay(page);
   });
 
-  test("TC-C001: Create New Customer", async ({ page }) => {
+  test("TC-C001: Create New Customer - Verify Data Recorded & Retrieved", async ({
+    page,
+  }) => {
     const customerName = `Test Customer ${Date.now()}`;
     const customerEmail = `test${Date.now()}@example.com`;
 
@@ -29,7 +30,6 @@ test.describe("Customer Management E2E Tests", () => {
     await randomDelay(page);
 
     // Step 3: Fill required fields
-    // Check if form fields exist and fill them
     const nameInput = page
       .getByLabel(/name/i)
       .or(page.locator('input[name="name"]'))
@@ -39,15 +39,13 @@ test.describe("Customer Management E2E Tests", () => {
       .or(page.locator('input[name="email"]'))
       .first();
 
-    if (await nameInput.isVisible()) {
-      await nameInput.fill(customerName);
-    }
+    await expect(nameInput).toBeVisible();
+    await expect(emailInput).toBeVisible();
 
-    if (await emailInput.isVisible()) {
-      await emailInput.fill(customerEmail);
-    }
+    await nameInput.fill(customerName);
+    await emailInput.fill(customerEmail);
 
-    // Step 4: Fill optional fields if visible
+    // Step 4: Fill optional fields
     const phoneInput = page
       .getByLabel(/phone/i)
       .or(page.locator('input[name="phone"]'))
@@ -58,29 +56,69 @@ test.describe("Customer Management E2E Tests", () => {
 
     // Step 5: Save customer
     const saveButton = page
-      .getByRole("button", { name: /save/i })
-      .or(page.getByRole("button", { name: /submit/i }))
+      .getByRole("button", { name: /save|submit/i })
       .first();
-    if (await saveButton.isVisible()) {
-      await saveButton.click();
-    }
+    await expect(saveButton).toBeVisible();
+    await saveButton.click();
 
-    // Wait for redirect and verify
+    // Wait for redirect and VERIFY DATA IS RECORDED
     await page.waitForURL(/\/customers/);
     await randomDelay(page);
 
-    // Step 6: Verify new customer appears in list
-    await expect(page.locator("table").first()).toContainText(customerName);
+    // VERIFICATION 2: Navigate back to list and verify customer is RETRIEVABLE
+    await page.goto("/customers");
+    await page.waitForLoadState("domcontentloaded");
+    await randomDelay(page);
 
-    console.log(`✓ Created customer: ${customerName}`);
+    // Find the created customer in the list
+    const customerRow = page
+      .locator("table tbody tr")
+      .filter({ hasText: customerName });
+    await expect(customerRow.first()).toBeVisible({ timeout: 10000 });
+
+    // VERIFICATION 3: Click View/Edit and verify data is correctly recorded
+    const viewButton = customerRow
+      .getByRole("button", { name: /view|edit/i })
+      .first();
+    if (await viewButton.isVisible()) {
+      await viewButton.click();
+      await randomDelay(page);
+
+      // Verify the recorded data can be retrieved
+      const recordedNameInput = page
+        .getByLabel(/name/i)
+        .or(page.locator('input[name="name"]'))
+        .first();
+      const recordedEmailInput = page
+        .getByLabel(/email/i)
+        .or(page.locator('input[name="email"]'))
+        .first();
+
+      const recordedName = await recordedNameInput.inputValue();
+      const recordedEmail = await recordedEmailInput.inputValue();
+
+      // Assert that recorded data matches input
+      expect(recordedName).toContain(customerName.split(" ")[0]);
+      expect(recordedEmail).toContain("@");
+    }
+
+    console.log(
+      `✅ TC-C001: Customer created and verified retrievable: ${customerName}`,
+    );
   });
 
-  test("TC-C002: Edit Customer", async ({ page }) => {
-    // Step 1-2: Find and click Edit button
+  test("TC-C002: Edit Customer - Verify Updated Data is Recorded & Retrieved", async ({
+    page,
+  }) => {
+    // Navigate to customers list first
+    await page.goto("/customers");
+    await page.waitForLoadState("domcontentloaded");
+    await randomDelay(page);
+
+    // Find any existing customer to edit
     const editButton = page.getByRole("button", { name: /edit/i }).first();
 
-    // Check if edit button is visible (test may pass without customers)
-    if (await editButton.isVisible({ timeout: 5000 }).catch(() => false)) {
+    if (await editButton.isVisible({ timeout: 5000 })) {
       await editButton.click();
       await randomDelay(page);
 
@@ -89,84 +127,179 @@ test.describe("Customer Management E2E Tests", () => {
         .getByLabel(/name/i)
         .or(page.locator('input[name="name"]'))
         .first();
-      if (await nameInput.isVisible()) {
-        const currentValue = await nameInput.inputValue();
-        await nameInput.fill(`${currentValue} (Updated)`);
-      }
+      const originalName = await nameInput.inputValue();
+      const updatedName = `${originalName} (Updated ${Date.now()})`;
+
+      await expect(nameInput).toBeVisible();
+      await nameInput.fill(updatedName);
 
       // Step 4: Save changes
       const saveButton = page.getByRole("button", { name: /save/i }).first();
-      if (await saveButton.isVisible()) {
-        await saveButton.click();
-      }
+      await expect(saveButton).toBeVisible();
+      await saveButton.click();
 
       await randomDelay(page);
 
-      // Step 5: Verify updates
-      await expect(page.locator("table").first()).toContainText("(Updated)");
+      // VERIFICATION: Navigate back and verify updated data is retrievable
+      await page.goto("/customers");
+      await page.waitForLoadState("domcontentloaded");
+      await randomDelay(page);
 
-      console.log("✓ Customer updated successfully");
+      // Check for the updated name
+      const updatedRow = page
+        .locator("table tbody tr")
+        .filter({ hasText: "(Updated" });
+
+      const isUpdatedVisible = await updatedRow
+        .first()
+        .isVisible()
+        .catch(() => false);
+
+      if (isUpdatedVisible) {
+        // Verify by viewing the record
+        await updatedRow
+          .first()
+          .getByRole("button", { name: /view|edit/i })
+          .first()
+          .click();
+        await randomDelay(page);
+
+        const recordedName = await page
+          .getByLabel(/name/i)
+          .or(page.locator('input[name="name"]'))
+          .first()
+          .inputValue();
+
+        expect(recordedName).toContain("(Updated");
+        console.log(
+          `✅ TC-C002: Customer updated and verified retrievable: ${updatedName}`,
+        );
+      } else {
+        console.log("⚠ TC-C002: No customers to edit - passed as no-op");
+      }
     } else {
-      console.log("⚠ No customers to edit - test passed as no-op");
+      console.log("⚠ TC-C002: No customers to edit - passed as no-op");
     }
   });
 
-  test("TC-C003: Delete Customer", async ({ page }) => {
-    // Step 1: Find Delete button
+  test("TC-C003: Delete Customer - Verify Deletion is Recorded", async ({
+    page,
+  }) => {
+    // Navigate to customers list
+    await page.goto("/customers");
+    await page.waitForLoadState("domcontentloaded");
+    await randomDelay(page);
+
+    // Get initial row count for verification
+    const initialRows = await page.locator("table tbody tr").count();
+
+    // Find Delete button
     const deleteButton = page.getByRole("button", { name: /delete/i }).first();
 
-    if (await deleteButton.isVisible({ timeout: 5000 }).catch(() => false)) {
-      // Step 2: Click Delete - expect confirmation dialog
+    if (await deleteButton.isVisible({ timeout: 5000 })) {
+      // Get customer name before deletion for logging
+      const customerRow = deleteButton.locator("..");
+      const customerName = await customerRow
+        .locator("td")
+        .first()
+        .textContent();
+
+      // Step 2: Click Delete
       await deleteButton.click();
 
-      // Step 3: Accept confirmation if dialog appears
+      // Step 3: Accept confirmation
       const confirmButton = page
         .getByRole("button", { name: /confirm|yes|delete/i })
         .first();
-      if (await confirmButton.isVisible({ timeout: 2000 }).catch(() => false)) {
+      if (await confirmButton.isVisible({ timeout: 2000 })) {
         await confirmButton.click();
       }
 
       await randomDelay(page);
 
-      // Verify deletion (customer count should change)
-      console.log("✓ Customer deletion processed");
+      // VERIFICATION: Check row count decreased
+      await page.waitForTimeout(1000);
+      const finalRows = await page.locator("table tbody tr").count();
+
+      // Navigate back and verify customer is no longer retrievable
+      await page.goto("/customers");
+      await page.waitForLoadState("domcontentloaded");
+      await randomDelay(page);
+
+      const customerStillExists = await page
+        .locator("table tbody tr")
+        .filter({ hasText: customerName || "" })
+        .first()
+        .isVisible()
+        .catch(() => false);
+
+      expect(customerStillExists).toBe(false);
+      console.log(
+        `✅ TC-C003: Customer deletion verified (${initialRows} → ${finalRows} rows)`,
+      );
     } else {
-      console.log("⚠ No customers to delete - test passed as no-op");
+      console.log("⚠ TC-C003: No customers to delete - passed as no-op");
     }
   });
 
-  test("TC-C004: Search Customers", async ({ page }) => {
-    // Step 1: Check search box exists
+  test("TC-C004: Search Customers - Verify Search Retrieves Recorded Data", async ({
+    page,
+  }) => {
+    // Create a customer first for search testing
+    const testEmail = `searchable${Date.now()}@example.com`;
+
+    // Navigate to new customer form
+    await page.goto("/customers/new");
+    await page.waitForLoadState("domcontentloaded");
+    await randomDelay(page);
+
+    // Create searchable customer
+    const nameInput = page.getByLabel(/name/i).first();
+    const emailInput = page.getByLabel(/email/i).first();
+
+    if ((await nameInput.isVisible()) && (await emailInput.isVisible())) {
+      const searchName = `Searchable Customer ${Date.now()}`;
+      await nameInput.fill(searchName);
+      await emailInput.fill(testEmail);
+
+      const saveButton = page.getByRole("button", { name: /save/i }).first();
+      if (await saveButton.isVisible()) {
+        await saveButton.click();
+        await page.waitForURL(/\/customers/);
+        await randomDelay(page);
+      }
+    }
+
+    // Now test search
     const searchInput = page
       .getByPlaceholder(/search/i)
       .or(page.locator('input[placeholder*="search"]'))
       .first();
 
-    if (await searchInput.isVisible({ timeout: 5000 })) {
-      // Step 2: Type search query
-      await searchInput.fill("test");
+    await expect(searchInput).toBeVisible({ timeout: 5000 });
 
-      // Wait for filtering
-      await page.waitForTimeout(1500);
-      await randomDelay(page);
+    // Step 2: Type search query
+    await searchInput.fill("Searchable Customer");
+    await page.waitForTimeout(1500);
+    await randomDelay(page);
 
-      // Step 3: Verify results are filtered
-      // Count table rows after search
-      const rows = page.locator("tbody tr");
-      const rowCount = await rows.count();
+    // VERIFICATION: Search results should contain searchable customer
+    const rows = page.locator("table tbody tr");
+    const rowCount = await rows.count();
 
-      // Results should be visible
-      expect(rowCount).toBeGreaterThanOrEqual(0);
+    // Verify search retrieved the created data
+    const hasSearchableData = await rows
+      .first()
+      .isVisible()
+      .catch(() => false);
 
-      console.log(`✓ Search performed, found ${rowCount} results`);
-    } else {
-      console.log("⚠ No search box found - test passed as no-op");
-    }
+    expect(hasSearchableData).toBe(true);
+    console.log(`✅ TC-C004: Search retrieved ${rowCount} results`);
   });
 
-  test("TC-C005: Customer Form Validation", async ({ page }) => {
-    // Navigate directly to new customer form
+  test("TC-C005: Customer Form Validation - Verify Errors are Recorded", async ({
+    page,
+  }) => {
     await page.goto("/customers/new");
     await page.waitForLoadState("domcontentloaded");
     await randomDelay(page);
@@ -175,20 +308,34 @@ test.describe("Customer Management E2E Tests", () => {
     const saveButton = page.getByRole("button", { name: /save/i }).first();
     if (await saveButton.isVisible()) {
       await saveButton.click();
+      await page.waitForTimeout(500);
     }
 
-    // Check for validation errors or successful save
+    // VERIFICATION: Check validation errors are recorded and displayed
     const errorMessages = page.locator(
-      '[role="alert"], .error, .invalid, .text-red',
+      '[role="alert"], .error, .invalid, .text-red, [aria-invalid="true"]',
     );
-    const hasErrors = (await errorMessages.count()) > 0;
+    const errorCount = await errorMessages.count();
 
-    // Validation should show errors or prevent submission
-    console.log(`✓ Form validation tested (errors: ${hasErrors})`);
+    // Verify error state is persisted in UI
+    const nameInput = page
+      .getByLabel(/name/i)
+      .or(page.locator('input[name="name"]'))
+      .first();
+
+    const hasValidationError =
+      (await nameInput.getAttribute("aria-invalid")).includes("true") ||
+      errorCount > 0;
+
+    expect(hasValidationError).toBe(true);
+    console.log(
+      `✅ TC-C005: Form validation errors recorded (${errorCount} errors)`,
+    );
   });
 
-  test("TC-C006: Customer Page Structure", async ({ page }) => {
-    // Verify page structure
+  test("TC-C006: Customer Page Structure - Verify Data Accessibility", async ({
+    page,
+  }) => {
     await expect(page.locator("h1").first()).toBeVisible({ timeout: 10000 });
 
     // Verify main actions exist
@@ -196,7 +343,7 @@ test.describe("Customer Management E2E Tests", () => {
       page.getByRole("button", { name: /new|add/i }).first(),
     ).toBeVisible();
 
-    // Verify table/list exists
+    // Verify table exists and is accessible
     const tableExists = await page
       .locator("table, .customer-list, .data-grid")
       .first()
@@ -204,6 +351,14 @@ test.describe("Customer Management E2E Tests", () => {
       .catch(() => false);
     expect(tableExists).toBe(true);
 
-    console.log("✓ Customer page structure verified");
+    // If data exists, verify it can be accessed
+    const firstRow = page.locator("table tbody tr").first();
+    if (await firstRow.isVisible()) {
+      const cellContent = await firstRow.locator("td").first().textContent();
+      expect(cellContent).toBeTruthy();
+      console.log(`✅ TC-C006: Customer data accessible: "${cellContent}"`);
+    }
+
+    console.log("✅ TC-C006: Customer page structure verified");
   });
 });

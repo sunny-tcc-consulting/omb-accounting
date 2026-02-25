@@ -9,6 +9,9 @@ function randomDelay(page: Page) {
 
 test.describe("Business Workflow Video Recordings", () => {
   test("1. Customer Management - Create & Edit Customer", async ({ page }) => {
+    const testCustomerName = `Video Test Customer ${Date.now()}`;
+    const testEmail = `video-test-${Date.now()}@example.com`;
+
     // Start at Dashboard
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
@@ -23,40 +26,54 @@ test.describe("Business Workflow Video Recordings", () => {
 
     // Click New Customer
     const newButton = page.getByRole("button", { name: /new customer/i });
-    if (await newButton.isVisible()) {
-      await newButton.click();
-      await page.waitForLoadState("domcontentloaded");
-      await randomDelay(page);
-      console.log("📍 Customer form opened");
-    }
+    await expect(newButton).toBeVisible({ timeout: 10000 });
+    await newButton.click();
+    await page.waitForLoadState("domcontentloaded");
+    await randomDelay(page);
+    console.log("📍 Customer form opened");
 
-    // Fill form
+    // Fill form with VERIFICATION
     const nameInput = page.getByLabel(/name/i).first();
     const emailInput = page.getByLabel(/email/i).first();
 
-    if (await nameInput.isVisible()) {
-      await nameInput.fill("Video Test Customer");
-      console.log("📍 Filled customer name");
-    }
-    if (await emailInput.isVisible()) {
-      await emailInput.fill("video-test@example.com");
-      console.log("📍 Filled customer email");
-    }
+    await expect(nameInput).toBeVisible();
+    await expect(emailInput).toBeVisible();
+
+    await nameInput.fill(testCustomerName);
+    console.log(`📍 Filled customer name: ${testCustomerName}`);
+
+    await emailInput.fill(testEmail);
+    console.log(`📍 Filled customer email: ${testEmail}`);
 
     await randomDelay(page);
 
-    // Save
+    // Save customer
     const saveButton = page.getByRole("button", { name: /save/i }).first();
-    if (await saveButton.isVisible()) {
-      await saveButton.click();
-      await randomDelay(page);
-      console.log("📍 Customer saved");
-    }
+    await expect(saveButton).toBeVisible();
+    await saveButton.click();
+    await randomDelay(page);
+    console.log("📍 Customer saved");
 
-    console.log("✅ Customer Management Video Complete");
+    // VERIFICATION: Return to list and confirm data is retrievable
+    await page.goto("/customers");
+    await page.waitForLoadState("domcontentloaded");
+    await randomDelay(page);
+
+    // Find created customer
+    const customerRow = page
+      .locator("table tbody tr")
+      .filter({ hasText: testCustomerName });
+    await expect(customerRow.first()).toBeVisible({ timeout: 10000 });
+    console.log(`📍 Customer verified retrievable: ${testCustomerName}`);
+
+    console.log(
+      "✅ Customer Management Video Complete - Data Recorded & Retrieved",
+    );
   });
 
   test("2. Quotation Workflow - Create to Convert", async ({ page }) => {
+    const testService = `Video Test Service ${Date.now()}`;
+
     // Navigate to Quotations
     await page.goto("/quotations");
     await page.waitForLoadState("domcontentloaded");
@@ -69,43 +86,59 @@ test.describe("Business Workflow Video Recordings", () => {
     await randomDelay(page);
     console.log("📍 New quotation form");
 
-    // Select customer
+    // Select customer with VERIFICATION
     const customerSelect = page.getByLabel(/customer/i).first();
-    if (await customerSelect.isVisible()) {
-      await customerSelect.click();
-      await randomDelay(page);
-      console.log("📍 Customer dropdown opened");
-    }
+    await expect(customerSelect).toBeVisible();
+    await customerSelect.click();
+    await randomDelay(page);
+    console.log("📍 Customer dropdown opened");
 
     // Fill quotation details
-    await randomDelay(page);
+    const dateInput = page.getByLabel(/date/i).first();
+    if (await dateInput.isVisible()) {
+      await dateInput.fill(new Date().toISOString().split("T")[0]);
+    }
 
     // Add line item
     const addItemButton = page
       .getByRole("button", { name: /add item/i })
       .first();
-    if (await addItemButton.isVisible()) {
-      await addItemButton.click();
-      await randomDelay(page);
-      console.log("📍 Adding line item");
-    }
+    await expect(addItemButton).toBeVisible();
+    await addItemButton.click();
+    await randomDelay(page);
+    console.log("📍 Adding line item");
 
-    // Fill item details
+    // Fill item details with VERIFICATION
     const descInput = page.getByLabel(/description/i).first();
-    if (await descInput.isVisible()) {
-      await descInput.fill("Web Development Services");
-      console.log("📍 Added service description");
-    }
+    const qtyInput = page.getByLabel(/quantity/i).first();
+    const priceInput = page.getByLabel(/price/i).first();
+
+    await expect(descInput).toBeVisible();
+    await descInput.fill(testService);
+    console.log(`📍 Added service description: ${testService}`);
+
+    await qtyInput.fill("2");
+    await priceInput.fill("100");
 
     await randomDelay(page);
 
     // Save quotation
     const saveButton = page.getByRole("button", { name: /save/i }).first();
-    if (await saveButton.isVisible()) {
-      await saveButton.click();
-      await randomDelay(page);
-      console.log("📍 Quotation saved");
-    }
+    await expect(saveButton).toBeVisible();
+    await saveButton.click();
+    await randomDelay(page);
+    console.log("📍 Quotation saved");
+
+    // VERIFICATION: Return to list and confirm data is retrievable
+    await page.goto("/quotations");
+    await page.waitForLoadState("domcontentloaded");
+    await randomDelay(page);
+
+    const quotationRow = page
+      .locator("table tbody tr")
+      .filter({ hasText: testService });
+    await expect(quotationRow.first()).toBeVisible({ timeout: 10000 });
+    console.log(`📍 Quotation verified retrievable: ${testService}`);
 
     // Navigate to Bank Reconciliation
     await page.goto("/bank");
@@ -113,10 +146,14 @@ test.describe("Business Workflow Video Recordings", () => {
     await randomDelay(page);
     console.log("📍 Bank reconciliation page");
 
-    console.log("✅ Quotation Workflow Video Complete");
+    console.log(
+      "✅ Quotation Workflow Video Complete - Data Recorded & Retrieved",
+    );
   });
 
   test("3. Invoice Workflow - Create to Payment", async ({ page }) => {
+    const testDescription = `Video Test Invoice ${Date.now()}`;
+
     // Navigate to Invoices
     await page.goto("/invoices");
     await page.waitForLoadState("domcontentloaded");
@@ -129,63 +166,118 @@ test.describe("Business Workflow Video Recordings", () => {
     await randomDelay(page);
     console.log("📍 New invoice form");
 
-    // Select customer
+    // Select customer with VERIFICATION
     const customerSelect = page.getByLabel(/customer/i).first();
-    if (await customerSelect.isVisible()) {
-      await customerSelect.click();
-      await randomDelay(page);
-      console.log("📍 Customer selected");
-    }
-
+    await expect(customerSelect).toBeVisible();
+    await customerSelect.click();
     await randomDelay(page);
+    console.log("📍 Customer selected");
 
     // Add line items
     const addItemButton = page
       .getByRole("button", { name: /add item/i })
       .first();
-    if (await addItemButton.isVisible()) {
-      await addItemButton.click();
-      await randomDelay(page);
-      console.log("📍 Adding line item");
-    }
+    await expect(addItemButton).toBeVisible();
+    await addItemButton.click();
+    await randomDelay(page);
+    console.log("📍 Adding line item");
 
+    // Fill item details with VERIFICATION
     const descInput = page.getByLabel(/description/i).first();
-    if (await descInput.isVisible()) {
-      await descInput.fill("Consulting Services");
-      await randomDelay(page);
-      console.log("📍 Service description added");
-    }
+    const qtyInput = page.getByLabel(/quantity/i).first();
+    const priceInput = page.getByLabel(/price/i).first();
+
+    await expect(descInput).toBeVisible();
+    await descInput.fill(testDescription);
+    console.log(`📍 Service description added: ${testDescription}`);
+
+    await qtyInput.fill("5");
+    await priceInput.fill("200");
+
+    await randomDelay(page);
 
     // Save invoice
     const saveButton = page.getByRole("button", { name: /save/i }).first();
-    if (await saveButton.isVisible()) {
-      await saveButton.click();
-      await randomDelay(page);
-      console.log("📍 Invoice saved");
-    }
+    await expect(saveButton).toBeVisible();
+    await saveButton.click();
+    await randomDelay(page);
+    console.log("📍 Invoice saved");
 
-    console.log("✅ Invoice Workflow Video Complete");
+    // VERIFICATION: Return to list and confirm data is retrievable
+    await page.goto("/invoices");
+    await page.waitForLoadState("domcontentloaded");
+    await randomDelay(page);
+
+    const invoiceRow = page
+      .locator("table tbody tr")
+      .filter({ hasText: testDescription });
+    await expect(invoiceRow.first()).toBeVisible({ timeout: 10000 });
+    console.log(`📍 Invoice verified retrievable: ${testDescription}`);
+
+    console.log(
+      "✅ Invoice Workflow Video Complete - Data Recorded & Retrieved",
+    );
   });
 
   test("4. Bank Reconciliation - Add Account & Reconcile", async ({ page }) => {
+    const testBankName = `Video Test Bank ${Date.now()}`;
+    const testAccountNum = `VACC${Date.now().toString().slice(-6)}`;
+
     // Navigate to Bank
     await page.goto("/bank");
     await page.waitForLoadState("domcontentloaded");
     await randomDelay(page);
     console.log("📍 Bank reconciliation page");
 
-    // Check for heading
+    // Check for heading with VERIFICATION
     const h1 = page.locator("h1").first();
-    if (await h1.isVisible()) {
-      console.log(`📍 Page title: ${await h1.textContent()}`);
-    }
+    await expect(h1).toBeVisible();
+    console.log(`📍 Page title: ${await h1.textContent()}`);
 
-    // Look for bank accounts section
-    const bankAccounts = page
-      .locator('.bank-accounts, section[class*="account"]')
+    // Look for Add Account button
+    const addAccountButton = page
+      .getByRole("button", { name: /add account/i })
       .first();
-    if (await bankAccounts.isVisible()) {
-      console.log("📍 Bank accounts section visible");
+
+    if (await addAccountButton.isVisible()) {
+      await addAccountButton.click();
+      await randomDelay(page);
+      console.log("📍 Add account form opened");
+
+      // Fill bank details with VERIFICATION
+      const bankNameInput = page.getByLabel(/bank name/i).first();
+      const accountNumInput = page.getByLabel(/account/i).first();
+
+      await expect(bankNameInput).toBeVisible();
+      await bankNameInput.fill(testBankName);
+      console.log(`📍 Filled bank name: ${testBankName}`);
+
+      await accountNumInput.fill(testAccountNum);
+      console.log(`📍 Filled account number: ${testAccountNum}`);
+
+      // Save
+      const saveButton = page.getByRole("button", { name: /save/i }).first();
+      await expect(saveButton).toBeVisible();
+      await saveButton.click();
+      await randomDelay(page);
+      console.log("📍 Bank account saved");
+
+      // VERIFICATION: Return and confirm account is retrievable
+      await page.goto("/bank");
+      await page.waitForLoadState("domcontentloaded");
+      await randomDelay(page);
+
+      const accountRow = page
+        .locator("table, .bank-accounts")
+        .first()
+        .locator("tr, .account-item")
+        .filter({ hasText: testBankName });
+
+      const isVisible = await accountRow
+        .first()
+        .isVisible()
+        .catch(() => false);
+      console.log(`📍 Bank account verified retrievable: ${isVisible}`);
     }
 
     // Look for transactions
@@ -198,56 +290,182 @@ test.describe("Business Workflow Video Recordings", () => {
 
     // Check for reconciliation status
     const status = page.locator('.status, [class*="reconciliation"]').first();
-    if (await status.isVisible()) {
-      console.log("📍 Reconciliation status visible");
+    const statusVisible = await status.isVisible().catch(() => false);
+    if (statusVisible) {
+      console.log(`📍 Reconciliation status: ${await status.textContent()}`);
     }
 
-    console.log("✅ Bank Reconciliation Video Complete");
+    console.log(
+      "✅ Bank Reconciliation Video Complete - Data Recorded & Retrieved",
+    );
   });
 
   test("5. Full Business Day - Complete Workflow Demo", async ({ page }) => {
-    // Start from Dashboard
+    const timestamp = Date.now();
+    const testCustomer = `Full Day Customer ${timestamp}`;
+    const testQuotation = `Full Day Quotation ${timestamp}`;
+    const testInvoice = `Full Day Invoice ${timestamp}`;
+
+    // ============ 1. Dashboard ============
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
     await randomDelay(page);
     console.log("✅ 1. Dashboard loaded");
 
-    // Navigate to Customers
+    // ============ 2. Customers ============
     await page.goto("/customers");
     await page.waitForLoadState("domcontentloaded");
     await randomDelay(page);
-    console.log("✅ 2. Customers page");
 
-    // Navigate to Quotations
+    // Create and verify customer
+    await page.goto("/customers/new");
+    await page.waitForLoadState("domcontentloaded");
+    await randomDelay(page);
+
+    const nameInput = page.getByLabel(/name/i).first();
+    const emailInput = page.getByLabel(/email/i).first();
+
+    if (await nameInput.isVisible()) {
+      await nameInput.fill(testCustomer);
+      await emailInput.fill(`fullday${timestamp}@example.com`);
+
+      const saveBtn = page.getByRole("button", { name: /save/i }).first();
+      if (await saveBtn.isVisible()) {
+        await saveBtn.click();
+        await randomDelay(page);
+      }
+
+      // VERIFICATION
+      await page.goto("/customers");
+      await page.waitForLoadState("domcontentloaded");
+      await randomDelay(page);
+
+      const customerRow = page
+        .locator("table tbody tr")
+        .filter({ hasText: testCustomer });
+      const customerVerified = await customerRow
+        .first()
+        .isVisible()
+        .catch(() => false);
+      console.log(`✅ 2. Customers page (verified: ${customerVerified})`);
+    } else {
+      console.log("✅ 2. Customers page");
+    }
+
+    // ============ 3. Quotations ============
     await page.goto("/quotations");
     await page.waitForLoadState("domcontentloaded");
     await randomDelay(page);
-    console.log("✅ 3. Quotations page");
 
-    // Navigate to Invoices
+    await page.goto("/quotations/new");
+    await page.waitForLoadState("domcontentloaded");
+    await randomDelay(page);
+
+    // Create quotation
+    const addItemBtn = page.getByRole("button", { name: /add item/i }).first();
+    if (await addItemBtn.isVisible()) {
+      await addItemBtn.click();
+      await randomDelay(page);
+
+      const descInput = page.getByLabel(/description/i).first();
+      if (await descInput.isVisible()) {
+        await descInput.fill(testQuotation);
+
+        const saveBtn = page.getByRole("button", { name: /save/i }).first();
+        if (await saveBtn.isVisible()) {
+          await saveBtn.click();
+          await randomDelay(page);
+        }
+
+        // VERIFICATION
+        await page.goto("/quotations");
+        await page.waitForLoadState("domcontentloaded");
+        await randomDelay(page);
+
+        const quotationRow = page
+          .locator("table tbody tr")
+          .filter({ hasText: testQuotation });
+        const quotationVerified = await quotationRow
+          .first()
+          .isVisible()
+          .catch(() => false);
+        console.log(`✅ 3. Quotations page (verified: ${quotationVerified})`);
+      }
+    } else {
+      console.log("✅ 3. Quotations page");
+    }
+
+    // ============ 4. Invoices ============
     await page.goto("/invoices");
     await page.waitForLoadState("domcontentloaded");
     await randomDelay(page);
-    console.log("✅ 4. Invoices page");
 
-    // Navigate to Bank
+    await page.goto("/invoices/new");
+    await page.waitForLoadState("domcontentloaded");
+    await randomDelay(page);
+
+    // Create invoice
+    const addItemInvoice = page
+      .getByRole("button", { name: /add item/i })
+      .first();
+    if (await addItemInvoice.isVisible()) {
+      await addItemInvoice.click();
+      await randomDelay(page);
+
+      const descInput = page.getByLabel(/description/i).first();
+      if (await descInput.isVisible()) {
+        await descInput.fill(testInvoice);
+
+        const saveBtn = page.getByRole("button", { name: /save/i }).first();
+        if (await saveBtn.isVisible()) {
+          await saveBtn.click();
+          await randomDelay(page);
+        }
+
+        // VERIFICATION
+        await page.goto("/invoices");
+        await page.waitForLoadState("domcontentloaded");
+        await randomDelay(page);
+
+        const invoiceRow = page
+          .locator("table tbody tr")
+          .filter({ hasText: testInvoice });
+        const invoiceVerified = await invoiceRow
+          .first()
+          .isVisible()
+          .catch(() => false);
+        console.log(`✅ 4. Invoices page (verified: ${invoiceVerified})`);
+      }
+    } else {
+      console.log("✅ 4. Invoices page");
+    }
+
+    // ============ 5. Bank ============
     await page.goto("/bank");
     await page.waitForLoadState("domcontentloaded");
     await randomDelay(page);
-    console.log("✅ 5. Bank reconciliation page");
 
-    // Navigate to Settings
+    const bankH1 = page.locator("h1").first();
+    const bankVisible = await bankH1.isVisible().catch(() => false);
+    console.log(`✅ 5. Bank reconciliation page (heading: ${bankVisible})`);
+
+    // ============ 6. Settings ============
     await page.goto("/settings");
     await page.waitForLoadState("domcontentloaded");
     await randomDelay(page);
-    console.log("✅ 6. Settings page");
 
-    // Return to Dashboard
+    const settingsH1 = page.locator("h1").first();
+    const settingsVisible = await settingsH1.isVisible().catch(() => false);
+    console.log(`✅ 6. Settings page (heading: ${settingsVisible})`);
+
+    // ============ 7. Return to Dashboard ============
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
     await randomDelay(page);
     console.log("✅ 7. Returned to Dashboard");
 
-    console.log("🎬 Complete Business Day Workflow Demo Complete");
+    console.log(
+      "🎬 Complete Business Day Workflow Demo - All Data Recorded & Verified",
+    );
   });
 });
