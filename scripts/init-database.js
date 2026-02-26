@@ -48,10 +48,10 @@ async function initializeDatabase() {
 
     // Verify data
     console.log('Step 3: Verifying data...');
-    const userCount = db.query('SELECT COUNT(*) as count FROM users').[0].count;
-    const customerCount = db.query('SELECT COUNT(*) as count FROM customers').[0].count;
-    const invoiceCount = db.query('SELECT COUNT(*) as count FROM invoices').[0].count;
-    const bankAccountCount = db.query('SELECT COUNT(*) as count FROM bank_accounts').[0].count;
+    const userCount = db.query('SELECT COUNT(*) as count FROM users').get().count;
+    const customerCount = db.query('SELECT COUNT(*) as count FROM customers').get().count;
+    const invoiceCount = db.query('SELECT COUNT(*) as count FROM invoices').get().count;
+    const bankAccountCount = db.query('SELECT COUNT(*) as count FROM bank_accounts').get().count;
 
     console.log(`  Users: ${userCount}`);
     console.log(`  Customers: ${customerCount}`);
