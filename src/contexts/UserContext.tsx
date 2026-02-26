@@ -18,6 +18,7 @@ import {
   UserFormData,
   UserPreferences,
   LoginCredentials,
+  RegisterCredentials,
   AuthResponse,
 } from "@/types";
 import {
@@ -41,6 +42,9 @@ interface UserContextType {
   // Login/Logout
   login: (
     credentials: LoginCredentials,
+  ) => Promise<{ success: boolean; error?: string }>;
+  register: (
+    credentials: RegisterCredentials,
   ) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
 
@@ -215,6 +219,90 @@ export function UserProvider({ children }: UserProviderProps) {
         console.error("Login error:", error);
         setIsLoading(false);
         return { success: false, error: "An error occurred during login" };
+      }
+    },
+    [users, startSessionTimer],
+  );
+
+  // Register
+  const register = useCallback(
+    async (credentials: RegisterCredentials) => {
+      setIsLoading(true);
+
+      try {
+        // Check if email already exists
+        const existingUser = users.find((u) => u.email === credentials.email);
+        if (existingUser) {
+          setIsLoading(false);
+          return { success: false, error: "Email already registered" };
+        }
+
+        // Create new user (auto-approved, active status)
+        const newUser: User = {
+          id: `user-${Date.now()}`,
+          email: credentials.email,
+          name: credentials.name,
+          roleId: "role-user-001", // Default user role
+          status: "active",
+          phone: "",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          lastLoginAt: new Date(),
+          loginCount: 1,
+          failedLoginAttempts: 0,
+          passwordHash: "", // No password for demo
+          twoFactorEnabled: false,
+          permissions: [],
+          preferences: {
+            language: "en",
+            timezone: "Asia/Hong_Kong",
+            currency: "HKD",
+            dateFormat: "YYYY-MM-DD",
+            theme: "light",
+            notificationEmail: true,
+            notificationInApp: true,
+            emailDigest: "daily",
+          },
+          avatar: undefined,
+          passwordChangedAt: new Date(),
+        };
+
+        setUsers((prev) => [...prev, newUser]);
+
+        // Set current user
+        setCurrentUser(newUser);
+        localStorage.setItem("omb_currentUser", JSON.stringify(newUser));
+
+        // Log activity
+        logActivity(
+          newUser.id,
+          newUser.name,
+          "register",
+          "users",
+          newUser.id,
+          { email: newUser.email },
+          "client-ip",
+          navigator.userAgent,
+        );
+
+        logLogin(
+          newUser.id,
+          newUser.name,
+          "client-ip",
+          navigator.userAgent,
+          true,
+        );
+
+        startSessionTimer();
+        setIsLoading(false);
+        return { success: true };
+      } catch (error) {
+        console.error("Registration error:", error);
+        setIsLoading(false);
+        return {
+          success: false,
+          error: "An error occurred during registration",
+        };
       }
     },
     [users, startSessionTimer],
@@ -490,6 +578,7 @@ export function UserProvider({ children }: UserProviderProps) {
     isAuthenticated: !!currentUser,
     isLoading,
     login,
+    register,
     logout,
     users: users.filter((u) => u.status !== "inactive"),
     getUser,

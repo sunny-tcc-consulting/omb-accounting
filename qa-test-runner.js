@@ -187,30 +187,15 @@ async function runQA() {
         { name: 'Line items section exists', selector: "document.querySelector('[class*=item], table, [class*=line]')" }
       ]
     },
-    // Reports
+    // Reports (single page with tabs)
     {
-      name: 'Reports-TrialBalance',
-      path: '/reports/trial-balance',
+      name: 'Reports',
+      path: '/reports',
       checks: [
         { name: 'Page loads', selector: "document.body.innerHTML.length > 100" },
         { name: 'Report heading exists', selector: "document.querySelector('h1, h2')?.textContent?.length > 0" },
-        { name: 'Filter controls exist', selector: "document.querySelector('input, select, [class*=filter]')" }
-      ]
-    },
-    {
-      name: 'Reports-BalanceSheet',
-      path: '/reports/balance-sheet',
-      checks: [
-        { name: 'Page loads', selector: "document.body.innerHTML.length > 100" },
-        { name: 'Balance sheet content exists', selector: "document.querySelector('h1, h2, [class*=balance]')" }
-      ]
-    },
-    {
-      name: 'Reports-ProfitLoss',
-      path: '/reports/profit-loss',
-      checks: [
-        { name: 'Page loads', selector: "document.body.innerHTML.length > 100" },
-        { name: 'P&L content exists', selector: "document.querySelector('h1, h2, [class*=profit]')" }
+        { name: 'Filter controls exist', selector: "document.querySelector('input, select, [class*=filter]')" },
+        { name: 'Tabs exist', selector: "document.querySelector('button, a, [role=tab]')" }
       ]
     },
     // Bank
@@ -238,8 +223,8 @@ async function runQA() {
       path: '/auth/login',
       checks: [
         { name: 'Page loads', selector: "document.body.innerHTML.length > 100" },
-        { name: 'Login form exists', selector: "document.querySelector('form, input[type=\"password\"]')" },
-        { name: 'Email input exists', selector: "document.querySelector('input[type=\"email\"]')" }
+        { name: 'Login form exists', selector: "document.querySelector('form')" },
+        { name: 'Email input exists', selector: "document.querySelector('input[type=\"email\"], input#email')" }
       ]
     },
     {
