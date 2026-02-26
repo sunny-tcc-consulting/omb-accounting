@@ -1,0 +1,326 @@
+{
+  "passed": 18,
+  "failed": 21,
+  "errors": [
+    {
+      "page": "Dashboard",
+      "error": "Error: Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
+    },
+    {
+      "page": "Reports-TrialBalance",
+      "error": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "page": "Reports-BalanceSheet",
+      "error": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "page": "Reports-ProfitLoss",
+      "error": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "page": "Auth-Login",
+      "error": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "page": "Auth-Register",
+      "error": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    }
+  ],
+  "pages": [
+    {
+      "name": "Dashboard",
+      "url": "http://localhost:8000/",
+      "passed": false,
+      "consoleErrors": [
+        "Error: Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
+      ],
+      "checks": [
+        {
+          "name": "Page title contains accounting",
+          "passed": true
+        },
+        {
+          "name": "Dashboard heading exists",
+          "passed": true
+        },
+        {
+          "name": "Navigation exists",
+          "passed": false
+        },
+        {
+          "name": "No critical console errors",
+          "passed": true
+        }
+      ],
+      "screenshot": "./qa-screenshots/Dashboard.png"
+    },
+    {
+      "name": "Customers-List",
+      "url": "http://localhost:8000/customers",
+      "passed": false,
+      "consoleErrors": [],
+      "checks": [
+        {
+          "name": "Page loads",
+          "passed": true
+        },
+        {
+          "name": "Customers heading or table exists",
+          "passed": false
+        },
+        {
+          "name": "Add button or link exists",
+          "passed": false
+        }
+      ],
+      "screenshot": "./qa-screenshots/Customers-List.png"
+    },
+    {
+      "name": "Customers-New",
+      "url": "http://localhost:8000/customers/new",
+      "passed": false,
+      "consoleErrors": [],
+      "checks": [
+        {
+          "name": "Page loads",
+          "passed": true
+        },
+        {
+          "name": "Form or input fields exist",
+          "passed": false
+        },
+        {
+          "name": "Submit button exists",
+          "passed": false
+        }
+      ],
+      "screenshot": "./qa-screenshots/Customers-New.png"
+    },
+    {
+      "name": "Quotations-List",
+      "url": "http://localhost:8000/quotations",
+      "passed": false,
+      "consoleErrors": [],
+      "checks": [
+        {
+          "name": "Page loads",
+          "passed": true
+        },
+        {
+          "name": "Quotations heading or table exists",
+          "passed": false
+        },
+        {
+          "name": "Create button exists",
+          "passed": false
+        }
+      ],
+      "screenshot": "./qa-screenshots/Quotations-List.png"
+    },
+    {
+      "name": "Quotations-New",
+      "url": "http://localhost:8000/quotations/new",
+      "passed": false,
+      "consoleErrors": [],
+      "checks": [
+        {
+          "name": "Page loads",
+          "passed": true
+        },
+        {
+          "name": "Form fields exist",
+          "passed": false
+        },
+        {
+          "name": "Customer selector exists",
+          "passed": false
+        }
+      ],
+      "screenshot": "./qa-screenshots/Quotations-New.png"
+    },
+    {
+      "name": "Invoices-List",
+      "url": "http://localhost:8000/invoices",
+      "passed": false,
+      "consoleErrors": [],
+      "checks": [
+        {
+          "name": "Page loads",
+          "passed": true
+        },
+        {
+          "name": "Invoices heading or table exists",
+          "passed": false
+        },
+        {
+          "name": "Create button exists",
+          "passed": false
+        }
+      ],
+      "screenshot": "./qa-screenshots/Invoices-List.png"
+    },
+    {
+      "name": "Invoices-New",
+      "url": "http://localhost:8000/invoices/new",
+      "passed": false,
+      "consoleErrors": [],
+      "checks": [
+        {
+          "name": "Page loads",
+          "passed": true
+        },
+        {
+          "name": "Form fields exist",
+          "passed": false
+        },
+        {
+          "name": "Line items section exists",
+          "passed": false
+        }
+      ],
+      "screenshot": "./qa-screenshots/Invoices-New.png"
+    },
+    {
+      "name": "Reports-TrialBalance",
+      "url": "http://localhost:8000/reports/trial-balance",
+      "passed": false,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "checks": [
+        {
+          "name": "Page loads",
+          "passed": true
+        },
+        {
+          "name": "Report heading exists",
+          "passed": true
+        },
+        {
+          "name": "Filter controls exist",
+          "passed": false
+        }
+      ],
+      "screenshot": "./qa-screenshots/Reports-TrialBalance.png"
+    },
+    {
+      "name": "Reports-BalanceSheet",
+      "url": "http://localhost:8000/reports/balance-sheet",
+      "passed": false,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "checks": [
+        {
+          "name": "Page loads",
+          "passed": true
+        },
+        {
+          "name": "Balance sheet content exists",
+          "passed": false
+        }
+      ],
+      "screenshot": "./qa-screenshots/Reports-BalanceSheet.png"
+    },
+    {
+      "name": "Reports-ProfitLoss",
+      "url": "http://localhost:8000/reports/profit-loss",
+      "passed": false,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "checks": [
+        {
+          "name": "Page loads",
+          "passed": true
+        },
+        {
+          "name": "P&L content exists",
+          "passed": false
+        }
+      ],
+      "screenshot": "./qa-screenshots/Reports-ProfitLoss.png"
+    },
+    {
+      "name": "Bank-Overview",
+      "url": "http://localhost:8000/bank",
+      "passed": false,
+      "consoleErrors": [],
+      "checks": [
+        {
+          "name": "Page loads",
+          "passed": true
+        },
+        {
+          "name": "Bank overview exists",
+          "passed": false
+        },
+        {
+          "name": "Account list exists",
+          "passed": false
+        }
+      ],
+      "screenshot": "./qa-screenshots/Bank-Overview.png"
+    },
+    {
+      "name": "Users-List",
+      "url": "http://localhost:8000/users",
+      "passed": true,
+      "consoleErrors": [],
+      "checks": [
+        {
+          "name": "Page loads",
+          "passed": true
+        },
+        {
+          "name": "Users heading exists",
+          "passed": true
+        }
+      ],
+      "screenshot": "./qa-screenshots/Users-List.png"
+    },
+    {
+      "name": "Auth-Login",
+      "url": "http://localhost:8000/auth/login",
+      "passed": false,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "checks": [
+        {
+          "name": "Page loads",
+          "passed": true
+        },
+        {
+          "name": "Login form exists",
+          "passed": false
+        },
+        {
+          "name": "Email input exists",
+          "passed": false
+        }
+      ],
+      "screenshot": "./qa-screenshots/Auth-Login.png"
+    },
+    {
+      "name": "Auth-Register",
+      "url": "http://localhost:8000/auth/register",
+      "passed": false,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "checks": [
+        {
+          "name": "Page loads",
+          "passed": true
+        },
+        {
+          "name": "Register form exists",
+          "passed": false
+        }
+      ],
+      "screenshot": "./qa-screenshots/Auth-Register.png"
+    }
+  ]
+}

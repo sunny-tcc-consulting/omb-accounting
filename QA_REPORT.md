@@ -1,0 +1,234 @@
+# QA Test Report - omb-accounting
+
+**Test Date**: 2026-02-26
+**Tester**: 圓圓 (AI QA Engineer) 🐱
+**Environment**: localhost:8000
+
+---
+
+## 📊 Test Summary
+
+| Metric             | Value |
+| ------------------ | ----- |
+| Total Pages Tested | 14    |
+| ✅ Passed          | 1     |
+| ❌ Failed          | 13    |
+| ⚠️ Console Errors  | 6     |
+
+---
+
+## 🔥 Critical Bugs (需要立即修復)
+
+### 1. CustomerProvider 冇加到 Providers.tsx 🔴 CRITICAL
+
+**位置**: `src/app/providers.tsx`
+
+**問題描述**:
+
+- `providers.tsx` 只包含 `UserProvider` 和 `ReportProvider`
+- 但 `CustomerContext` 被 `CustomerList`、`Quotations`、`Invoices` 等組件使用
+- 導致所有列表頁面一直顯示 loading skeleton，數據無法加載
+
+**受影響頁面**:
+
+- `/customers` - Customers List
+- `/customers/new` - New Customer Form
+- `/quotations` - Quotations List
+- `/quotations/new` - New Quotation Form
+- `/invoices` - Invoices List
+- `/invoices/new` - New Invoice Form
+
+**截圖位置**:
+
+- `qa-screenshots/Customers-List.png`
+- `qa-screenshots/Quotations-List.png`
+- `qa-screenshots/Invoices-List.png`
+
+**修復方法**:
+
+```typescript
+// src/app/providers.tsx
+import { CustomerProvider } from '@/contexts/CustomerContext';
+import { QuotationProvider } from '@/contexts/QuotationContext';
+import { InvoiceProvider } from '@/contexts/InvoiceContext';
+
+export function Providers({ children }: ProvidersProps) {
+  return (
+    <UserProvider>
+      <ReportProvider>
+        <CustomerProvider>
+          <QuotationProvider>
+            <InvoiceProvider>
+              {children}
+            </InvoiceProvider>
+          </QuotationProvider>
+        </CustomerProvider>
+      </ReportProvider>
+    </UserProvider>
+  );
+}
+```
+
+---
+
+### 2. Auth Register 路由唔存在 🔴 CRITICAL
+
+**位置**: `/auth/register`
+
+**問題描述**:
+
+- `/auth/login` 存在且正常
+- `/auth/register` 頁面不存在
+- 返回 404 Not Found
+
+**受影響頁面**: `/auth/register`
+
+**截圖位置**: `qa-screenshots/Auth-Register.png`
+
+**修復方法**:
+建立 `src/app/(auth)/register/page.tsx`
+
+---
+
+### 3. React Hydration Error #418 🔴 CRITICAL
+
+**位置**: Dashboard (`/`)
+
+**錯誤訊息**:
+
+```
+Error: Minified React error #418; visit https://react.dev/errors/418?args0=text&args1= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+```
+
+**問題描述**:
+
+- SSR 和 CSR 內容不匹配
+- 通常由服務器和客戶端渲染差異導致（如日期、隨機值等）
+
+**受影響頁面**: `/` (Dashboard)
+
+**截圖位置**: `qa-screenshots/Dashboard.png`
+
+**可能原因**:
+
+- Dashboard 使用 `new Date()` 或隨機值
+- Mock data 生成導致 hydration mismatch
+
+---
+
+### 4. Bank 頁面出錯 🔴 CRITICAL
+
+**位置**: `/bank`
+
+**問題描述**:
+
+- 頁面顯示 "Something went wrong"
+- 無法正常顯示銀行帳戶和交易信息
+
+**受影響頁面**: `/bank`
+
+**截圖位置**: `qa-screenshots/Bank-Overview.png`
+
+---
+
+## ⚠️ High Priority Issues
+
+### 5. Reports URL 路由結構問題
+
+**問題描述**:
+
+- QA 測試嘗試訪問 `/reports/trial-balance`, `/reports/balance-sheet`, `/reports/profit-loss`
+- 但所有報告都在 `/reports/page.tsx` 中，用 tab 切換
+- 個別報告 URL 不存在
+
+**受影響頁面**:
+
+- `/reports/trial-balance`
+- `/reports/balance-sheet`
+- `/reports/profit-loss`
+
+**建議修復**:
+
+1. 建立 dynamic routes: `src/app/(dashboard)/reports/[reportType]/page.tsx`
+2. 或者使用 query parameters: `/reports?type=trial-balance`
+
+---
+
+### 6. Login 資源載入失敗
+
+**位置**: `/auth/login`
+
+**錯誤訊息**:
+
+```
+Failed to load resource: the server responded with a status of 404 (Not Found)
+```
+
+**問題描述**:
+
+- Login 頁面存在，但有資源載入失敗（可能是圖片、字體、API 等）
+
+**受影響頁面**: `/auth/login`
+
+**截圖位置**: `qa-screenshots/Auth-Login.png`
+
+---
+
+## ✅ Passed Pages
+
+| Page       | URL    | Status    |
+| ---------- | ------ | --------- |
+| Users-List | /users | ✅ Passed |
+
+---
+
+## 📸 Screenshot Evidence
+
+所有截圖保存在 `qa-screenshots/` 目錄:
+
+```
+qa-screenshots/
+├── Dashboard.png
+├── Customers-List.png
+├── Customers-New.png
+├── Quotations-List.png
+├── Quotations-New.png
+├── Invoices-List.png
+├── Invoices-New.png
+├── Reports-TrialBalance.png
+├── Reports-BalanceSheet.png
+├── Reports-ProfitLoss.png
+├── Bank-Overview.png
+├── Users-List.png
+├── Auth-Login.png
+└── Auth-Register.png
+```
+
+---
+
+## 🛠️ Reproduction Steps
+
+```bash
+# 啟動開發服務器
+cd /home/tcc/.openclaw/workspace/omb-accounting
+npm run dev
+
+# 運行 QA 測試
+node qa-test-runner.js
+```
+
+---
+
+## 📝 Next Steps
+
+1. ✅ 修復 CustomerProvider 缺失問題
+2. ✅ 建立 Auth Register 頁面
+3. ⚠️ 修復 React Hydration Error
+4. ⚠️ 調查 Bank 頁面錯誤
+5. ⚠️ 修復 Reports 路由結構
+6. ⚠️ 調查 Login 資源 404
+
+---
+
+**Report Generated by**: 圓圓 🐱
+**Date**: 2026-02-26
