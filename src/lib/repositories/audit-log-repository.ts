@@ -26,9 +26,6 @@ interface AuditLogFilters {
   offset?: number;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type DbAny = any;
-
 export class AuditLogRepository {
   private db: unknown;
   private tableName = "audit_logs";
@@ -60,7 +57,8 @@ export class AuditLogRepository {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-    await (this.db as DbAny).execute(sql, [
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (this.db as any).execute(sql, [
       auditLog.id,
       auditLog.user_id,
       auditLog.operation,
@@ -79,7 +77,8 @@ export class AuditLogRepository {
    * Get audit log by ID
    */
   async getById(id: string): Promise<AuditLog | null> {
-    const result = (this.db as DbAny).execute(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = (this.db as any).execute(
       `SELECT * FROM ${this.tableName} WHERE id = ?`,
       [id],
     );
@@ -135,7 +134,8 @@ export class AuditLogRepository {
       params.push(filters.offset);
     }
 
-    const result = (this.db as DbAny).execute(sql, params);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = (this.db as any).execute(sql, params);
     return result as AuditLog[];
   }
 
@@ -186,7 +186,8 @@ export class AuditLogRepository {
       sql += ` WHERE ${conditions.join(" AND ")}`;
     }
 
-    const result = (this.db as DbAny).execute(sql, params) as Array<{
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = (this.db as any).execute(sql, params) as Array<{
       count: number;
     }>;
     return result[0]?.count ?? 0;
@@ -197,7 +198,8 @@ export class AuditLogRepository {
    */
   async deleteOlderThan(timestamp: number): Promise<number> {
     const sql = `DELETE FROM ${this.tableName} WHERE created_at < ?`;
-    const result = (this.db as DbAny).execute(sql, [timestamp]) as {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = (this.db as any).execute(sql, [timestamp]) as {
       changes: number;
     };
     return result?.changes ?? 0;
