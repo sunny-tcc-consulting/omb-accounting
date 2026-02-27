@@ -71,7 +71,7 @@ export function ReportPageContent() {
     new Date().toISOString().split("T")[0],
   );
   const [startDate, setStartDate] = useState<string>(
-    new Date(new Date().setMonth(new Date().getMonth() - 12))
+    new Date(new Date().setFullYear(new Date().getFullYear() - 1))
       .toISOString()
       .split("T")[0],
   );
@@ -1256,9 +1256,14 @@ export function ReportPageContent() {
               <div className="flex items-center gap-4">
                 <div>
                   <CardTitle>Profit and Loss Statement</CardTitle>
-                  <CardDescription>
-                    {new Date(startDate).toLocaleDateString("zh-CN")} to{" "}
-                    {new Date(endDate).toLocaleDateString("zh-CN")}
+                  <CardDescription suppressHydrationWarning>
+                    <span suppressHydrationWarning>
+                      {new Date(startDate).toLocaleDateString("zh-CN")}
+                    </span>{" "}
+                    to{" "}
+                    <span suppressHydrationWarning>
+                      {new Date(endDate).toLocaleDateString("zh-CN")}
+                    </span>
                   </CardDescription>
                 </div>
                 <div className="flex gap-2 ml-auto">
@@ -1267,6 +1272,7 @@ export function ReportPageContent() {
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
                     className="border rounded px-2 py-1"
+                    suppressHydrationWarning
                   />
                   <span className="text-gray-400">to</span>
                   <input
@@ -1274,6 +1280,7 @@ export function ReportPageContent() {
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
                     className="border rounded px-2 py-1"
+                    suppressHydrationWarning
                   />
                 </div>
               </div>

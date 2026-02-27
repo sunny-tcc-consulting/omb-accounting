@@ -93,9 +93,14 @@ export default function DashboardPage() {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
             Dashboard
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p
+            className="text-gray-600 dark:text-gray-400 mt-1"
+            suppressHydrationWarning
+          >
             Financial overview and insights • Last updated:{" "}
-            {new Date().toLocaleTimeString()}
+            <span suppressHydrationWarning>
+              {new Date().toLocaleTimeString()}
+            </span>
           </p>
         </div>
         <div className="flex items-center gap-3">
