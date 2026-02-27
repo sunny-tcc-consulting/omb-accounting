@@ -24,14 +24,14 @@ export async function logAuditEntry(
   const auditLogRepository = new AuditLogRepository(db);
   const auditLogService = new AuditLogService(auditLogRepository);
 
-  auditLogService.create({
-    user_id: user_id || "system",
+  auditLogService.log({
+    userId: user_id || "system",
     operation,
-    table_name,
-    record_id,
-    changes,
-    ip_address,
-    user_agent,
+    entityType: table_name,
+    entityId: record_id,
+    changes: changes ? JSON.parse(changes) : undefined,
+    ipAddress: ip_address,
+    userAgent: user_agent,
   });
 }
 
@@ -62,7 +62,7 @@ export async function logCreate(
 export async function logUpdate(
   table_name: string,
   record_id: string,
-  changes?: string,
+  changes?: Record<string, unknown>,
   user_id?: string,
   ip_address?: string,
   user_agent?: string,
@@ -71,7 +71,7 @@ export async function logUpdate(
     "update",
     table_name,
     record_id,
-    changes,
+    changes ? JSON.stringify(changes) : undefined,
     user_id,
     ip_address,
     user_agent,

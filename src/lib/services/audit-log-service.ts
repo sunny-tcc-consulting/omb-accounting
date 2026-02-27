@@ -1,166 +1,186 @@
 /**
  * Audit Log Service
  *
- * Business logic layer for AuditLog entity.
+ * Business logic layer for audit logging.
  */
 
-import { AuditLogRepository } from "@/lib/repositories/audit-log-repository";
-import { CreateAuditLogInput } from "@/lib/repositories/audit-log-repository";
-import { v4 as uuidv4 } from "uuid";
+import { AuditLogRepository } from "../repositories/audit-log-repository";
+import { AuditLog } from "../types/database";
 
-export interface AuditLogDTO {
-  id: string;
-  user_id?: string;
+interface CreateAuditLogInput {
+  userId: string;
   operation: "create" | "update" | "delete";
-  table_name: string;
-  record_id: string;
-  changes?: string;
-  ip_address?: string;
-  user_agent?: string;
-  created_at: number;
+  entityType: string;
+  entityId: string;
+  changes?: Record<string, unknown>;
+  ipAddress?: string;
+  userAgent?: string;
+}
+
+interface AuditLogFilters {
+  userId?: string;
+  entityType?: string;
+  entityId?: string;
+  startDate?: number;
+  endDate?: number;
+  limit?: number;
+  offset?: number;
+}
+
+interface PaginatedAuditLogs {
+  data: AuditLog[];
+  total: number;
+  limit: number;
+  offset: number;
 }
 
 export class AuditLogService {
-  constructor(private auditLogRepository: AuditLogRepository) {}
+  private repository: AuditLogRepository;
 
-  /**
-   * Create a new audit log
-   */
-  create(data: CreateAuditLogInput): AuditLogDTO {
-    const auditLog = this.auditLogRepository.create(data);
-
-    return {
-      id: auditLog.id,
-      user_id: auditLog.user_id,
-      operation: auditLog.operation,
-      table_name: auditLog.table_name,
-      record_id: auditLog.record_id,
-      changes: auditLog.changes,
-      ip_address: auditLog.ip_address,
-      user_agent: auditLog.user_agent,
-      created_at: auditLog.created_at,
-    };
+  constructor(repository: AuditLogRepository) {
+    this.repository = repository;
   }
 
   /**
-   * Get audit log by ID
+   * Create a new audit log entry
    */
-  getById(id: string): AuditLogDTO | undefined {
-    const auditLog = this.auditLogRepository.findById(id);
-    if (!auditLog) {
-      return undefined;
-    }
-
-    return {
-      id: auditLog.id,
-      user_id: auditLog.user_id,
-      operation: auditLog.operation,
-      table_name: auditLog.table_name,
-      record_id: auditLog.record_id,
-      changes: auditLog.changes,
-      ip_address: auditLog.ip_address,
-      user_agent: auditLog.user_agent,
-      created_at: auditLog.created_at,
-    };
+  async log(input: CreateAuditLogInput): Promise<AuditLog> {
+    return this.repository.create({
+      user_id: input.userId,
+      operation: input.operation,
+      table_name: input.entityType,
+      record_id: input.entityId,
+      changes: input.changes,
+      ip_address: input.ipAddress,
+      user_agent: input.userAgent,
+    });
   }
 
   /**
-   * Get all audit logs
+   * Log customer operation
    */
-  getAll(): AuditLogDTO[] {
-    const auditLogs = this.auditLogRepository.findAll();
-    return auditLogs.map((auditLog) => ({
-      id: auditLog.id,
-      user_id: auditLog.user_id,
-      operation: auditLog.operation,
-      table_name: auditLog.table_name,
-      record_id: auditLog.record_id,
-      changes: auditLog.changes,
-      ip_address: auditLog.ip_address,
-      user_agent: auditLog.user_agent,
-      created_at: auditLog.created_at,
-    }));
+  async logCustomerOperation(
+    userId: string,
+    operation: "create" | "update" | "delete",
+    customerId: string,
+    changes?: Record<string, unknown>,
+    request?: { ip?: string; userAgent?: string },
+  ): Promise<AuditLog> {
+    return this.log({
+      userId,
+      operation,
+      entityType: "customers",
+      entityId: customerId,
+      changes,
+      ipAddress: request?.ip,
+      userAgent: request?.userAgent,
+    });
+  }
+
+  /**
+   * Log quotation operation
+   */
+  async logQuotationOperation(
+    userId: string,
+    operation: "create" | "update" | "delete",
+    quotationId: string,
+    changes?: Record<string, unknown>,
+    request?: { ip?: string; userAgent?: string },
+  ): Promise<AuditLog> {
+    return this.log({
+      userId,
+      operation,
+      entityType: "quotations",
+      entityId: quotationId,
+      changes,
+      ipAddress: request?.ip,
+      userAgent: request?.userAgent,
+    });
+  }
+
+  /**
+   * Log invoice operation
+   */
+  async logInvoiceOperation(
+    userId: string,
+    operation: "create" | "update" | "delete",
+    invoiceId: string,
+    changes?: Record<string, unknown>,
+    request?: { ip?: string; userAgent?: string },
+  ): Promise<AuditLog> {
+    return this.log({
+      userId,
+      operation,
+      entityType: "invoices",
+      entityId: invoiceId,
+      changes,
+      ipAddress: request?.ip,
+      userAgent: request?.userAgent,
+    });
+  }
+
+  /**
+   * Get audit logs with pagination
+   */
+  async getAuditLogs(filters?: AuditLogFilters): Promise<PaginatedAuditLogs> {
+    const limit = filters?.limit || 50;
+    const offset = filters?.offset || 0;
+
+    const [data, total] = await Promise.all([
+      this.repository.getAll({ ...filters, limit, offset }),
+      this.repository.count(filters),
+    ]);
+
+    return {
+      data,
+      total,
+      limit,
+      offset,
+    };
   }
 
   /**
    * Get audit logs by user
    */
-  getByUser(user_id: string): AuditLogDTO[] {
-    const auditLogs = this.auditLogRepository.findByUser(user_id);
-    return auditLogs.map((auditLog) => ({
-      id: auditLog.id,
-      user_id: auditLog.user_id,
-      operation: auditLog.operation,
-      table_name: auditLog.table_name,
-      record_id: auditLog.record_id,
-      changes: auditLog.changes,
-      ip_address: auditLog.ip_address,
-      user_agent: auditLog.user_agent,
-      created_at: auditLog.created_at,
-    }));
+  async getByUser(userId: string, limit = 50): Promise<AuditLog[]> {
+    return this.repository.getByUserId(userId, limit);
   }
 
   /**
-   * Get audit logs by table
+   * Get audit trail for a specific entity
    */
-  getByTable(table_name: string): AuditLogDTO[] {
-    const auditLogs = this.auditLogRepository.findByTable(table_name);
-    return auditLogs.map((auditLog) => ({
-      id: auditLog.id,
-      user_id: auditLog.user_id,
-      operation: auditLog.operation,
-      table_name: auditLog.table_name,
-      record_id: auditLog.record_id,
-      changes: auditLog.changes,
-      ip_address: auditLog.ip_address,
-      user_agent: auditLog.user_agent,
-      created_at: auditLog.created_at,
-    }));
+  async getAuditTrail(
+    entityType: string,
+    entityId: string,
+  ): Promise<AuditLog[]> {
+    return this.repository.getByEntity(entityType, entityId);
   }
 
   /**
-   * Get audit logs by operation
+   * Get audit logs within date range
    */
-  getByOperation(operation: string): AuditLogDTO[] {
-    const auditLogs = this.auditLogRepository.findByOperation(operation);
-    return auditLogs.map((auditLog) => ({
-      id: auditLog.id,
-      user_id: auditLog.user_id,
-      operation: auditLog.operation,
-      table_name: auditLog.table_name,
-      record_id: auditLog.record_id,
-      changes: auditLog.changes,
-      ip_address: auditLog.ip_address,
-      user_agent: auditLog.user_agent,
-      created_at: auditLog.created_at,
-    }));
+  async getByDateRange(
+    startDate: number,
+    endDate: number,
+    limit = 1000,
+  ): Promise<AuditLog[]> {
+    return this.repository.getByDateRange(startDate, endDate, limit);
   }
 
   /**
-   * Get audit logs by date range
+   * Get recent activity
    */
-  getByDateRange(startDate: number, endDate: number): AuditLogDTO[] {
-    const auditLogs = this.auditLogRepository.findByDateRange(
-      startDate,
-      endDate,
-    );
-    return auditLogs.map((auditLog) => ({
-      id: auditLog.id,
-      user_id: auditLog.user_id,
-      operation: auditLog.operation,
-      table_name: auditLog.table_name,
-      record_id: auditLog.record_id,
-      changes: auditLog.changes,
-      ip_address: auditLog.ip_address,
-      user_agent: auditLog.user_agent,
-      created_at: auditLog.created_at,
-    }));
+  async getRecentActivity(limit = 20): Promise<AuditLog[]> {
+    return this.repository.getAll({ limit });
   }
 
   /**
-   * Get audit log count
+   * Clean up old audit logs (older than 1 year by default)
    */
-  count(): number {
-    return this.auditLogRepository.count();
+  async cleanupOldLogs(
+    olderThanMs = 365 * 24 * 60 * 60 * 1000,
+  ): Promise<number> {
+    const cutoffTime = Date.now() - olderThanMs;
+    return this.repository.deleteOlderThan(cutoffTime);
   }
 }

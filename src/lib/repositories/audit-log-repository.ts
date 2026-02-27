@@ -1,58 +1,76 @@
 /**
- *
  * Audit Log Repository
  *
- * Data access layer for AuditLog entity.
+ * Data access layer for audit logs.
  */
 
-import { SQLiteDatabase } from "../database/sqlite";
-import { AuditLog } from "@/lib/types/database";
-import { v4 as uuidv4 } from "uuid";
+import { AuditLog } from "../types/database";
 
-export interface CreateAuditLogInput {
+interface CreateAuditLogInput {
   user_id: string;
   operation: "create" | "update" | "delete";
   table_name: string;
   record_id: string;
-  changes?: string;
+  changes?: Record<string, unknown>;
   ip_address?: string;
   user_agent?: string;
 }
 
+interface AuditLogFilters {
+  userId?: string;
+  entityType?: string;
+  entityId?: string;
+  startDate?: number;
+  endDate?: number;
+  limit?: number;
+  offset?: number;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DbAny = any;
+
 export class AuditLogRepository {
-  constructor(private db: unknown) {}
+  private db: unknown;
+  private tableName = "audit_logs";
+
+  constructor(database: unknown) {
+    this.db = database;
+  }
 
   /**
-   * Create a new audit log
+   * Create a new audit log entry
    */
-  create(data: CreateAuditLogInput): AuditLog {
+  async create(input: CreateAuditLogInput): Promise<AuditLog> {
     const now = Date.now();
     const auditLog: AuditLog = {
-      id: uuidv4(),
-      user_id: data.user_id || "system",
-      operation: data.operation,
-      table_name: data.table_name,
-      record_id: data.record_id,
-      changes: data.changes,
-      ip_address: data.ip_address,
-      user_agent: data.user_agent,
+      id: crypto.randomUUID(),
+      user_id: input.user_id,
+      operation: input.operation,
+      table_name: input.table_name,
+      record_id: input.record_id,
+      changes: input.changes ? JSON.stringify(input.changes) : undefined,
+      ip_address: input.ip_address,
+      user_agent: input.user_agent,
       created_at: now,
     };
 
-    (this.db as any).run(
-      "INSERT INTO audit_logs (id, user_id, operation, table_name, record_id, changes, ip_address, user_agent, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [
-        auditLog.id,
-        auditLog.user_id,
-        auditLog.operation,
-        auditLog.table_name,
-        auditLog.record_id,
-        auditLog.changes,
-        auditLog.ip_address,
-        auditLog.user_agent,
-        auditLog.created_at,
-      ],
-    );
+    const sql = `
+      INSERT INTO ${this.tableName}
+      (id, user_id, operation, table_name, record_id, changes, ip_address, user_agent, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    await (this.db as DbAny).execute(sql, [
+      auditLog.id,
+      auditLog.user_id,
+      auditLog.operation,
+      auditLog.table_name,
+      auditLog.record_id,
+      auditLog.changes || null,
+      auditLog.ip_address || null,
+      auditLog.user_agent || null,
+      auditLog.created_at,
+    ]);
 
     return auditLog;
   }
@@ -60,78 +78,128 @@ export class AuditLogRepository {
   /**
    * Get audit log by ID
    */
-  findById(id: string): AuditLog | undefined {
-    return (this.db as any).get("SELECT * FROM audit_logs WHERE id = ?", [id]) as
-      | AuditLog
-      | undefined;
+  async getById(id: string): Promise<AuditLog | null> {
+    const result = (this.db as DbAny).execute(
+      `SELECT * FROM ${this.tableName} WHERE id = ?`,
+      [id],
+    );
+    return result[0] || null;
   }
 
   /**
-   * Get all audit logs
+   * Get all audit logs with optional filters
    */
-  findAll(): AuditLog[] {
-    return (this.db as any).query(
-      "SELECT * FROM audit_logs ORDER BY created_at DESC",
-    ) as AuditLog[];
+  async getAll(filters?: AuditLogFilters): Promise<AuditLog[]> {
+    let sql = `SELECT * FROM ${this.tableName}`;
+    const conditions: string[] = [];
+    const params: unknown[] = [];
+
+    if (filters?.userId) {
+      conditions.push("user_id = ?");
+      params.push(filters.userId);
+    }
+
+    if (filters?.entityType) {
+      conditions.push("table_name = ?");
+      params.push(filters.entityType);
+    }
+
+    if (filters?.entityId) {
+      conditions.push("record_id = ?");
+      params.push(filters.entityId);
+    }
+
+    if (filters?.startDate) {
+      conditions.push("created_at >= ?");
+      params.push(filters.startDate);
+    }
+
+    if (filters?.endDate) {
+      conditions.push("created_at <= ?");
+      params.push(filters.endDate);
+    }
+
+    if (conditions.length > 0) {
+      sql += ` WHERE ${conditions.join(" AND ")}`;
+    }
+
+    sql += ` ORDER BY created_at DESC`;
+
+    if (filters?.limit) {
+      sql += ` LIMIT ?`;
+      params.push(filters.limit);
+    }
+
+    if (filters?.offset) {
+      sql += ` OFFSET ?`;
+      params.push(filters.offset);
+    }
+
+    const result = (this.db as DbAny).execute(sql, params);
+    return result as AuditLog[];
   }
 
   /**
-   * Get audit logs by user
+   * Get audit logs by user ID
    */
-  findByUser(user_id: string): AuditLog[] {
-    return (this.db as any).query(
-      "SELECT * FROM audit_logs WHERE user_id = ? ORDER BY created_at DESC",
-      [user_id],
-    ) as AuditLog[];
+  async getByUserId(userId: string, limit = 100): Promise<AuditLog[]> {
+    return this.getAll({ userId, limit });
   }
 
   /**
-   * Get audit logs by table
+   * Get audit logs by entity type and ID
    */
-  findByTable(table_name: string): AuditLog[] {
-    return (this.db as any).query(
-      "SELECT * FROM audit_logs WHERE table_name = ? ORDER BY created_at DESC",
-      [table_name],
-    ) as AuditLog[];
+  async getByEntity(tableName: string, recordId: string): Promise<AuditLog[]> {
+    return this.getAll({ entityType: tableName, entityId: recordId });
   }
 
   /**
-   * Get audit logs by operation
+   * Get audit logs within date range
    */
-  findByOperation(operation: string): AuditLog[] {
-    return (this.db as any).query(
-      "SELECT * FROM audit_logs WHERE operation = ? ORDER BY created_at DESC",
-      [operation],
-    ) as AuditLog[];
+  async getByDateRange(
+    startDate: number,
+    endDate: number,
+    limit = 1000,
+  ): Promise<AuditLog[]> {
+    return this.getAll({ startDate, endDate, limit });
   }
 
   /**
-   * Get audit logs by date range
+   * Get count of audit logs matching filters
    */
-  findByDateRange(startDate: number, endDate: number): AuditLog[] {
-    return (this.db as any).query(
-      "SELECT * FROM audit_logs WHERE created_at >= ? AND created_at <= ? ORDER BY created_at DESC",
-      [startDate, endDate],
-    ) as AuditLog[];
+  async count(filters?: AuditLogFilters): Promise<number> {
+    let sql = `SELECT COUNT(*) as count FROM ${this.tableName}`;
+    const conditions: string[] = [];
+    const params: unknown[] = [];
+
+    if (filters?.userId) {
+      conditions.push("user_id = ?");
+      params.push(filters.userId);
+    }
+
+    if (filters?.entityType) {
+      conditions.push("table_name = ?");
+      params.push(filters.entityType);
+    }
+
+    if (conditions.length > 0) {
+      sql += ` WHERE ${conditions.join(" AND ")}`;
+    }
+
+    const result = (this.db as DbAny).execute(sql, params) as Array<{
+      count: number;
+    }>;
+    return result[0]?.count ?? 0;
   }
 
   /**
-   * Get audit logs by date
+   * Delete old audit logs (for maintenance)
    */
-  findByDate(created_at: number): AuditLog[] {
-    return (this.db as any).query(
-      "SELECT * FROM audit_logs WHERE created_at = ? ORDER BY created_at DESC",
-      [created_at],
-    ) as AuditLog[];
-  }
-
-  /**
-   * Get audit log count
-   */
-  count(): number {
-    const result = (this.db as any).get(
-      "SELECT COUNT(*) as count FROM audit_logs",
-    ) as Record<string, unknown>;
-    return (result as Record<string, unknown>).count as number;
+  async deleteOlderThan(timestamp: number): Promise<number> {
+    const sql = `DELETE FROM ${this.tableName} WHERE created_at < ?`;
+    const result = (this.db as DbAny).execute(sql, [timestamp]) as {
+      changes: number;
+    };
+    return result?.changes ?? 0;
   }
 }
