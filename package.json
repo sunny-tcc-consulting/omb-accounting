@@ -20,6 +20,8 @@
     "e2e:video:record": "node scripts/record-video.js",
     "e2e:video:upload": "node scripts/record-video.js --send",
     "e2e:video:list": "node scripts/record-video.js --list",
+    "migrate": "node src/lib/scripts/migrate-data.js",
+    "migrate:seed": "node src/lib/scripts/migrate-data.js --seed",
     "prepare": "husky"
   },
   "lint-staged": {
