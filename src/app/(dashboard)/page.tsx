@@ -14,6 +14,7 @@ import {
   Activity,
 } from "lucide-react";
 import { useData } from "@/contexts/DataContext";
+import { VersionDisplay } from "@/components/VersionDisplay";
 
 // Lazy load heavy chart components for better performance
 const OverviewCard = lazy(() =>
@@ -312,6 +313,9 @@ export default function DashboardPage() {
       <div className="grid gap-6 md:grid-cols-2">
         {/* Placeholder for future widgets */}
       </div>
+
+      {/* Version Info - Helps QA verify which version is deployed */}
+      <VersionDisplay />
     </div>
   );
 }
