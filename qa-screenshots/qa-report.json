@@ -1,284 +1,215 @@
 {
-  "passed": 16,
-  "failed": 20,
-  "errors": [
+  "timestamp": "2026-02-27T04:21:31.462Z",
+  "summary": {
+    "passed": 10,
+    "failed": 0,
+    "total": 10
+  },
+  "tests": [
     {
-      "page": "Dashboard",
-      "error": "Error: Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
+      "name": "dashboard",
+      "status": "passed",
+      "checks": [
+        {
+          "name": "Page title",
+          "status": "passed"
+        },
+        {
+          "name": "Content container",
+          "status": "passed"
+        },
+        {
+          "name": "Search input",
+          "status": "passed"
+        }
+      ],
+      "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/dashboard.png",
+      "errors": []
     },
     {
-      "page": "Reports",
-      "error": "Error: Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
+      "name": "customers_list",
+      "status": "passed",
+      "checks": [
+        {
+          "name": "Page title",
+          "status": "passed"
+        },
+        {
+          "name": "Content container",
+          "status": "passed"
+        },
+        {
+          "name": "Buttons",
+          "status": "passed"
+        }
+      ],
+      "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/customers_list.png",
+      "errors": []
     },
     {
-      "page": "Auth-Login",
-      "error": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      "name": "customers_new",
+      "status": "passed",
+      "checks": [
+        {
+          "name": "Page title",
+          "status": "passed"
+        },
+        {
+          "name": "Form elements",
+          "status": "passed"
+        },
+        {
+          "name": "Submit button",
+          "status": "passed"
+        }
+      ],
+      "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/customers_new.png",
+      "errors": []
     },
     {
-      "page": "Auth-Register",
-      "error": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      "name": "quotations_list",
+      "status": "passed",
+      "checks": [
+        {
+          "name": "Page title",
+          "status": "passed"
+        },
+        {
+          "name": "Content container",
+          "status": "passed"
+        },
+        {
+          "name": "Buttons",
+          "status": "passed"
+        }
+      ],
+      "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/quotations_list.png",
+      "errors": []
+    },
+    {
+      "name": "quotations_new",
+      "status": "passed",
+      "checks": [
+        {
+          "name": "Page title",
+          "status": "passed"
+        },
+        {
+          "name": "Form elements",
+          "status": "passed"
+        },
+        {
+          "name": "Select element",
+          "status": "passed"
+        },
+        {
+          "name": "Submit button",
+          "status": "passed"
+        }
+      ],
+      "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/quotations_new.png",
+      "errors": []
+    },
+    {
+      "name": "invoices_list",
+      "status": "passed",
+      "checks": [
+        {
+          "name": "Page title",
+          "status": "passed"
+        },
+        {
+          "name": "Content container",
+          "status": "passed"
+        },
+        {
+          "name": "Buttons",
+          "status": "passed"
+        }
+      ],
+      "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/invoices_list.png",
+      "errors": []
+    },
+    {
+      "name": "invoices_new",
+      "status": "passed",
+      "checks": [
+        {
+          "name": "Page title",
+          "status": "passed"
+        },
+        {
+          "name": "Form elements",
+          "status": "passed"
+        },
+        {
+          "name": "Submit button",
+          "status": "passed"
+        }
+      ],
+      "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/invoices_new.png",
+      "errors": []
+    },
+    {
+      "name": "reports",
+      "status": "passed",
+      "checks": [
+        {
+          "name": "Page title",
+          "status": "passed"
+        },
+        {
+          "name": "Content container",
+          "status": "passed"
+        },
+        {
+          "name": "Interactive elements",
+          "status": "passed"
+        }
+      ],
+      "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/reports.png",
+      "errors": []
+    },
+    {
+      "name": "bank",
+      "status": "passed",
+      "checks": [
+        {
+          "name": "Page title",
+          "status": "passed"
+        },
+        {
+          "name": "Content container",
+          "status": "passed"
+        },
+        {
+          "name": "Interactive elements",
+          "status": "passed"
+        }
+      ],
+      "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/bank.png",
+      "errors": []
+    },
+    {
+      "name": "users",
+      "status": "passed",
+      "checks": [
+        {
+          "name": "Page title",
+          "status": "passed"
+        },
+        {
+          "name": "Content container",
+          "status": "passed"
+        },
+        {
+          "name": "Interactive elements",
+          "status": "passed"
+        }
+      ],
+      "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/users.png",
+      "errors": []
     }
   ],
-  "pages": [
-    {
-      "name": "Dashboard",
-      "url": "http://localhost:8000/",
-      "passed": false,
-      "consoleErrors": [
-        "Error: Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
-      ],
-      "checks": [
-        {
-          "name": "Page title contains accounting",
-          "passed": true
-        },
-        {
-          "name": "Dashboard heading exists",
-          "passed": true
-        },
-        {
-          "name": "Navigation exists",
-          "passed": false
-        },
-        {
-          "name": "No critical console errors",
-          "passed": true
-        }
-      ],
-      "screenshot": "./qa-screenshots/Dashboard.png"
-    },
-    {
-      "name": "Customers-List",
-      "url": "http://localhost:8000/customers",
-      "passed": false,
-      "consoleErrors": [],
-      "checks": [
-        {
-          "name": "Page loads",
-          "passed": true
-        },
-        {
-          "name": "Customers heading or table exists",
-          "passed": false
-        },
-        {
-          "name": "Add button or link exists",
-          "passed": false
-        }
-      ],
-      "screenshot": "./qa-screenshots/Customers-List.png"
-    },
-    {
-      "name": "Customers-New",
-      "url": "http://localhost:8000/customers/new",
-      "passed": false,
-      "consoleErrors": [],
-      "checks": [
-        {
-          "name": "Page loads",
-          "passed": true
-        },
-        {
-          "name": "Form or input fields exist",
-          "passed": false
-        },
-        {
-          "name": "Submit button exists",
-          "passed": false
-        }
-      ],
-      "screenshot": "./qa-screenshots/Customers-New.png"
-    },
-    {
-      "name": "Quotations-List",
-      "url": "http://localhost:8000/quotations",
-      "passed": false,
-      "consoleErrors": [],
-      "checks": [
-        {
-          "name": "Page loads",
-          "passed": true
-        },
-        {
-          "name": "Quotations heading or table exists",
-          "passed": false
-        },
-        {
-          "name": "Create button exists",
-          "passed": false
-        }
-      ],
-      "screenshot": "./qa-screenshots/Quotations-List.png"
-    },
-    {
-      "name": "Quotations-New",
-      "url": "http://localhost:8000/quotations/new",
-      "passed": false,
-      "consoleErrors": [],
-      "checks": [
-        {
-          "name": "Page loads",
-          "passed": true
-        },
-        {
-          "name": "Form fields exist",
-          "passed": false
-        },
-        {
-          "name": "Customer selector exists",
-          "passed": false
-        }
-      ],
-      "screenshot": "./qa-screenshots/Quotations-New.png"
-    },
-    {
-      "name": "Invoices-List",
-      "url": "http://localhost:8000/invoices",
-      "passed": false,
-      "consoleErrors": [],
-      "checks": [
-        {
-          "name": "Page loads",
-          "passed": true
-        },
-        {
-          "name": "Invoices heading or table exists",
-          "passed": false
-        },
-        {
-          "name": "Create button exists",
-          "passed": false
-        }
-      ],
-      "screenshot": "./qa-screenshots/Invoices-List.png"
-    },
-    {
-      "name": "Invoices-New",
-      "url": "http://localhost:8000/invoices/new",
-      "passed": false,
-      "consoleErrors": [],
-      "checks": [
-        {
-          "name": "Page loads",
-          "passed": true
-        },
-        {
-          "name": "Form fields exist",
-          "passed": false
-        },
-        {
-          "name": "Line items section exists",
-          "passed": false
-        }
-      ],
-      "screenshot": "./qa-screenshots/Invoices-New.png"
-    },
-    {
-      "name": "Reports",
-      "url": "http://localhost:8000/reports",
-      "passed": false,
-      "consoleErrors": [
-        "Error: Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
-      ],
-      "checks": [
-        {
-          "name": "Page loads",
-          "passed": true
-        },
-        {
-          "name": "Report heading exists",
-          "passed": true
-        },
-        {
-          "name": "Filter controls exist",
-          "passed": false
-        },
-        {
-          "name": "Tabs exist",
-          "passed": false
-        }
-      ],
-      "screenshot": "./qa-screenshots/Reports.png"
-    },
-    {
-      "name": "Bank-Overview",
-      "url": "http://localhost:8000/bank",
-      "passed": false,
-      "consoleErrors": [],
-      "checks": [
-        {
-          "name": "Page loads",
-          "passed": true
-        },
-        {
-          "name": "Bank overview exists",
-          "passed": false
-        },
-        {
-          "name": "Account list exists",
-          "passed": false
-        }
-      ],
-      "screenshot": "./qa-screenshots/Bank-Overview.png"
-    },
-    {
-      "name": "Users-List",
-      "url": "http://localhost:8000/users",
-      "passed": true,
-      "consoleErrors": [],
-      "checks": [
-        {
-          "name": "Page loads",
-          "passed": true
-        },
-        {
-          "name": "Users heading exists",
-          "passed": true
-        }
-      ],
-      "screenshot": "./qa-screenshots/Users-List.png"
-    },
-    {
-      "name": "Auth-Login",
-      "url": "http://localhost:8000/auth/login",
-      "passed": false,
-      "consoleErrors": [
-        "Failed to load resource: the server responded with a status of 404 (Not Found)"
-      ],
-      "checks": [
-        {
-          "name": "Page loads",
-          "passed": true
-        },
-        {
-          "name": "Login form exists",
-          "passed": false
-        },
-        {
-          "name": "Email input exists",
-          "passed": false
-        }
-      ],
-      "screenshot": "./qa-screenshots/Auth-Login.png"
-    },
-    {
-      "name": "Auth-Register",
-      "url": "http://localhost:8000/auth/register",
-      "passed": false,
-      "consoleErrors": [
-        "Failed to load resource: the server responded with a status of 404 (Not Found)"
-      ],
-      "checks": [
-        {
-          "name": "Page loads",
-          "passed": true
-        },
-        {
-          "name": "Register form exists",
-          "passed": false
-        }
-      ],
-      "screenshot": "./qa-screenshots/Auth-Register.png"
-    }
-  ]
+  "consoleErrors": []
 }
