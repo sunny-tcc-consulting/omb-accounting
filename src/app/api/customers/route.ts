@@ -7,6 +7,7 @@ import { CustomerService } from "@/lib/services/customer-service";
 import { CustomerRepository } from "@/lib/repositories/customer-repository";
 import { dbManager } from "@/lib/database/database-server";
 import { createCustomerSchema } from "@/lib/validations/customer.validation";
+import { toFrontendCustomerList } from "@/lib/dto";
 
 export async function GET() {
   try {
@@ -15,10 +16,13 @@ export async function GET() {
 
     const customers = customerService.getAll();
 
+    // Convert to frontend format for backward compatibility
+    const frontendCustomers = toFrontendCustomerList(customers);
+
     return NextResponse.json({
       success: true,
-      data: customers,
-      count: customers.length,
+      data: frontendCustomers,
+      count: frontendCustomers.length,
     });
   } catch (error) {
     console.error("Error fetching customers:", error);
@@ -36,6 +40,8 @@ export async function GET() {
  * POST /api/customers
  * Create a new customer
  */
+import { toDbCustomerInput, toFrontendCustomer } from "@/lib/dto";
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -56,12 +62,17 @@ export async function POST(request: NextRequest) {
     const db = dbManager.getDatabase();
     const customerService = new CustomerService(new CustomerRepository(db));
 
-    const customer = customerService.create(validation.data);
+    // Convert frontend input to database format
+    const dbInput = toDbCustomerInput(validation.data);
+    const customer = customerService.create(dbInput);
+
+    // Convert to frontend format for response
+    const frontendCustomer = toFrontendCustomer(customer);
 
     return NextResponse.json(
       {
         success: true,
-        data: customer,
+        data: frontendCustomer,
       },
       { status: 201 },
     );

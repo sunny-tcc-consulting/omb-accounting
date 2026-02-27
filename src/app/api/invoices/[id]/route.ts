@@ -7,6 +7,8 @@ import { InvoiceService } from "@/lib/services/invoice-service";
 import { InvoiceRepository } from "@/lib/repositories/invoice-repository";
 import { dbManager } from "@/lib/database/database-server";
 import { updateInvoiceSchema } from "@/lib/validations/invoice.validation";
+import { toFrontendInvoice } from "@/lib/dto";
+import type { UpdateInvoiceInput } from "@/lib/validations/invoice.validation";
 
 export async function GET(
   request: NextRequest,
@@ -30,9 +32,12 @@ export async function GET(
       );
     }
 
+    // Convert to frontend format for backward compatibility
+    const frontendInvoice = toFrontendInvoice(invoice);
+
     return NextResponse.json({
       success: true,
-      data: invoice,
+      data: frontendInvoice,
     });
   } catch (error) {
     console.error("Error fetching invoice:", error);
@@ -74,7 +79,11 @@ export async function PUT(
     const db = dbManager.getDatabase();
     const invoiceService = new InvoiceService(new InvoiceRepository(db));
 
-    const invoice = invoiceService.update(id, validation.data);
+    // Validation schema uses database format, pass directly
+    const invoice = invoiceService.update(
+      id,
+      validation.data as UpdateInvoiceInput,
+    );
 
     if (!invoice) {
       return NextResponse.json(
@@ -86,9 +95,12 @@ export async function PUT(
       );
     }
 
+    // Convert to frontend format for response
+    const frontendInvoice = toFrontendInvoice(invoice);
+
     return NextResponse.json({
       success: true,
-      data: invoice,
+      data: frontendInvoice,
     });
   } catch (error) {
     console.error("Error updating invoice:", error);
@@ -154,3 +166,6 @@ export async function DELETE(
     );
   }
 }
+
+// Export DTO functions for use in other routes
+export { toFrontendInvoice } from "@/lib/dto";

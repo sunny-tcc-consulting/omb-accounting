@@ -7,6 +7,7 @@ import { CustomerService } from "@/lib/services/customer-service";
 import { CustomerRepository } from "@/lib/repositories/customer-repository";
 import { dbManager } from "@/lib/database/database-server";
 import { updateCustomerSchema } from "@/lib/validations/customer.validation";
+import { toFrontendCustomer, toDbCustomerInput } from "@/lib/dto";
 
 export async function GET(
   request: NextRequest,
@@ -30,9 +31,12 @@ export async function GET(
       );
     }
 
+    // Convert to frontend format for backward compatibility
+    const frontendCustomer = toFrontendCustomer(customer);
+
     return NextResponse.json({
       success: true,
-      data: customer,
+      data: frontendCustomer,
     });
   } catch (error) {
     console.error("Error fetching customer:", error);
@@ -74,7 +78,9 @@ export async function PUT(
     const db = dbManager.getDatabase();
     const customerService = new CustomerService(new CustomerRepository(db));
 
-    const customer = customerService.update(id, validation.data);
+    // Convert frontend input to database format
+    const dbInput = toDbCustomerInput(validation.data);
+    const customer = customerService.update(id, dbInput);
 
     if (!customer) {
       return NextResponse.json(
@@ -86,9 +92,12 @@ export async function PUT(
       );
     }
 
+    // Convert to frontend format for response
+    const frontendCustomer = toFrontendCustomer(customer);
+
     return NextResponse.json({
       success: true,
-      data: customer,
+      data: frontendCustomer,
     });
   } catch (error) {
     console.error("Error updating customer:", error);
@@ -154,3 +163,6 @@ export async function DELETE(
     );
   }
 }
+
+// Export DTO functions for use in other routes
+export { toFrontendCustomer, toDbCustomerInput } from "@/lib/dto";

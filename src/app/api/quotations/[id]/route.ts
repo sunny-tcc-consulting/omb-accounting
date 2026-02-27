@@ -7,6 +7,8 @@ import { QuotationService } from "@/lib/services/quotation-service";
 import { QuotationRepository } from "@/lib/repositories/quotation-repository";
 import { dbManager } from "@/lib/database/database-server";
 import { updateQuotationSchema } from "@/lib/validations/quotation.validation";
+import { toFrontendQuotation } from "@/lib/dto";
+import type { UpdateQuotationInput } from "@/lib/validations/quotation.validation";
 
 export async function GET(
   request: NextRequest,
@@ -30,9 +32,12 @@ export async function GET(
       );
     }
 
+    // Convert to frontend format for backward compatibility
+    const frontendQuotation = toFrontendQuotation(quotation);
+
     return NextResponse.json({
       success: true,
-      data: quotation,
+      data: frontendQuotation,
     });
   } catch (error) {
     console.error("Error fetching quotation:", error);
@@ -74,7 +79,11 @@ export async function PUT(
     const db = dbManager.getDatabase();
     const quotationService = new QuotationService(new QuotationRepository(db));
 
-    const quotation = quotationService.update(id, validation.data);
+    // Validation schema uses database format, pass directly
+    const quotation = quotationService.update(
+      id,
+      validation.data as UpdateQuotationInput,
+    );
 
     if (!quotation) {
       return NextResponse.json(
@@ -86,9 +95,12 @@ export async function PUT(
       );
     }
 
+    // Convert to frontend format for response
+    const frontendQuotation = toFrontendQuotation(quotation);
+
     return NextResponse.json({
       success: true,
-      data: quotation,
+      data: frontendQuotation,
     });
   } catch (error) {
     console.error("Error updating quotation:", error);
@@ -154,3 +166,6 @@ export async function DELETE(
     );
   }
 }
+
+// Export DTO functions for use in other routes
+export { toFrontendQuotation } from "@/lib/dto";

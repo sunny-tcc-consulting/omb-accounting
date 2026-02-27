@@ -7,6 +7,8 @@ import { InvoiceService } from "@/lib/services/invoice-service";
 import { InvoiceRepository } from "@/lib/repositories/invoice-repository";
 import { dbManager } from "@/lib/database/database-server";
 import { createInvoiceSchema } from "@/lib/validations/invoice.validation";
+import { toFrontendInvoiceList, toFrontendInvoice } from "@/lib/dto";
+import type { CreateInvoiceInput } from "@/lib/validations/invoice.validation";
 
 export async function GET() {
   try {
@@ -15,10 +17,13 @@ export async function GET() {
 
     const invoices = invoiceService.getAll();
 
+    // Convert to frontend format for backward compatibility
+    const frontendInvoices = toFrontendInvoiceList(invoices);
+
     return NextResponse.json({
       success: true,
-      data: invoices,
-      count: invoices.length,
+      data: frontendInvoices,
+      count: frontendInvoices.length,
     });
   } catch (error) {
     console.error("Error fetching invoices:", error);
@@ -56,12 +61,18 @@ export async function POST(request: NextRequest) {
     const db = dbManager.getDatabase();
     const invoiceService = new InvoiceService(new InvoiceRepository(db));
 
-    const invoice = invoiceService.create(validation.data);
+    // Validation schema uses database format, pass directly
+    const invoice = invoiceService.create(
+      validation.data as CreateInvoiceInput,
+    );
+
+    // Convert to frontend format for response
+    const frontendInvoice = toFrontendInvoice(invoice);
 
     return NextResponse.json(
       {
         success: true,
-        data: invoice,
+        data: frontendInvoice,
       },
       { status: 201 },
     );

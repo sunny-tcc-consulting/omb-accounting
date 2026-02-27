@@ -7,6 +7,8 @@ import { QuotationService } from "@/lib/services/quotation-service";
 import { QuotationRepository } from "@/lib/repositories/quotation-repository";
 import { dbManager } from "@/lib/database/database-server";
 import { createQuotationSchema } from "@/lib/validations/quotation.validation";
+import { toFrontendQuotationList, toFrontendQuotation } from "@/lib/dto";
+import type { CreateQuotationInput } from "@/lib/validations/quotation.validation";
 
 export async function GET() {
   try {
@@ -15,10 +17,13 @@ export async function GET() {
 
     const quotations = quotationService.getAll();
 
+    // Convert to frontend format for backward compatibility
+    const frontendQuotations = toFrontendQuotationList(quotations);
+
     return NextResponse.json({
       success: true,
-      data: quotations,
-      count: quotations.length,
+      data: frontendQuotations,
+      count: frontendQuotations.length,
     });
   } catch (error) {
     console.error("Error fetching quotations:", error);
@@ -56,12 +61,18 @@ export async function POST(request: NextRequest) {
     const db = dbManager.getDatabase();
     const quotationService = new QuotationService(new QuotationRepository(db));
 
-    const quotation = quotationService.create(validation.data);
+    // Validation schema uses database format, pass directly
+    const quotation = quotationService.create(
+      validation.data as CreateQuotationInput,
+    );
+
+    // Convert to frontend format for response
+    const frontendQuotation = toFrontendQuotation(quotation);
 
     return NextResponse.json(
       {
         success: true,
-        data: quotation,
+        data: frontendQuotation,
       },
       { status: 201 },
     );
