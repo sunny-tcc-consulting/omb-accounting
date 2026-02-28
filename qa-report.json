@@ -1,0 +1,99 @@
+{
+  "timestamp": "2026-02-28T04:39:16.806Z",
+  "baseUrl": "http://localhost:8000",
+  "totalTests": 10,
+  "passed": 4,
+  "failed": 6,
+  "results": [
+    {
+      "route": "Dashboard",
+      "path": "/",
+      "status": "FAIL",
+      "title": "omb-accounting - Financial Management",
+      "elementsFound": "2/3",
+      "errors": 0,
+      "screenshot": "/home/tcc/.openclaw/workspace/qa-screenshots/dashboard.png"
+    },
+    {
+      "route": "Customers List",
+      "path": "/customers",
+      "status": "FAIL",
+      "title": "omb-accounting - Financial Management",
+      "elementsFound": "2/3",
+      "errors": 0,
+      "screenshot": "/home/tcc/.openclaw/workspace/qa-screenshots/customers-list.png"
+    },
+    {
+      "route": "New Customer",
+      "path": "/customers/new",
+      "status": "PASS",
+      "title": "omb-accounting - Financial Management",
+      "elementsFound": "3/3",
+      "errors": 0,
+      "screenshot": "/home/tcc/.openclaw/workspace/qa-screenshots/new-customer.png"
+    },
+    {
+      "route": "Quotations List",
+      "path": "/quotations",
+      "status": "FAIL",
+      "title": "omb-accounting - Financial Management",
+      "elementsFound": "2/3",
+      "errors": 0,
+      "screenshot": "/home/tcc/.openclaw/workspace/qa-screenshots/quotations-list.png"
+    },
+    {
+      "route": "New Quotation",
+      "path": "/quotations/new",
+      "status": "PASS",
+      "title": "omb-accounting - Financial Management",
+      "elementsFound": "3/3",
+      "errors": 0,
+      "screenshot": "/home/tcc/.openclaw/workspace/qa-screenshots/new-quotation.png"
+    },
+    {
+      "route": "Invoices List",
+      "path": "/invoices",
+      "status": "FAIL",
+      "title": "omb-accounting - Financial Management",
+      "elementsFound": "2/3",
+      "errors": 0,
+      "screenshot": "/home/tcc/.openclaw/workspace/qa-screenshots/invoices-list.png"
+    },
+    {
+      "route": "New Invoice",
+      "path": "/invoices/new",
+      "status": "PASS",
+      "title": "omb-accounting - Financial Management",
+      "elementsFound": "3/3",
+      "errors": 0,
+      "screenshot": "/home/tcc/.openclaw/workspace/qa-screenshots/new-invoice.png"
+    },
+    {
+      "route": "Reports",
+      "path": "/reports",
+      "status": "PASS",
+      "title": "omb-accounting - Financial Management",
+      "elementsFound": "3/3",
+      "errors": 0,
+      "screenshot": "/home/tcc/.openclaw/workspace/qa-screenshots/reports.png"
+    },
+    {
+      "route": "Bank Reconciliation",
+      "path": "/bank",
+      "status": "FAIL",
+      "title": "omb-accounting - Financial Management",
+      "elementsFound": "2/3",
+      "errors": 0,
+      "screenshot": "/home/tcc/.openclaw/workspace/qa-screenshots/bank-reconciliation.png"
+    },
+    {
+      "route": "Users Management",
+      "path": "/users",
+      "status": "FAIL",
+      "title": "omb-accounting - Financial Management",
+      "elementsFound": "2/3",
+      "errors": 0,
+      "screenshot": "/home/tcc/.openclaw/workspace/qa-screenshots/users-management.png"
+    }
+  ]
+}
