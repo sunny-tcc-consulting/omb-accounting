@@ -8,7 +8,7 @@ const path = require('path');
 const fs = require('fs');
 const http = require('http');
 
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = process.env.APP_URL || 'http://localhost:3000';
 const SCREENSHOTS_DIR = path.join(__dirname, 'qa-screenshots');
 const REPORT_DIR = path.join(__dirname, 'qa-reports');
 const DELAY_MS = 2000;

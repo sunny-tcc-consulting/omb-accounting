@@ -92,39 +92,34 @@ export class InvoiceRepository {
    * Get all invoices
    */
   findAll(): Invoice[] {
-    return (this.db as any).query(
-      "SELECT * FROM invoices ORDER BY created_at DESC",
-    ) as Invoice[];
+    return this.db.prepare("SELECT * FROM invoices ORDER BY created_at DESC").all() as Invoice[];
   }
 
   /**
    * Get invoices by customer
    */
   findByCustomer(customer_id: string): Invoice[] {
-    return (this.db as any).query(
-      "SELECT * FROM invoices WHERE customer_id = ? ORDER BY created_at DESC",
-      [customer_id],
-    ) as Invoice[];
+    return this.db
+      .prepare("SELECT * FROM invoices WHERE customer_id = ? ORDER BY created_at DESC")
+      .all(customer_id) as Invoice[];
   }
 
   /**
    * Get invoices by status
    */
   findByStatus(status: string): Invoice[] {
-    return (this.db as any).query(
-      "SELECT * FROM invoices WHERE status = ? ORDER BY created_at DESC",
-      [status],
-    ) as Invoice[];
+    return this.db
+      .prepare("SELECT * FROM invoices WHERE status = ? ORDER BY created_at DESC")
+      .all(status) as Invoice[];
   }
 
   /**
    * Get invoices by quotation
    */
   findByQuotation(quotation_id: string): Invoice[] {
-    return (this.db as any).query(
-      "SELECT * FROM invoices WHERE quotation_id = ? ORDER BY created_at DESC",
-      [quotation_id],
-    ) as Invoice[];
+    return this.db
+      .prepare("SELECT * FROM invoices WHERE quotation_id = ? ORDER BY created_at DESC")
+      .all(quotation_id) as Invoice[];
   }
 
   /**

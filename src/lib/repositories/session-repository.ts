@@ -48,7 +48,7 @@ export class SessionRepository {
    * Get session by token
    */
   findByToken(token: string): Session | undefined {
-    return (this.db as any).get("SELECT * FROM sessions WHERE token = ?", [token]) as
+    return this.db.prepare("SELECT * FROM  WHERE id = ?").get(token) as
       | Session
       | undefined;
   }
@@ -57,7 +57,7 @@ export class SessionRepository {
    * Get all sessions for a user
    */
   findByUserId(user_id: string): Session[] {
-    return (this.db as any).query(
+    return (this.db as any).prepare(
       "SELECT * FROM sessions WHERE user_id = ? ORDER BY created_at DESC",
       [user_id],
     ) as Session[];

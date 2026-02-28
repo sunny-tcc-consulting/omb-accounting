@@ -111,47 +111,45 @@ export class QuotationRepository {
    * Get quotation by ID
    */
   findById(id: string): Quotation | undefined {
-    return (this.db as any).get("SELECT * FROM quotations WHERE id = ?", [id]) as
-      | Quotation
-      | undefined;
+    return this.db
+      .prepare("SELECT * FROM quotations WHERE id = ?")
+      .get(id) as Quotation | undefined;
   }
 
   /**
    * Get quotation by number
    */
   findByNumber(quotation_number: string): Quotation | undefined {
-    return (this.db as any).get("SELECT * FROM quotations WHERE quotation_number = ?", [
-      quotation_number,
-    ]) as Quotation | undefined;
+    return this.db
+      .prepare("SELECT * FROM quotations WHERE quotation_number = ?")
+      .get(quotation_number) as Quotation | undefined;
   }
 
   /**
    * Get all quotations
    */
   findAll(): Quotation[] {
-    return (this.db as any).query(
-      "SELECT * FROM quotations ORDER BY created_at DESC",
-    ) as Quotation[];
+    return this.db
+      .prepare("SELECT * FROM quotations ORDER BY created_at DESC")
+      .all() as Quotation[];
   }
 
   /**
    * Get quotations by customer
    */
   findByCustomer(customer_id: string): Quotation[] {
-    return (this.db as any).query(
-      "SELECT * FROM quotations WHERE customer_id = ? ORDER BY created_at DESC",
-      [customer_id],
-    ) as Quotation[];
+    return this.db
+      .prepare("SELECT * FROM quotations WHERE customer_id = ? ORDER BY created_at DESC")
+      .all(customer_id) as Quotation[];
   }
 
   /**
    * Get quotations by status
    */
   findByStatus(status: string): Quotation[] {
-    return (this.db as any).query(
-      "SELECT * FROM quotations WHERE status = ? ORDER BY created_at DESC",
-      [status],
-    ) as Quotation[];
+    return this.db
+      .prepare("SELECT * FROM quotations WHERE status = ? ORDER BY created_at DESC")
+      .all(status) as Quotation[];
   }
 
   /**

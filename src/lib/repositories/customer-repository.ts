@@ -62,7 +62,7 @@ export class CustomerRepository {
    * Get customer by ID
    */
   findById(id: string): Customer | undefined {
-    return (this.db as any).get("SELECT * FROM customers WHERE id = ?", [id]) as
+    return this.db.prepare("SELECT * FROM  WHERE id = ?").get(id) as
       | Customer
       | undefined;
   }
@@ -71,7 +71,7 @@ export class CustomerRepository {
    * Get customer by email
    */
   findByEmail(email: string): Customer | undefined {
-    return (this.db as any).get("SELECT * FROM customers WHERE email = ?", [email]) as
+    return this.db.prepare("SELECT * FROM  WHERE id = ?").get(email) as
       | Customer
       | undefined;
   }
@@ -80,39 +80,34 @@ export class CustomerRepository {
    * Get all customers
    */
   findAll(): Customer[] {
-    return (this.db as any).query(
-      "SELECT * FROM customers ORDER BY created_at DESC",
-    ) as Customer[];
+    return this.db.prepare("SELECT * FROM customers ORDER BY created_at DESC").all() as Customer[];
   }
 
   /**
    * Get customers by name (search)
    */
   searchByName(name: string): Customer[] {
-    return (this.db as any).query(
-      "SELECT * FROM customers WHERE name LIKE ? ORDER BY created_at DESC",
-      [`%${name}%`],
-    ) as Customer[];
+    return this.db
+      .prepare("SELECT * FROM customers WHERE name LIKE ? ORDER BY created_at DESC")
+      .all(`%${name}%`) as Customer[];
   }
 
   /**
    * Get customers by email (search)
    */
   searchByEmail(email: string): Customer[] {
-    return (this.db as any).query(
-      "SELECT * FROM customers WHERE email LIKE ? ORDER BY created_at DESC",
-      [`%${email}%`],
-    ) as Customer[];
+    return this.db
+      .prepare("SELECT * FROM customers WHERE email LIKE ? ORDER BY created_at DESC")
+      .all(`%${email}%`) as Customer[];
   }
 
   /**
    * Get customers by phone (search)
    */
   searchByPhone(phone: string): Customer[] {
-    return (this.db as any).query(
-      "SELECT * FROM customers WHERE phone LIKE ? ORDER BY created_at DESC",
-      [`%${phone}%`],
-    ) as Customer[];
+    return this.db
+      .prepare("SELECT * FROM customers WHERE phone LIKE ? ORDER BY created_at DESC")
+      .all(`%${phone}%`) as Customer[];
   }
 
   /**

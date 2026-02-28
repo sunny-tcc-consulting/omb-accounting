@@ -84,7 +84,7 @@ export class BankAccountRepository {
    * Get all bank accounts
    */
   findAll(): BankAccount[] {
-    return (this.db as any).query(
+    return (this.db as any).prepare(
       "SELECT * FROM bank_accounts ORDER BY created_at DESC",
     ) as BankAccount[];
   }
@@ -93,7 +93,7 @@ export class BankAccountRepository {
    * Get bank account by name
    */
   findByName(name: string): BankAccount[] {
-    return (this.db as any).query(
+    return (this.db as any).prepare(
       "SELECT * FROM bank_accounts WHERE name LIKE ? ORDER BY created_at DESC",
       [`%${name}%`],
     ) as BankAccount[];

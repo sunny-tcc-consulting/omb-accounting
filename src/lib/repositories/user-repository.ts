@@ -61,7 +61,7 @@ export class UserRepository {
    * Get user by ID
    */
   findById(id: string): User | undefined {
-    return (this.db as any).get("SELECT * FROM users WHERE id = ?", [id]) as
+    return this.db.prepare("SELECT * FROM  WHERE id = ?").get(id) as
       | User
       | undefined;
   }
@@ -70,7 +70,7 @@ export class UserRepository {
    * Get user by email
    */
   findByEmail(email: string): User | undefined {
-    return (this.db as any).get("SELECT * FROM users WHERE email = ?", [email]) as
+    return this.db.prepare("SELECT * FROM  WHERE id = ?").get(email) as
       | User
       | undefined;
   }
@@ -79,7 +79,7 @@ export class UserRepository {
    * Get all users
    */
   findAll(): User[] {
-    return (this.db as any).query(
+    return (this.db as any).prepare(
       "SELECT * FROM users ORDER BY created_at DESC",
     ) as User[];
   }

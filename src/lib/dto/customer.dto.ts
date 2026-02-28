@@ -23,7 +23,7 @@ export function toFrontendCustomer(dbCustomer: Customer): FrontendCustomer {
     company: dbAny.company || undefined,
     taxId: dbAny.tax_id || undefined,
     notes: dbAny.notes || undefined,
-    createdAt: new Date(dbCustomer.created_at),
+    createdAt: dbCustomer.created_at ? new Date(dbCustomer.created_at).toISOString() : undefined,
   };
 }
 

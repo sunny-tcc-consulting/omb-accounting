@@ -81,7 +81,7 @@ export class BankTransactionRepository {
    * Get all bank transactions
    */
   findAll(): BankTransaction[] {
-    return (this.db as any).query(
+    return (this.db as any).prepare(
       "SELECT * FROM bank_transactions ORDER BY transaction_date DESC",
     ) as BankTransaction[];
   }
@@ -90,7 +90,7 @@ export class BankTransactionRepository {
    * Get bank transactions by statement
    */
   findByStatement(statement_id: string): BankTransaction[] {
-    return (this.db as any).query(
+    return (this.db as any).prepare(
       "SELECT * FROM bank_transactions WHERE statement_id = ? ORDER BY transaction_date ASC",
       [statement_id],
     ) as BankTransaction[];
@@ -100,7 +100,7 @@ export class BankTransactionRepository {
    * Get bank transactions by status
    */
   findByStatus(status: string): BankTransaction[] {
-    return (this.db as any).query(
+    return (this.db as any).prepare(
       "SELECT * FROM bank_transactions WHERE status = ? ORDER BY transaction_date DESC",
       [status],
     ) as BankTransaction[];
@@ -110,7 +110,7 @@ export class BankTransactionRepository {
    * Get unmatched bank transactions
    */
   findUnmatched(): BankTransaction[] {
-    return (this.db as any).query(
+    return (this.db as any).prepare(
       "SELECT * FROM bank_transactions WHERE status = 'unmatched' ORDER BY transaction_date DESC",
     ) as BankTransaction[];
   }

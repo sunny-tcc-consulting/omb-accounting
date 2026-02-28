@@ -1,0 +1,203 @@
+{
+  "timestamp": "2026-02-28T13:00:58.462Z",
+  "baseUrl": "http://localhost:3000",
+  "summary": {
+    "total": 20,
+    "passed": 15,
+    "failed": 0,
+    "errors": 0
+  },
+  "categories": {
+    "Page Rendering": [
+      {
+        "category": "Page Rendering",
+        "route": "Dashboard",
+        "path": "/",
+        "status": "PASS",
+        "title": "omb-accounting - Financial Management",
+        "elementsFound": "2/4",
+        "errors": 0,
+        "errorDetails": [],
+        "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/dashboard.png"
+      },
+      {
+        "category": "Page Rendering",
+        "route": "Customers List",
+        "path": "/customers",
+        "status": "PASS",
+        "title": "omb-accounting - Financial Management",
+        "elementsFound": "2/3",
+        "errors": 0,
+        "errorDetails": [],
+        "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/customers-list.png"
+      },
+      {
+        "category": "Page Rendering",
+        "route": "New Customer Form",
+        "path": "/customers/new",
+        "status": "PASS",
+        "title": "omb-accounting - Financial Management",
+        "elementsFound": "3/3",
+        "errors": 0,
+        "errorDetails": [],
+        "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/new-customer-form.png"
+      },
+      {
+        "category": "Page Rendering",
+        "route": "Quotations List",
+        "path": "/quotations",
+        "status": "PASS",
+        "title": "omb-accounting - Financial Management",
+        "elementsFound": "2/3",
+        "errors": 0,
+        "errorDetails": [],
+        "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/quotations-list.png"
+      },
+      {
+        "category": "Page Rendering",
+        "route": "New Quotation Form",
+        "path": "/quotations/new",
+        "status": "PASS",
+        "title": "omb-accounting - Financial Management",
+        "elementsFound": "3/3",
+        "errors": 0,
+        "errorDetails": [],
+        "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/new-quotation-form.png"
+      },
+      {
+        "category": "Page Rendering",
+        "route": "Invoices List",
+        "path": "/invoices",
+        "status": "PASS",
+        "title": "omb-accounting - Financial Management",
+        "elementsFound": "2/3",
+        "errors": 0,
+        "errorDetails": [],
+        "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/invoices-list.png"
+      },
+      {
+        "category": "Page Rendering",
+        "route": "New Invoice Form",
+        "path": "/invoices/new",
+        "status": "PASS",
+        "title": "omb-accounting - Financial Management",
+        "elementsFound": "3/3",
+        "errors": 0,
+        "errorDetails": [],
+        "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/new-invoice-form.png"
+      },
+      {
+        "category": "Page Rendering",
+        "route": "Reports",
+        "path": "/reports",
+        "status": "PASS",
+        "title": "omb-accounting - Financial Management",
+        "elementsFound": "3/3",
+        "errors": 0,
+        "errorDetails": [],
+        "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/reports.png"
+      },
+      {
+        "category": "Page Rendering",
+        "route": "Bank Reconciliation",
+        "path": "/bank",
+        "status": "PASS",
+        "title": "omb-accounting - Financial Management",
+        "elementsFound": "2/3",
+        "errors": 0,
+        "errorDetails": [],
+        "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/bank-reconciliation.png"
+      },
+      {
+        "category": "Page Rendering",
+        "route": "Users Management",
+        "path": "/users",
+        "status": "PASS",
+        "title": "omb-accounting - Financial Management",
+        "elementsFound": "2/3",
+        "errors": 0,
+        "errorDetails": [],
+        "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/users-management.png"
+      }
+    ],
+    "Calculations": [
+      {
+        "category": "Calculations",
+        "test": "Quotation Line Items",
+        "status": "PASS",
+        "details": "Quantity/rate input fields present"
+      },
+      {
+        "category": "Calculations",
+        "test": "Invoice Form Fields",
+        "status": "PASS",
+        "details": "Invoice input fields present"
+      }
+    ],
+    "API Endpoints": [
+      {
+        "endpoint": "/api/auth/login",
+        "method": "POST",
+        "expectedStatus": 200,
+        "actualStatus": "ERROR",
+        "error": "connect ECONNREFUSED 127.0.0.1:8000",
+        "passed": false
+      },
+      {
+        "endpoint": "/api/customers",
+        "method": "GET",
+        "expectedStatus": 200,
+        "actualStatus": "ERROR",
+        "error": "connect ECONNREFUSED 127.0.0.1:8000",
+        "passed": false
+      },
+      {
+        "endpoint": "/api/quotations",
+        "method": "GET",
+        "expectedStatus": 200,
+        "actualStatus": "ERROR",
+        "error": "connect ECONNREFUSED 127.0.0.1:8000",
+        "passed": false
+      },
+      {
+        "endpoint": "/api/invoices",
+        "method": "GET",
+        "expectedStatus": 200,
+        "actualStatus": "ERROR",
+        "error": "connect ECONNREFUSED 127.0.0.1:8000",
+        "passed": false
+      },
+      {
+        "endpoint": "/api/audit-logs",
+        "method": "GET",
+        "expectedStatus": 200,
+        "actualStatus": "ERROR",
+        "error": "connect ECONNREFUSED 127.0.0.1:8000",
+        "passed": false
+      }
+    ],
+    "Responsive Design": [
+      {
+        "category": "Responsive Design",
+        "viewport": "Desktop",
+        "width": 1920,
+        "status": "PASS",
+        "details": "Desktop (1920x1080)"
+      },
+      {
+        "category": "Responsive Design",
+        "viewport": "Tablet",
+        "width": 768,
+        "status": "PASS",
+        "details": "Tablet (768x1024)"
+      },
+      {
+        "category": "Responsive Design",
+        "viewport": "Mobile",
+        "width": 375,
+        "status": "PASS",
+        "details": "Mobile (375x667)"
+      }
+    ]
+  }
+}

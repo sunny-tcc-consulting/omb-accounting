@@ -89,7 +89,7 @@ export class BankStatementRepository {
    * Get all bank statements
    */
   findAll(): BankStatement[] {
-    return (this.db as any).query(
+    return (this.db as any).prepare(
       "SELECT * FROM bank_statements ORDER BY statement_date DESC",
     ) as BankStatement[];
   }
@@ -98,7 +98,7 @@ export class BankStatementRepository {
    * Get bank statements by bank account
    */
   findByBankAccount(bank_account_id: string): BankStatement[] {
-    return (this.db as any).query(
+    return (this.db as any).prepare(
       "SELECT * FROM bank_statements WHERE bank_account_id = ? ORDER BY statement_date DESC",
       [bank_account_id],
     ) as BankStatement[];
@@ -108,7 +108,7 @@ export class BankStatementRepository {
    * Get bank statements by status
    */
   findByStatus(status: string): BankStatement[] {
-    return (this.db as any).query(
+    return (this.db as any).prepare(
       "SELECT * FROM bank_statements WHERE status = ? ORDER BY statement_date DESC",
       [status],
     ) as BankStatement[];
@@ -118,7 +118,7 @@ export class BankStatementRepository {
    * Get bank statements by date range
    */
   findByDateRange(startDate: number, endDate: number): BankStatement[] {
-    return (this.db as any).query(
+    return (this.db as any).prepare(
       "SELECT * FROM bank_statements WHERE statement_date >= ? AND statement_date <= ? ORDER BY statement_date DESC",
       [startDate, endDate],
     ) as BankStatement[];
@@ -128,7 +128,7 @@ export class BankStatementRepository {
    * Get bank statements by date
    */
   findByDate(statement_date: number): BankStatement[] {
-    return (this.db as any).query(
+    return (this.db as any).prepare(
       "SELECT * FROM bank_statements WHERE statement_date = ? ORDER BY statement_date DESC",
       [statement_date],
     ) as BankStatement[];

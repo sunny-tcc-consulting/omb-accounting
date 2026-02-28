@@ -73,7 +73,7 @@ export class JournalEntryRepository {
    * Get all journal entries
    */
   findAll(): JournalEntry[] {
-    return (this.db as any).query(
+    return (this.db as any).prepare(
       "SELECT * FROM journal_entries ORDER BY transaction_date DESC",
     ) as JournalEntry[];
   }
@@ -82,7 +82,7 @@ export class JournalEntryRepository {
    * Get journal entries by account
    */
   findByAccount(account_id: string): JournalEntry[] {
-    return (this.db as any).query(
+    return (this.db as any).prepare(
       "SELECT * FROM journal_entries WHERE account_id = ? ORDER BY transaction_date DESC",
       [account_id],
     ) as JournalEntry[];
@@ -92,7 +92,7 @@ export class JournalEntryRepository {
    * Get journal entries by date range
    */
   findByDateRange(startDate: number, endDate: number): JournalEntry[] {
-    return (this.db as any).query(
+    return (this.db as any).prepare(
       "SELECT * FROM journal_entries WHERE transaction_date >= ? AND transaction_date <= ? ORDER BY transaction_date DESC",
       [startDate, endDate],
     ) as JournalEntry[];
@@ -102,7 +102,7 @@ export class JournalEntryRepository {
    * Get journal entries by date
    */
   findByDate(transaction_date: number): JournalEntry[] {
-    return (this.db as any).query(
+    return (this.db as any).prepare(
       "SELECT * FROM journal_entries WHERE transaction_date = ? ORDER BY transaction_date DESC",
       [transaction_date],
     ) as JournalEntry[];
