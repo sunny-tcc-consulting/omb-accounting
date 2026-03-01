@@ -25,7 +25,7 @@ export interface UpdateCustomerInput {
 }
 
 export class CustomerRepository {
-  constructor(private db: unknown) {}
+  constructor(private db: any) {}
 
   /**
    * Create a new customer
@@ -80,7 +80,9 @@ export class CustomerRepository {
    * Get all customers
    */
   findAll(): Customer[] {
-    return this.db.prepare("SELECT * FROM customers ORDER BY created_at DESC").all() as Customer[];
+    return this.db
+      .prepare("SELECT * FROM customers ORDER BY created_at DESC")
+      .all() as Customer[];
   }
 
   /**
@@ -88,7 +90,9 @@ export class CustomerRepository {
    */
   searchByName(name: string): Customer[] {
     return this.db
-      .prepare("SELECT * FROM customers WHERE name LIKE ? ORDER BY created_at DESC")
+      .prepare(
+        "SELECT * FROM customers WHERE name LIKE ? ORDER BY created_at DESC",
+      )
       .all(`%${name}%`) as Customer[];
   }
 
@@ -97,7 +101,9 @@ export class CustomerRepository {
    */
   searchByEmail(email: string): Customer[] {
     return this.db
-      .prepare("SELECT * FROM customers WHERE email LIKE ? ORDER BY created_at DESC")
+      .prepare(
+        "SELECT * FROM customers WHERE email LIKE ? ORDER BY created_at DESC",
+      )
       .all(`%${email}%`) as Customer[];
   }
 
@@ -106,7 +112,9 @@ export class CustomerRepository {
    */
   searchByPhone(phone: string): Customer[] {
     return this.db
-      .prepare("SELECT * FROM customers WHERE phone LIKE ? ORDER BY created_at DESC")
+      .prepare(
+        "SELECT * FROM customers WHERE phone LIKE ? ORDER BY created_at DESC",
+      )
       .all(`%${phone}%`) as Customer[];
   }
 
@@ -155,7 +163,9 @@ export class CustomerRepository {
    * Delete customer
    */
   delete(id: string): boolean {
-    const result = (this.db as any).run("DELETE FROM customers WHERE id = ?", [id]);
+    const result = (this.db as any).run("DELETE FROM customers WHERE id = ?", [
+      id,
+    ]);
     return result.changes > 0;
   }
 
@@ -163,9 +173,10 @@ export class CustomerRepository {
    * Check if customer exists
    */
   exists(id: string): boolean {
-    const result = (this.db as any).get("SELECT 1 FROM customers WHERE id = ?", [
-      id,
-    ]) as Record<string, unknown>;
+    const result = (this.db as any).get(
+      "SELECT 1 FROM customers WHERE id = ?",
+      [id],
+    ) as Record<string, unknown>;
     return !!result;
   }
 

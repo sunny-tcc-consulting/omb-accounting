@@ -29,7 +29,7 @@ export interface UpdateBankStatementInput {
 }
 
 export class BankStatementRepository {
-  constructor(private db: unknown) {}
+  constructor(private db: any) {}
 
   /**
    * Create a new bank statement
@@ -70,9 +70,9 @@ export class BankStatementRepository {
    * Get bank statement by ID
    */
   findById(id: string): BankStatement | undefined {
-    return (this.db as any).get("SELECT * FROM bank_statements WHERE id = ?", [id]) as
-      | BankStatement
-      | undefined;
+    return (this.db as any).get("SELECT * FROM bank_statements WHERE id = ?", [
+      id,
+    ]) as BankStatement | undefined;
   }
 
   /**
@@ -190,9 +190,10 @@ export class BankStatementRepository {
    * Delete bank statement
    */
   delete(id: string): boolean {
-    const result = (this.db as any).run("DELETE FROM bank_statements WHERE id = ?", [
-      id,
-    ]);
+    const result = (this.db as any).run(
+      "DELETE FROM bank_statements WHERE id = ?",
+      [id],
+    );
     return result.changes > 0;
   }
 
@@ -200,9 +201,10 @@ export class BankStatementRepository {
    * Check if bank statement exists
    */
   exists(id: string): boolean {
-    const result = (this.db as any).get("SELECT 1 FROM bank_statements WHERE id = ?", [
-      id,
-    ]) as Record<string, unknown>;
+    const result = (this.db as any).get(
+      "SELECT 1 FROM bank_statements WHERE id = ?",
+      [id],
+    ) as Record<string, unknown>;
     return !!result;
   }
 

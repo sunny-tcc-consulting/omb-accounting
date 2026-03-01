@@ -24,7 +24,7 @@ export interface UpdateUserInput {
 }
 
 export class UserRepository {
-  constructor(private db: unknown) {}
+  constructor(private db: any) {}
 
   /**
    * Create a new user
@@ -113,7 +113,10 @@ export class UserRepository {
     values.push(Date.now());
     values.push(id);
 
-    (this.db as any).run(`UPDATE users SET ${updates.join(", ")} WHERE id = ?`, values);
+    (this.db as any).run(
+      `UPDATE users SET ${updates.join(", ")} WHERE id = ?`,
+      values,
+    );
 
     return this.findById(id);
   }

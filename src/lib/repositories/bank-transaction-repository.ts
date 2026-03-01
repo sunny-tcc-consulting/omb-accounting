@@ -31,7 +31,7 @@ export interface UpdateBankTransactionInput {
 }
 
 export class BankTransactionRepository {
-  constructor(private db: unknown) {}
+  constructor(private db: any) {}
 
   /**
    * Create a new bank transaction
@@ -72,9 +72,10 @@ export class BankTransactionRepository {
    * Get bank transaction by ID
    */
   findById(id: string): BankTransaction | undefined {
-    return (this.db as any).get("SELECT * FROM bank_transactions WHERE id = ?", [id]) as
-      | BankTransaction
-      | undefined;
+    return (this.db as any).get(
+      "SELECT * FROM bank_transactions WHERE id = ?",
+      [id],
+    ) as BankTransaction | undefined;
   }
 
   /**
@@ -175,9 +176,10 @@ export class BankTransactionRepository {
    * Delete bank transaction
    */
   delete(id: string): boolean {
-    const result = (this.db as any).run("DELETE FROM bank_transactions WHERE id = ?", [
-      id,
-    ]);
+    const result = (this.db as any).run(
+      "DELETE FROM bank_transactions WHERE id = ?",
+      [id],
+    );
     return result.changes > 0;
   }
 
@@ -185,9 +187,10 @@ export class BankTransactionRepository {
    * Check if bank transaction exists
    */
   exists(id: string): boolean {
-    const result = (this.db as any).get("SELECT 1 FROM bank_transactions WHERE id = ?", [
-      id,
-    ]) as Record<string, unknown>;
+    const result = (this.db as any).get(
+      "SELECT 1 FROM bank_transactions WHERE id = ?",
+      [id],
+    ) as Record<string, unknown>;
     return !!result;
   }
 

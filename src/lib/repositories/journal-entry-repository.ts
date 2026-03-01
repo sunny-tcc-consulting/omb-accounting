@@ -27,7 +27,7 @@ export interface UpdateJournalEntryInput {
 }
 
 export class JournalEntryRepository {
-  constructor(private db: unknown) {}
+  constructor(private db: any) {}
 
   /**
    * Create a new journal entry
@@ -64,9 +64,9 @@ export class JournalEntryRepository {
    * Get journal entry by ID
    */
   findById(id: string): JournalEntry | undefined {
-    return (this.db as any).get("SELECT * FROM journal_entries WHERE id = ?", [id]) as
-      | JournalEntry
-      | undefined;
+    return (this.db as any).get("SELECT * FROM journal_entries WHERE id = ?", [
+      id,
+    ]) as JournalEntry | undefined;
   }
 
   /**
@@ -157,9 +157,10 @@ export class JournalEntryRepository {
    * Delete journal entry
    */
   delete(id: string): boolean {
-    const result = (this.db as any).run("DELETE FROM journal_entries WHERE id = ?", [
-      id,
-    ]);
+    const result = (this.db as any).run(
+      "DELETE FROM journal_entries WHERE id = ?",
+      [id],
+    );
     return result.changes > 0;
   }
 
@@ -167,9 +168,10 @@ export class JournalEntryRepository {
    * Check if journal entry exists
    */
   exists(id: string): boolean {
-    const result = (this.db as any).get("SELECT 1 FROM journal_entries WHERE id = ?", [
-      id,
-    ]) as Record<string, unknown>;
+    const result = (this.db as any).get(
+      "SELECT 1 FROM journal_entries WHERE id = ?",
+      [id],
+    ) as Record<string, unknown>;
     return !!result;
   }
 

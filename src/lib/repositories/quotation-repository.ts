@@ -47,7 +47,7 @@ export interface UpdateQuotationInput {
 }
 
 export class QuotationRepository {
-  constructor(private db: unknown) {}
+  constructor(private db: any) {}
 
   /**
    * Create a new quotation
@@ -111,9 +111,9 @@ export class QuotationRepository {
    * Get quotation by ID
    */
   findById(id: string): Quotation | undefined {
-    return this.db
-      .prepare("SELECT * FROM quotations WHERE id = ?")
-      .get(id) as Quotation | undefined;
+    return this.db.prepare("SELECT * FROM quotations WHERE id = ?").get(id) as
+      | Quotation
+      | undefined;
   }
 
   /**
@@ -139,7 +139,9 @@ export class QuotationRepository {
    */
   findByCustomer(customer_id: string): Quotation[] {
     return this.db
-      .prepare("SELECT * FROM quotations WHERE customer_id = ? ORDER BY created_at DESC")
+      .prepare(
+        "SELECT * FROM quotations WHERE customer_id = ? ORDER BY created_at DESC",
+      )
       .all(customer_id) as Quotation[];
   }
 
@@ -148,7 +150,9 @@ export class QuotationRepository {
    */
   findByStatus(status: string): Quotation[] {
     return this.db
-      .prepare("SELECT * FROM quotations WHERE status = ? ORDER BY created_at DESC")
+      .prepare(
+        "SELECT * FROM quotations WHERE status = ? ORDER BY created_at DESC",
+      )
       .all(status) as Quotation[];
   }
 
@@ -197,7 +201,9 @@ export class QuotationRepository {
    * Delete quotation
    */
   delete(id: string): boolean {
-    const result = (this.db as any).run("DELETE FROM quotations WHERE id = ?", [id]);
+    const result = (this.db as any).run("DELETE FROM quotations WHERE id = ?", [
+      id,
+    ]);
     return result.changes > 0;
   }
 
@@ -205,9 +211,10 @@ export class QuotationRepository {
    * Check if quotation exists
    */
   exists(id: string): boolean {
-    const result = (this.db as any).get("SELECT 1 FROM quotations WHERE id = ?", [
-      id,
-    ]) as Record<string, unknown>;
+    const result = (this.db as any).get(
+      "SELECT 1 FROM quotations WHERE id = ?",
+      [id],
+    ) as Record<string, unknown>;
     return !!result;
   }
 

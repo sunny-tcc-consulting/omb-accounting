@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-02-28T04:39:16.806Z",
-  "baseUrl": "http://localhost:8000",
+  "timestamp": "2026-03-01T04:40:32.933Z",
+  "baseUrl": "http://localhost:3001",
   "totalTests": 10,
   "passed": 4,
   "failed": 6,
@@ -12,7 +12,7 @@
       "title": "omb-accounting - Financial Management",
       "elementsFound": "2/3",
       "errors": 0,
-      "screenshot": "/home/tcc/.openclaw/workspace/qa-screenshots/dashboard.png"
+      "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/dashboard.png"
     },
     {
       "route": "Customers List",
@@ -21,7 +21,7 @@
       "title": "omb-accounting - Financial Management",
       "elementsFound": "2/3",
       "errors": 0,
-      "screenshot": "/home/tcc/.openclaw/workspace/qa-screenshots/customers-list.png"
+      "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/customers-list.png"
     },
     {
       "route": "New Customer",
@@ -30,7 +30,7 @@
       "title": "omb-accounting - Financial Management",
       "elementsFound": "3/3",
       "errors": 0,
-      "screenshot": "/home/tcc/.openclaw/workspace/qa-screenshots/new-customer.png"
+      "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/new-customer.png"
     },
     {
       "route": "Quotations List",
@@ -39,7 +39,7 @@
       "title": "omb-accounting - Financial Management",
       "elementsFound": "2/3",
       "errors": 0,
-      "screenshot": "/home/tcc/.openclaw/workspace/qa-screenshots/quotations-list.png"
+      "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/quotations-list.png"
     },
     {
       "route": "New Quotation",
@@ -48,7 +48,7 @@
       "title": "omb-accounting - Financial Management",
       "elementsFound": "3/3",
       "errors": 0,
-      "screenshot": "/home/tcc/.openclaw/workspace/qa-screenshots/new-quotation.png"
+      "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/new-quotation.png"
     },
     {
       "route": "Invoices List",
@@ -57,7 +57,7 @@
       "title": "omb-accounting - Financial Management",
       "elementsFound": "2/3",
       "errors": 0,
-      "screenshot": "/home/tcc/.openclaw/workspace/qa-screenshots/invoices-list.png"
+      "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/invoices-list.png"
     },
     {
       "route": "New Invoice",
@@ -66,7 +66,7 @@
       "title": "omb-accounting - Financial Management",
       "elementsFound": "3/3",
       "errors": 0,
-      "screenshot": "/home/tcc/.openclaw/workspace/qa-screenshots/new-invoice.png"
+      "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/new-invoice.png"
     },
     {
       "route": "Reports",
@@ -75,7 +75,7 @@
       "title": "omb-accounting - Financial Management",
       "elementsFound": "3/3",
       "errors": 0,
-      "screenshot": "/home/tcc/.openclaw/workspace/qa-screenshots/reports.png"
+      "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/reports.png"
     },
     {
       "route": "Bank Reconciliation",
@@ -84,7 +84,7 @@
       "title": "omb-accounting - Financial Management",
       "elementsFound": "2/3",
       "errors": 0,
-      "screenshot": "/home/tcc/.openclaw/workspace/qa-screenshots/bank-reconciliation.png"
+      "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/bank-reconciliation.png"
     },
     {
       "route": "Users Management",
@@ -93,7 +93,7 @@
       "title": "omb-accounting - Financial Management",
       "elementsFound": "2/3",
       "errors": 0,
-      "screenshot": "/home/tcc/.openclaw/workspace/qa-screenshots/users-management.png"
+      "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/users-management.png"
     }
   ]
 }

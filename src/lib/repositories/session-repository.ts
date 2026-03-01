@@ -16,7 +16,7 @@ export interface CreateSessionInput {
 }
 
 export class SessionRepository {
-  constructor(private db: unknown) {}
+  constructor(private db: any) {}
 
   /**
    * Create a new session
@@ -67,7 +67,10 @@ export class SessionRepository {
    * Delete session by token
    */
   delete(token: string): boolean {
-    const result = (this.db as any).run("DELETE FROM sessions WHERE token = ?", [token]);
+    const result = (this.db as any).run(
+      "DELETE FROM sessions WHERE token = ?",
+      [token],
+    );
     return result.changes > 0;
   }
 
@@ -75,9 +78,10 @@ export class SessionRepository {
    * Delete all sessions for a user
    */
   deleteByUserId(user_id: string): boolean {
-    const result = (this.db as any).run("DELETE FROM sessions WHERE user_id = ?", [
-      user_id,
-    ]);
+    const result = (this.db as any).run(
+      "DELETE FROM sessions WHERE user_id = ?",
+      [user_id],
+    );
     return result.changes > 0;
   }
 
@@ -85,9 +89,10 @@ export class SessionRepository {
    * Delete expired sessions
    */
   deleteExpired(): number {
-    const result = (this.db as any).run("DELETE FROM sessions WHERE expires_at < ?", [
-      Date.now(),
-    ]);
+    const result = (this.db as any).run(
+      "DELETE FROM sessions WHERE expires_at < ?",
+      [Date.now()],
+    );
     return result.changes;
   }
 

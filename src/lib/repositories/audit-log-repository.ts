@@ -27,7 +27,7 @@ interface AuditLogFilters {
 }
 
 export class AuditLogRepository {
-  private db: unknown;
+  private db: any;
   private tableName = "audit_logs";
 
   constructor(database: unknown) {

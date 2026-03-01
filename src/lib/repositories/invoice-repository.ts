@@ -31,7 +31,7 @@ export interface UpdateInvoiceInput {
 }
 
 export class InvoiceRepository {
-  constructor(private db: unknown) {}
+  constructor(private db: any) {}
 
   /**
    * Create a new invoice
@@ -83,16 +83,19 @@ export class InvoiceRepository {
    * Get invoice by number
    */
   findByNumber(invoice_number: string): Invoice | undefined {
-    return (this.db as any).get("SELECT * FROM invoices WHERE invoice_number = ?", [
-      invoice_number,
-    ]) as Invoice | undefined;
+    return (this.db as any).get(
+      "SELECT * FROM invoices WHERE invoice_number = ?",
+      [invoice_number],
+    ) as Invoice | undefined;
   }
 
   /**
    * Get all invoices
    */
   findAll(): Invoice[] {
-    return this.db.prepare("SELECT * FROM invoices ORDER BY created_at DESC").all() as Invoice[];
+    return this.db
+      .prepare("SELECT * FROM invoices ORDER BY created_at DESC")
+      .all() as Invoice[];
   }
 
   /**
@@ -100,7 +103,9 @@ export class InvoiceRepository {
    */
   findByCustomer(customer_id: string): Invoice[] {
     return this.db
-      .prepare("SELECT * FROM invoices WHERE customer_id = ? ORDER BY created_at DESC")
+      .prepare(
+        "SELECT * FROM invoices WHERE customer_id = ? ORDER BY created_at DESC",
+      )
       .all(customer_id) as Invoice[];
   }
 
@@ -109,7 +114,9 @@ export class InvoiceRepository {
    */
   findByStatus(status: string): Invoice[] {
     return this.db
-      .prepare("SELECT * FROM invoices WHERE status = ? ORDER BY created_at DESC")
+      .prepare(
+        "SELECT * FROM invoices WHERE status = ? ORDER BY created_at DESC",
+      )
       .all(status) as Invoice[];
   }
 
@@ -118,7 +125,9 @@ export class InvoiceRepository {
    */
   findByQuotation(quotation_id: string): Invoice[] {
     return this.db
-      .prepare("SELECT * FROM invoices WHERE quotation_id = ? ORDER BY created_at DESC")
+      .prepare(
+        "SELECT * FROM invoices WHERE quotation_id = ? ORDER BY created_at DESC",
+      )
       .all(quotation_id) as Invoice[];
   }
 
@@ -179,7 +188,9 @@ export class InvoiceRepository {
    * Delete invoice
    */
   delete(id: string): boolean {
-    const result = (this.db as any).run("DELETE FROM invoices WHERE id = ?", [id]);
+    const result = (this.db as any).run("DELETE FROM invoices WHERE id = ?", [
+      id,
+    ]);
     return result.changes > 0;
   }
 

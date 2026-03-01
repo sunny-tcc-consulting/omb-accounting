@@ -7,7 +7,7 @@ const puppeteer = require('puppeteer');
 const path = require('path');
 const fs = require('fs');
 
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = 'http://localhost:3001';
 const SCREENSHOTS_DIR = path.join(__dirname, 'qa-screenshots');
 const DELAY_MS = 3000; // Wait for React hydration
 

@@ -27,7 +27,7 @@ export interface UpdateBankAccountInput {
 }
 
 export class BankAccountRepository {
-  constructor(private db: unknown) {}
+  constructor(private db: any) {}
 
   /**
    * Create a new bank account
@@ -66,18 +66,19 @@ export class BankAccountRepository {
    * Get bank account by ID
    */
   findById(id: string): BankAccount | undefined {
-    return (this.db as any).get("SELECT * FROM bank_accounts WHERE id = ?", [id]) as
-      | BankAccount
-      | undefined;
+    return (this.db as any).get("SELECT * FROM bank_accounts WHERE id = ?", [
+      id,
+    ]) as BankAccount | undefined;
   }
 
   /**
    * Get bank account by account number
    */
   findByAccountNumber(account_number: string): BankAccount | undefined {
-    return (this.db as any).get("SELECT * FROM bank_accounts WHERE account_number = ?", [
-      account_number,
-    ]) as BankAccount | undefined;
+    return (this.db as any).get(
+      "SELECT * FROM bank_accounts WHERE account_number = ?",
+      [account_number],
+    ) as BankAccount | undefined;
   }
 
   /**
@@ -156,7 +157,10 @@ export class BankAccountRepository {
    * Delete bank account
    */
   delete(id: string): boolean {
-    const result = (this.db as any).run("DELETE FROM bank_accounts WHERE id = ?", [id]);
+    const result = (this.db as any).run(
+      "DELETE FROM bank_accounts WHERE id = ?",
+      [id],
+    );
     return result.changes > 0;
   }
 
@@ -164,9 +168,10 @@ export class BankAccountRepository {
    * Check if bank account exists
    */
   exists(id: string): boolean {
-    const result = (this.db as any).get("SELECT 1 FROM bank_accounts WHERE id = ?", [
-      id,
-    ]) as Record<string, unknown>;
+    const result = (this.db as any).get(
+      "SELECT 1 FROM bank_accounts WHERE id = ?",
+      [id],
+    ) as Record<string, unknown>;
     return !!result;
   }
 
