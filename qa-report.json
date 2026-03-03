@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-03-01T04:40:32.933Z",
-  "baseUrl": "http://localhost:3001",
+  "timestamp": "2026-03-03T18:32:43.028Z",
+  "baseUrl": "http://localhost:3002",
   "totalTests": 10,
   "passed": 4,
   "failed": 6,
@@ -9,8 +9,8 @@
       "route": "Dashboard",
       "path": "/",
       "status": "FAIL",
-      "title": "omb-accounting - Financial Management",
-      "elementsFound": "2/3",
+      "title": "",
+      "elementsFound": "1/3",
       "errors": 0,
       "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/dashboard.png"
     },
@@ -90,8 +90,8 @@
       "route": "Users Management",
       "path": "/users",
       "status": "FAIL",
-      "title": "omb-accounting - Financial Management",
-      "elementsFound": "2/3",
+      "title": "",
+      "elementsFound": "0/3",
       "errors": 0,
       "screenshot": "/home/tcc/.openclaw/workspace/omb-accounting/qa-screenshots/users-management.png"
     }

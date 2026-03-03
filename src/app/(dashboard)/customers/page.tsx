@@ -1,13 +1,18 @@
-'use client';
+"use client";
 
-import { CustomerList } from '@/components/customers/CustomerList';
+import { CustomerList } from "@/components/customers/CustomerList";
+import { useTranslation } from "@/contexts/I18nContext";
 
 export default function CustomersPage() {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Customers</h1>
-        <p className="mt-2 text-gray-600">Manage your customer relationships</p>
+        <h1 className="text-3xl font-bold text-gray-900">
+          {t("customers.title")}
+        </h1>
+        <p className="mt-2 text-gray-600">{t("customers.customerList")}</p>
       </div>
       <CustomerList />
     </div>
