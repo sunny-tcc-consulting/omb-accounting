@@ -25,6 +25,7 @@ const en: Dictionary = {
     submit: "Submit",
     reset: "Reset",
     retry: "Retry",
+    print: "Print",
   },
   nav: {
     dashboard: "Dashboard",
@@ -114,6 +115,14 @@ const en: Dictionary = {
     searchQuotations: "Search quotations...",
     noQuotations: "No quotations found",
     quotationList: "Quotation List",
+    quotationNotFound: "Quotation not found",
+    convertedSuccessfully: "Successfully converted to invoice!",
+    conversionFailed: "Conversion failed, please try again",
+    printingInvoice: "Printing invoice...",
+    backToQuotation: "Back to Quotation",
+    willBeConverted: "Quotation {{number}} will be converted to invoice",
+    quotationTotal: "Quotation Total",
+    saveInvoice: "Save Invoice",
     status: {
       draft: "Draft",
       sent: "Sent",
@@ -140,6 +149,7 @@ const en: Dictionary = {
     searchInvoices: "Search invoices...",
     noInvoices: "No invoices found",
     invoiceList: "Invoice List",
+    invoicePreview: "Invoice Preview",
     status: {
       draft: "Draft",
       sent: "Sent",

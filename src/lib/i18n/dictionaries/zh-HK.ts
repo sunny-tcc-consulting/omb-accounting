@@ -25,6 +25,7 @@ const zhHant: Dictionary = {
     submit: "提交",
     reset: "重設",
     retry: "重試",
+    print: "列印",
   },
   nav: {
     dashboard: "主頁",
@@ -113,6 +114,14 @@ const zhHant: Dictionary = {
     searchQuotations: "搜尋報價單...",
     noQuotations: "暫無報價單",
     quotationList: "報價單列表",
+    quotationNotFound: "找不到報價單",
+    convertedSuccessfully: "成功轉換為發票！",
+    conversionFailed: "轉換失敗，請重試",
+    printingInvoice: "正在列印發票...",
+    backToQuotation: "返回報價單",
+    willBeConverted: "報價單 {{number}} 將轉換為發票",
+    quotationTotal: "報價單總額",
+    saveInvoice: "保存發票",
     status: {
       draft: "草稿",
       sent: "已發送",
@@ -139,6 +148,7 @@ const zhHant: Dictionary = {
     searchInvoices: "搜尋發票...",
     noInvoices: "暫無發票",
     invoiceList: "發票列表",
+    invoicePreview: "發票預覽",
     status: {
       draft: "草稿",
       sent: "已發送",

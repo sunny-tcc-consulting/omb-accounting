@@ -85,7 +85,8 @@ export default function BankPage() {
       {/* Page Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">
-          {t("bank.title")} <span className="text-indigo-600">銀行對帳</span>
+          {t("bank.title")}{" "}
+          <span className="text-indigo-600">{t("bank.reconciliation")}</span>
         </h1>
         <p className="text-gray-600 mt-2">
           Manage your bank accounts, statements, and reconcile transactions
