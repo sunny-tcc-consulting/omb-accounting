@@ -7,6 +7,7 @@ import { useTranslation } from "@/contexts/I18nContext";
  * {t('bank.title')} Page
  * Simplified self-contained version for video testing
  */
+
 export default function BankPage() {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<
@@ -64,17 +65,28 @@ export default function BankPage() {
   ]);
 
   const tabs = [
-    { value: "accounts", label: t("bank.bankAccounts") },
+    {
+      value: "accounts",
+      label: t("bank.bankAccounts") + " " + t("bank.bankAccounts"),
+    },
     { value: "statements", label: "Statements" },
-    { value: "transactions", label: t("bank.transactions") },
-    { value: "reconciliation", label: t("bank.reconciliation") },
+    {
+      value: "transactions",
+      label: t("bank.transactions") + " " + t("bank.transactions"),
+    },
+    {
+      value: "reconciliation",
+      label: t("bank.reconciliation") + " " + t("bank.reconciliation"),
+    },
   ];
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       {/* Page Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">{t("bank.title")}</h1>
+        <h1 className="text-2xl font-bold text-gray-900">
+          {t("bank.title")} <span className="text-indigo-600">銀行對帳</span>
+        </h1>
         <p className="text-gray-600 mt-2">
           Manage your bank accounts, statements, and reconcile transactions
         </p>
@@ -153,7 +165,6 @@ function AccountsTab({
           + Add Bank Account
         </button>
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {accounts.map((account) => (
           <div

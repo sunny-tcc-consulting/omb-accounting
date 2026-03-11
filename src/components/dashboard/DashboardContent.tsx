@@ -1,7 +1,3 @@
-/**
- * Dashboard Page - Main Analytics Dashboard
- * Part of Phase 4.5: Dashboard & Analytics
- */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -147,9 +143,7 @@ function AgingCard({
       <div className="space-y-2">
         <div>
           <div className="flex justify-between text-xs text-gray-600 mb-1">
-            <span>
-              {current > 0 ? t("dashboard.current") : t("dashboard.none")}
-            </span>
+            <span>Current</span>
             <span>${current.toLocaleString()}</span>
           </div>
           <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -161,7 +155,7 @@ function AgingCard({
         </div>
         <div>
           <div className="flex justify-between text-xs text-gray-600 mb-1">
-            <span>{t("dashboard.days1to30")}</span>
+            <span>1-30 Days</span>
             <span>${overdue30.toLocaleString()}</span>
           </div>
           <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -173,7 +167,7 @@ function AgingCard({
         </div>
         <div>
           <div className="flex justify-between text-xs text-gray-600 mb-1">
-            <span>{t("dashboard.days31to60")}</span>
+            <span>31-60 Days</span>
             <span>${overdue60.toLocaleString()}</span>
           </div>
           <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -185,7 +179,7 @@ function AgingCard({
         </div>
         <div>
           <div className="flex justify-between text-xs text-gray-600 mb-1">
-            <span>{t("dashboard.days60plus")}</span>
+            <span>60+ Days</span>
             <span>${overdue90.toLocaleString()}</span>
           </div>
           <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -200,7 +194,7 @@ function AgingCard({
   );
 }
 
-export default function DashboardPage() {
+export function DashboardContent() {
   const { t } = useTranslation();
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [loading, setLoading] = useState(true);
@@ -241,24 +235,13 @@ export default function DashboardPage() {
   // Loading state
   if (loading) {
     return (
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">
-            {t("dashboard.title")}
-          </h1>
-        </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="animate-pulse rounded-xl border p-5 bg-gray-100 h-32"
-            />
-          ))}
-        </div>
-        <div className="mt-6 grid gap-6 md:grid-cols-2">
-          <div className="animate-pulse rounded-xl border p-5 bg-gray-100 h-64" />
-          <div className="animate-pulse rounded-xl border p-5 bg-gray-100 h-64" />
-        </div>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="animate-pulse rounded-xl border p-5 bg-gray-100 h-32"
+          />
+        ))}
       </div>
     );
   }
@@ -266,20 +249,15 @@ export default function DashboardPage() {
   // Error state
   if (error) {
     return (
-      <div className="p-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">
-          {t("dashboard.title")}
-        </h1>
-        <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
-          <p className="text-red-600 mb-4">{error}</p>
-          <button
-            onClick={fetchMetrics}
-            className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-          >
-            <RefreshCw className="w-4 h-4 mr-2" />
-            {t("common.retry")}
-          </button>
-        </div>
+      <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+        <p className="text-red-600 mb-4">{error}</p>
+        <button
+          onClick={fetchMetrics}
+          className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+        >
+          <RefreshCw className="w-4 h-4 mr-2" />
+          {t("common.retry")}
+        </button>
       </div>
     );
   }
@@ -287,54 +265,15 @@ export default function DashboardPage() {
   // No metrics yet (empty database)
   if (!metrics) {
     return (
-      <div className="p-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">
-          {t("dashboard.title")}
-        </h1>
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center">
-          <p className="text-blue-600 mb-2">{t("common.noData")}</p>
-          <p className="text-sm text-blue-500">
-            {t("dashboard.startCreating")}
-          </p>
-        </div>
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center">
+        <p className="text-blue-600 mb-2">{t("common.noData")}</p>
+        <p className="text-sm text-blue-500">{t("dashboard.startCreating")}</p>
       </div>
     );
   }
 
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
-          {t("dashboard.title")}
-        </h1>
-        <div className="flex items-center gap-2">
-          {/* Period Selector */}
-          <div className="flex items-center bg-gray-100 rounded-lg p-1">
-            {(["month", "quarter", "year"] as const).map((p) => (
-              <button
-                key={p}
-                onClick={() => setPeriod(p)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                  period === p
-                    ? "bg-white text-gray-900 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                {p.charAt(0).toUpperCase() + p.slice(1)}
-              </button>
-            ))}
-          </div>
-          {/* Refresh Button */}
-          <button
-            onClick={fetchMetrics}
-            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
-          >
-            <RefreshCw className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-
+    <div>
       {/* Key Metrics Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-6">
         <MetricCard

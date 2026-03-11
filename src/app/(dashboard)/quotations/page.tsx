@@ -10,9 +10,13 @@ export default function QuotationsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">
-          {t("quotations.title")}
+          {t("quotations.title")}{" "}
+          <span className="text-indigo-600">報價單</span>
         </h1>
-        <p className="mt-2 text-gray-600">{t("quotations.quotationList")}</p>
+        <p className="mt-2 text-gray-600">
+          {t("quotations.quotationList")}{" "}
+          <span className="text-indigo-600">報價單列表</span>
+        </p>
       </div>
       <QuotationList />
     </div>
