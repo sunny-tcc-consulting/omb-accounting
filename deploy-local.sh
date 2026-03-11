@@ -54,6 +54,7 @@ fi
 # Run tests
 echo ""
 echo -e "${YELLOW}Running tests...${NC}"
+export NODE_OPTIONS="--max-old-space-size=4096"
 npm test
 if [ $? -ne 0 ]; then
     echo -e "${RED}Tests failed! Deployment aborted.${NC}"
