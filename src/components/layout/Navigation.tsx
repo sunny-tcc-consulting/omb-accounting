@@ -76,7 +76,7 @@ export function Breadcrumb() {
     // 直接設置 items（這是 React 推薦的方式）
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setItems(breadcrumbs);
-  }, [pathname, t]);
+  }, [pathname]); // Don't include `t` in dependencies - it changes on every render
 
   if (items.length <= 1) return null;
 
