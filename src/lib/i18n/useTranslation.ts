@@ -3,11 +3,8 @@
  * Provides type-safe translation key access
  */
 
-import {
-  useTranslation as useI18nTranslation,
-  Locale,
-} from "@/contexts/I18nContext";
-import type { Dictionary } from "@/lib/i18n/i18n";
+import { useTranslation as useI18nTranslation } from "@/contexts/I18nContext";
+import { Locale, type Dictionary } from "@/lib/i18n/i18n";
 
 // Main translation hook
 export function useTranslation() {
@@ -21,7 +18,7 @@ export function getNestedTranslation(
   fallback?: string,
 ): string {
   const keys = key.split(".");
-  let value: Dictionary = obj;
+  let value: any = obj; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   for (const k of keys) {
     if (value && typeof value === "object" && k in value) {
@@ -57,4 +54,4 @@ export function formatDate(date: Date | string, locale: Locale = "en"): string {
   return new Intl.DateTimeFormat(locale.replace("-", "-")).format(d);
 }
 
-export { Locale };
+export type { Locale };

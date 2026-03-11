@@ -1,6 +1,44 @@
 // i18n configuration and utilities
 export type Locale = "en" | "zh-HK" | "zh-CN";
-export type Dictionary = typeof import("./dictionaries/en");
+
+// Dictionary type definition (to avoid circular dependency)
+export interface Dictionary {
+  [key: string]:
+    | {
+        [key: string]: string | { [key: string]: string };
+      }
+    | undefined;
+  common: {
+    [key: string]: string;
+  };
+  nav: {
+    [key: string]: string;
+  };
+  dashboard: {
+    [key: string]: string;
+  };
+  customers: {
+    [key: string]: string;
+  };
+  quotations: {
+    [key: string]: string | { [key: string]: string };
+  };
+  invoices: {
+    [key: string]: string | { [key: string]: string };
+  };
+  reports: {
+    [key: string]: string;
+  };
+  bank: {
+    [key: string]: string | { [key: string]: string };
+  };
+  users: {
+    [key: string]: string | { [key: string]: string };
+  };
+  settings?: {
+    [key: string]: string;
+  };
+}
 
 export const locales: Locale[] = ["en", "zh-HK", "zh-CN"];
 export const defaultLocale: Locale = "en";

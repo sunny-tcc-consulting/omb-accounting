@@ -13,7 +13,6 @@ import {
   loadDictionary,
   Dictionary,
 } from "@/lib/i18n/i18n";
-import type { Dictionary } from "@/lib/i18n/i18n";
 
 interface I18nContextType {
   locale: Locale;
@@ -82,7 +81,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       }
 
       const keys = key.split(".");
-      let value: Dictionary = dictionary;
+      let value: any = dictionary; // eslint-disable-line @typescript-eslint/no-explicit-any
 
       for (const k of keys) {
         if (value && typeof value === "object" && k in value) {

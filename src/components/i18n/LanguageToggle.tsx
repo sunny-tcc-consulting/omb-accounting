@@ -17,7 +17,7 @@ export function LanguageToggle() {
     <div className="relative group">
       <button
         className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
-        aria-label={dictionary.settings?.languageSelect || "Select Language"}
+        aria-label={dictionary.nav?.settings || "Select Language"}
       >
         <Globe className="w-4 h-4" />
         <span className="hidden sm:inline">{localeNames[locale]}</span>

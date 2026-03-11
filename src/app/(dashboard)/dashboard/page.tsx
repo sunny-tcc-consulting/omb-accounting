@@ -7,14 +7,12 @@
 import { useState, useEffect } from "react";
 import {
   TrendingUp,
-  TrendingDown,
   DollarSign,
   Users,
   CreditCard,
   ArrowUpRight,
   ArrowDownRight,
   RefreshCw,
-  Calendar,
 } from "lucide-react";
 import { DashboardMetrics } from "@/lib/dashboard-metrics";
 import { useTranslation } from "@/contexts/I18nContext";
@@ -134,6 +132,7 @@ function AgingCard({
   overdue60: number;
   overdue90: number;
 }) {
+  const { t } = useTranslation();
   const total = current + overdue30 + overdue60 + overdue90;
   const maxAmount = Math.max(current, overdue30, overdue60, overdue90, 1);
   const barWidth = (amount: number) => Math.max((amount / maxAmount) * 100, 5);

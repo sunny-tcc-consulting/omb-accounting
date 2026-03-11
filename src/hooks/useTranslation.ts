@@ -1,7 +1,5 @@
-import {
-  useTranslation as useI18nTranslation,
-  Locale,
-} from "@/contexts/I18nContext";
+import { useTranslation as useI18nTranslation } from "@/contexts/I18nContext";
+import { Locale } from "@/lib/i18n/i18n";
 
 export function useTranslation() {
   return useI18nTranslation();
@@ -10,4 +8,4 @@ export function useTranslation() {
 // Helper for getting translation key type safety
 export type TranslationKey = string;
 
-export { Locale };
+export type { Locale };
