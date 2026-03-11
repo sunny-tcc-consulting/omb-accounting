@@ -37,6 +37,7 @@ const zhHant: Dictionary = {
     reports: "報告",
     bank: "銀行對帳",
     users: "用戶",
+    roles: "角色",
     settings: "設定",
     logout: "登出",
     login: "登入",

@@ -37,6 +37,7 @@ const en: Dictionary = {
     reports: "Reports",
     bank: "Bank Reconciliation",
     users: "Users",
+    roles: "Roles",
     settings: "Settings",
     logout: "Logout",
     login: "Login",

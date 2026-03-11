@@ -21,14 +21,14 @@ export default function SettingsPage() {
 
   // List of existing pages in the app
   const navPages = [
-    { path: "/", label: "Dashboard", icon: "📊" },
-    { path: "/customers", label: "Customers", icon: "👥" },
-    { path: "/quotations", label: "Quotations", icon: "📄" },
-    { path: "/invoices", label: "Invoices", icon: "🧾" },
-    { path: "/reports", label: "Reports", icon: "📈" },
-    { path: "/bank", label: "Bank Reconciliation", icon: "🏦" },
-    { path: "/users", label: "Users", icon: "👤" },
-    { path: "/roles", label: "Roles", icon: "🔐" },
+    { path: "/", label: t("nav.dashboard"), icon: "📊" },
+    { path: "/customers", label: t("nav.customers"), icon: "👥" },
+    { path: "/quotations", label: t("nav.quotations"), icon: "📄" },
+    { path: "/invoices", label: t("nav.invoices"), icon: "🧾" },
+    { path: "/reports", label: t("nav.reports"), icon: "📈" },
+    { path: "/bank", label: t("nav.bank"), icon: "🏦" },
+    { path: "/users", label: t("nav.users"), icon: "👤" },
+    { path: "/roles", label: t("nav.roles"), icon: "🔐" },
   ];
 
   // Locale names mapping
