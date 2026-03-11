@@ -182,8 +182,10 @@ const zhHant: Dictionary = {
     netProfit: "淨利潤",
   },
   bank: {
-    title: "銀行對帳",
+    title: "銀行",
+    description: "管理您的銀行賬戶、對賬單和交易對帳",
     bankAccounts: "銀行帳戶",
+    statements: "對賬單",
     addAccount: "新增帳戶",
     editAccount: "編輯帳戶",
     accountName: "帳戶名稱",

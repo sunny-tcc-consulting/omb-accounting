@@ -67,16 +67,16 @@ export default function BankPage() {
   const tabs = [
     {
       value: "accounts",
-      label: t("bank.bankAccounts") + " " + t("bank.bankAccounts"),
+      label: t("bank.bankAccounts"),
     },
-    { value: "statements", label: "Statements" },
+    { value: "statements", label: t("bank.statements") },
     {
       value: "transactions",
-      label: t("bank.transactions") + " " + t("bank.transactions"),
+      label: t("bank.transactions"),
     },
     {
       value: "reconciliation",
-      label: t("bank.reconciliation") + " " + t("bank.reconciliation"),
+      label: t("bank.reconciliation"),
     },
   ];
 
@@ -84,13 +84,8 @@ export default function BankPage() {
     <div className="min-h-screen bg-gray-50 p-8">
       {/* Page Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
-          {t("bank.title")}{" "}
-          <span className="text-indigo-600">{t("bank.reconciliation")}</span>
-        </h1>
-        <p className="text-gray-600 mt-2">
-          Manage your bank accounts, statements, and reconcile transactions
-        </p>
+        <h1 className="text-2xl font-bold text-gray-900">{t("bank.title")}</h1>
+        <p className="text-gray-600 mt-2">{t("bank.description")}</p>
       </div>
 
       {/* Navigation Tabs */}

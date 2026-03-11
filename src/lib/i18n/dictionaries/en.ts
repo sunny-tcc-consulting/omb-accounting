@@ -183,8 +183,11 @@ const en: Dictionary = {
     netProfit: "Net Profit",
   },
   bank: {
-    title: "Bank Reconciliation",
+    title: "Bank",
+    description:
+      "Manage your bank accounts, statements, and reconcile transactions",
     bankAccounts: "Bank Accounts",
+    statements: "Statements",
     addAccount: "Add Account",
     editAccount: "Edit Account",
     accountName: "Account Name",
