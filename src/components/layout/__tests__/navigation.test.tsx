@@ -9,6 +9,29 @@ jest.mock("next/navigation", () => ({
   usePathname: jest.fn(),
 }));
 
+// Mock useTranslation hook
+jest.mock("@/hooks/useTranslation", () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      // Return translated text for testing
+      const translations: Record<string, string> = {
+        "nav.home": "Home",
+        "nav.dashboard": "Dashboard",
+        "nav.bank": "Bank Reconciliation",
+        "nav.reports": "Reports",
+        "nav.customers": "Customers",
+        "nav.quotations": "Quotations",
+        "nav.invoices": "Invoices",
+        "nav.settings": "Settings",
+        "nav.logout": "Logout",
+        "customers.newCustomer": "New Customer",
+      };
+      return translations[key] || key;
+    },
+    locale: "en",
+  }),
+}));
+
 // Import after mocking
 import { usePathname } from "next/navigation";
 
