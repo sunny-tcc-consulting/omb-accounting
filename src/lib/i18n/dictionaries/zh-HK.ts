@@ -26,6 +26,7 @@ const zhHant: Dictionary = {
     reset: "重設",
     retry: "重試",
     print: "列印",
+    selectDate: "選擇日期",
   },
   nav: {
     dashboard: "主頁",
@@ -167,6 +168,7 @@ const zhHant: Dictionary = {
     generalLedger: "總分類帳",
     cashFlow: "現金流量表",
     dateRange: "日期範圍",
+    dateRangeDescription: "自定義報告的日期範圍",
     startDate: "開始日期",
     endDate: "結束日期",
     generateReport: "產生報告",

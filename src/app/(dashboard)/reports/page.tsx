@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { ReportProvider, useReport } from "@/contexts/ReportContext";
+import { useTranslation } from "@/hooks/useTranslation";
 import {
   generateTrialBalance,
   generateBalanceSheet,
@@ -65,6 +66,7 @@ import {
 // =============================================================================
 
 export function ReportPageContent() {
+  const { t } = useTranslation();
   const { accounts, journalEntries } = useReport();
   const [selectedReport, setSelectedReport] = useState<string>("trial-balance");
   const [asOfDate, setAsOfDate] = useState<string>(
@@ -883,10 +885,10 @@ export function ReportPageContent() {
         <div className="flex items-center justify-between">
           <div>
             <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-              日期範圍
+              {t("reports.dateRange")}
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              自定義報告的日期範圍
+              {t("reports.dateRangeDescription")}
             </p>
           </div>
           <DateRangePicker

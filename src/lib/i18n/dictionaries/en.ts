@@ -26,6 +26,7 @@ const en: Dictionary = {
     reset: "Reset",
     retry: "Retry",
     print: "Print",
+    selectDate: "Select Date",
   },
   nav: {
     dashboard: "Dashboard",
@@ -168,6 +169,7 @@ const en: Dictionary = {
     generalLedger: "General Ledger",
     cashFlow: "Cash Flow Statement",
     dateRange: "Date Range",
+    dateRangeDescription: "Customize the date range for the report",
     startDate: "Start Date",
     endDate: "End Date",
     generateReport: "Generate Report",

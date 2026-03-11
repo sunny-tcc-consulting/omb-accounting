@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface DateRangePickerProps {
   startDate: Date | undefined;
@@ -26,12 +27,13 @@ export function DateRangePicker({
   onEndDateChange,
   className,
 }: DateRangePickerProps) {
+  const { t, locale } = useTranslation();
   const [startOpen, setStartOpen] = React.useState(false);
   const [endOpen, setEndOpen] = React.useState(false);
 
   const formatDate = (date: Date | undefined) => {
-    if (!date) return "選擇日期";
-    return date.toLocaleDateString("zh-CN", {
+    if (!date) return t("common.selectDate");
+    return date.toLocaleDateString(locale === "en" ? "en-US" : "zh-CN", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
