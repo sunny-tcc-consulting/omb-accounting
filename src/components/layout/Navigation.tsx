@@ -14,20 +14,24 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SkipLink } from "@/components/ui/skip-link";
+import { useTranslation } from "@/hooks/useTranslation";
 
-// 路由配置：用於生成麵包屑
-const routeConfig: Record<string, { label: string; parent?: string }> = {
-  "/": { label: "Home" },
-  "/dashboard": { label: "Analytics Dashboard", parent: "/" },
-  "/settings": { label: "Settings", parent: "/" },
-  "/bank": { label: "Bank Reconciliation", parent: "/" },
-  "/reports": { label: "Reports", parent: "/" },
-  "/customers": { label: "Customers", parent: "/" },
-  "/customers/new": { label: "New Customer", parent: "/customers" },
-  "/quotations": { label: "Quotations", parent: "/" },
-  "/quotations/new": { label: "New Quotation", parent: "/quotations" },
-  "/invoices": { label: "Invoices", parent: "/" },
-  "/invoices/new": { label: "New Invoice", parent: "/invoices" },
+// 路由配置：用於生成麵包屑（使用翻譯鍵）
+const routeConfig: Record<string, { labelKey: string; parent?: string }> = {
+  "/": { labelKey: "nav.home" },
+  "/dashboard": { labelKey: "nav.dashboard", parent: "/" },
+  "/settings": { labelKey: "nav.settings", parent: "/" },
+  "/bank": { labelKey: "nav.bank", parent: "/" },
+  "/reports": { labelKey: "nav.reports", parent: "/" },
+  "/customers": { labelKey: "nav.customers", parent: "/" },
+  "/customers/new": { labelKey: "customers.newCustomer", parent: "/customers" },
+  "/quotations": { labelKey: "nav.quotations", parent: "/" },
+  "/quotations/new": {
+    labelKey: "quotations.newQuotation",
+    parent: "/quotations",
+  },
+  "/invoices": { labelKey: "nav.invoices", parent: "/" },
+  "/invoices/new": { labelKey: "invoices.newInvoice", parent: "/invoices" },
 };
 
 interface BreadcrumbItem {
@@ -37,6 +41,7 @@ interface BreadcrumbItem {
 }
 
 export function Breadcrumb() {
+  const { t } = useTranslation();
   const pathname = usePathname();
   const [items, setItems] = useState<BreadcrumbItem[]>([]);
 
@@ -47,7 +52,7 @@ export function Breadcrumb() {
     // 添加首頁
     breadcrumbs.push({
       href: "/",
-      label: "Home",
+      label: t("nav.home"),
       isActive: pathname === "/",
     });
 
@@ -57,8 +62,9 @@ export function Breadcrumb() {
       currentPath += `/${segment}`;
       const isLast = index === pathSegments.length - 1;
       const config = routeConfig[currentPath];
-      const label =
-        config?.label || segment.charAt(0).toUpperCase() + segment.slice(1);
+      const label = config?.labelKey
+        ? t(config.labelKey)
+        : segment.charAt(0).toUpperCase() + segment.slice(1);
 
       breadcrumbs.push({
         href: currentPath,
@@ -70,7 +76,7 @@ export function Breadcrumb() {
     // 直接設置 items（這是 React 推薦的方式）
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setItems(breadcrumbs);
-  }, [pathname]);
+  }, [pathname, t]);
 
   if (items.length <= 1) return null;
 
@@ -108,19 +114,19 @@ export function Breadcrumb() {
 // 導航項目類型
 interface NavItem {
   href: string;
-  label: string;
+  labelKey: string;
   icon: React.ComponentType<{ className?: string }> | string;
   shortcut?: string;
 }
 
-const navItems: NavItem[] = [
-  { href: "/", label: "Dashboard", icon: Home },
-  { href: "/bank", label: "Bank Reconciliation", icon: "Receipt" },
-  { href: "/reports", label: "Reports", icon: "BarChart" },
-  { href: "/customers", label: "Customers", icon: "Users" },
-  { href: "/quotations", label: "Quotations", icon: "FileText" },
-  { href: "/invoices", label: "Invoices", icon: "FileText2" },
-  { href: "/settings", label: "Settings", icon: "Settings" },
+const navItemKeys: NavItem[] = [
+  { href: "/", labelKey: "nav.dashboard", icon: Home },
+  { href: "/bank", labelKey: "nav.bank", icon: "Receipt" },
+  { href: "/reports", labelKey: "nav.reports", icon: "BarChart" },
+  { href: "/customers", labelKey: "nav.customers", icon: "Users" },
+  { href: "/quotations", labelKey: "nav.quotations", icon: "FileText" },
+  { href: "/invoices", labelKey: "nav.invoices", icon: "FileText2" },
+  { href: "/settings", labelKey: "nav.settings", icon: "Settings" },
 ];
 
 // 圖標映射
@@ -189,6 +195,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
+  const { t } = useTranslation();
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -275,9 +282,10 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         role="navigation"
         aria-label="Main navigation"
       >
-        {navItems.map((item) => {
+        {navItemKeys.map((item) => {
           const Icon = iconMap[item.icon as string] || Home;
           const isActive = pathname === item.href;
+          const label = t(item.labelKey);
 
           return (
             <Link
@@ -291,12 +299,12 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                 isCollapsed && "justify-center px-2",
               )}
               aria-current={isActive ? "page" : undefined}
-              title={isCollapsed ? item.label : undefined}
+              title={isCollapsed ? label : undefined}
               tabIndex={0}
               onKeyDown={(e) => handleKeyDown(e, item.href)}
             >
               <Icon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
-              {!isCollapsed && <span>{item.label}</span>}
+              {!isCollapsed && <span>{label}</span>}
               {!isCollapsed && item.shortcut && (
                 <kbd
                   className="ml-auto text-xs text-gray-400 border border-gray-200 rounded px-1.5"

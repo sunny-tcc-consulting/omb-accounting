@@ -29,12 +29,13 @@ const en: Dictionary = {
     selectDate: "Select Date",
   },
   nav: {
+    home: "Home",
     dashboard: "Dashboard",
     customers: "Customers",
     quotations: "Quotations",
     invoices: "Invoices",
     reports: "Reports",
-    bank: "Bank",
+    bank: "Bank Reconciliation",
     users: "Users",
     settings: "Settings",
     logout: "Logout",
@@ -83,6 +84,7 @@ const en: Dictionary = {
   },
   customers: {
     title: "Customers",
+    newCustomer: "New Customer",
     addCustomer: "Add Customer",
     editCustomer: "Edit Customer",
     customerName: "Customer Name",
@@ -99,6 +101,8 @@ const en: Dictionary = {
   },
   quotations: {
     title: "Quotations",
+    quotationList: "Quotation List",
+    newQuotation: "New Quotation",
     createQuotation: "Create Quotation",
     editQuotation: "Edit Quotation",
     quotationNumber: "Quotation Number",
@@ -115,7 +119,6 @@ const en: Dictionary = {
     convertToInvoice: "Convert to Invoice",
     searchQuotations: "Search quotations...",
     noQuotations: "No quotations found",
-    quotationList: "Quotation List",
     quotationNotFound: "Quotation not found",
     convertedSuccessfully: "Successfully converted to invoice!",
     conversionFailed: "Conversion failed, please try again",
@@ -134,6 +137,8 @@ const en: Dictionary = {
   },
   invoices: {
     title: "Invoices",
+    invoiceList: "Invoice List",
+    newInvoice: "New Invoice",
     createInvoice: "Create Invoice",
     editInvoice: "Edit Invoice",
     invoiceNumber: "Invoice Number",
@@ -149,7 +154,6 @@ const en: Dictionary = {
     notes: "Notes",
     searchInvoices: "Search invoices...",
     noInvoices: "No invoices found",
-    invoiceList: "Invoice List",
     invoicePreview: "Invoice Preview",
     status: {
       draft: "Draft",
@@ -183,7 +187,7 @@ const en: Dictionary = {
     netProfit: "Net Profit",
   },
   bank: {
-    title: "Bank",
+    title: "Bank Reconciliation",
     description:
       "Manage your bank accounts, statements, and reconcile transactions",
     bankAccounts: "Bank Accounts",

@@ -29,12 +29,13 @@ const zhHant: Dictionary = {
     selectDate: "選擇日期",
   },
   nav: {
+    home: "主頁",
     dashboard: "主頁",
     customers: "客戶",
     quotations: "報價單",
     invoices: "發票",
     reports: "報告",
-    bank: "銀行",
+    bank: "銀行對帳",
     users: "用戶",
     settings: "設定",
     logout: "登出",
@@ -82,6 +83,7 @@ const zhHant: Dictionary = {
   },
   customers: {
     title: "客戶",
+    newCustomer: "新增客戶",
     addCustomer: "新增客戶",
     editCustomer: "編輯客戶",
     customerName: "客戶名稱",
@@ -182,7 +184,7 @@ const zhHant: Dictionary = {
     netProfit: "淨利潤",
   },
   bank: {
-    title: "銀行",
+    title: "銀行對帳",
     description: "管理您的銀行賬戶、對賬單和交易對帳",
     bankAccounts: "銀行帳戶",
     statements: "對賬單",
