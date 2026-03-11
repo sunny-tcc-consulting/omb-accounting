@@ -265,6 +265,11 @@ const zhHant: Dictionary = {
     security: "安全",
     changePassword: "更改密碼",
     twoFactor: "雙重認證",
+    appearance: "外觀",
+    appearanceSettings: "外觀設定",
+    integrations: "整合",
+    dataManagement: "資料管理",
+    quickLinks: "快速連結",
   },
   validation: {
     required: "此欄位為必填",

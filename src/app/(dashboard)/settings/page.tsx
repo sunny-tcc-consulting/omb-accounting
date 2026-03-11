@@ -84,9 +84,17 @@ export default function SettingsPage() {
                   }),
                   icon: "🔔",
                 },
-                { id: "appearance", label: "Appearance", icon: "🎨" },
-                { id: "integrations", label: "Integrations", icon: "🔗" },
-                { id: "data", label: "Data Management", icon: "💾" },
+                {
+                  id: "appearance",
+                  label: t("settings.appearance"),
+                  icon: "🎨",
+                },
+                {
+                  id: "integrations",
+                  label: t("settings.integrations"),
+                  icon: "🔗",
+                },
+                { id: "data", label: t("settings.dataManagement"), icon: "💾" },
               ].map((item) => (
                 <li key={item.id}>
                   <button
@@ -108,7 +116,9 @@ export default function SettingsPage() {
           {/* Quick Links */}
           <nav className="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="p-4 border-b border-gray-200">
-              <h3 className="font-medium text-gray-900">Quick Links</h3>
+              <h3 className="font-medium text-gray-900">
+                {t("settings.quickLinks")}
+              </h3>
             </div>
             <ul className="divide-y divide-gray-100">
               {navPages.map((page) => (
@@ -133,7 +143,7 @@ export default function SettingsPage() {
             {activeTab === "appearance" && (
               <div className="p-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-6">
-                  Appearance Settings
+                  {t("settings.appearanceSettings")}
                 </h2>
 
                 <div className="space-y-6">

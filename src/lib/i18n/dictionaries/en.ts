@@ -269,6 +269,11 @@ const en: Dictionary = {
     security: "Security",
     changePassword: "Change Password",
     twoFactor: "Two-Factor Authentication",
+    appearance: "Appearance",
+    appearanceSettings: "Appearance Settings",
+    integrations: "Integrations",
+    dataManagement: "Data Management",
+    quickLinks: "Quick Links",
   },
   validation: {
     required: "This field is required",

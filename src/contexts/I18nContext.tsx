@@ -50,17 +50,35 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Initialize locale from browser
+  // Initialize locale from browser (cookie > localStorage > browser)
   useEffect(() => {
+    // Try to get locale from cookie first
+    const getCookie = (name: string) => {
+      if (typeof document === "undefined") return null;
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(";").shift();
+      return null;
+    };
+
+    const cookieLocale = getCookie("locale") as Locale | null;
+    const storedLocale = localStorage.getItem("locale") as Locale | null;
     const browserLocale = getBrowserLocale();
-    setLocaleState(browserLocale);
-    loadDict(browserLocale);
+
+    const initialLocale = cookieLocale || storedLocale || browserLocale;
+    setLocaleState(initialLocale);
+    loadDict(initialLocale);
   }, [loadDict]);
 
-  // Persist locale to localStorage
+  // Persist locale to both cookie and localStorage
   const setLocale = useCallback(
     (newLocale: Locale) => {
       setLocaleState(newLocale);
+      // Save to cookie (30 days expiry)
+      if (typeof document !== "undefined") {
+        document.cookie = `locale=${newLocale}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Lax`;
+      }
+      // Save to localStorage as fallback
       localStorage.setItem("locale", newLocale);
       loadDict(newLocale);
     },
