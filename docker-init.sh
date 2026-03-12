@@ -145,9 +145,24 @@ fi
 build_image() {
     log_info "Building container image..."
     if [ "$CONTAINER_RUNTIME" = "docker" ]; then
-        docker build -t omb-accounting:latest .
+        # Build and tag all stages
+        docker build -t omb-accounting:latest \
+            --target production \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            .
+        # Also tag builder stage for database init
+        docker build -t omb-accounting:builder \
+            --target builder \
+            .
     else
-        podman build -t localhost/omb-accounting:latest .
+        # Build and tag all stages
+        podman build -t localhost/omb-accounting:latest \
+            --target production \
+            .
+        # Also tag builder stage for database init
+        podman build -t localhost/omb-accounting:builder \
+            --target builder \
+            .
     fi
 }
 
@@ -161,7 +176,7 @@ init_database() {
         podman network create omb-network 2>/dev/null || true
     fi
     
-    # Run initialization container
+    # Run initialization using builder image (has source code)
     local init_cmd=""
     if [ "$INIT_MODE" = "seed" ]; then
         init_cmd="require('./src/lib/database/migrations').runMigrations(); require('./src/lib/database/seed').seedDatabase();"
@@ -174,14 +189,14 @@ init_database() {
             -v omb-data:/app/data \
             -e DATABASE_PATH=/app/data/omb-accounting.db \
             -e INIT_MODE=$INIT_MODE \
-            omb-accounting:latest \
+            omb-accounting:builder \
             node -e "$init_cmd"
     else
         podman run --rm \
             -v omb-data:/app/data \
             -e DATABASE_PATH=/app/data/omb-accounting.db \
             -e INIT_MODE=$INIT_MODE \
-            localhost/omb-accounting:latest \
+            localhost/omb-accounting:builder \
             node -e "$init_cmd"
     fi
 }
