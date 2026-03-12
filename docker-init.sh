@@ -283,38 +283,16 @@ start_container() {
 }
 
 # Build the container image
-if [ "$USE_COMPOSE" = true ]; then
-    log_info "Building container image with $CONTAINER_RUNTIME compose..."
-    $COMPOSE_CMD build
-else
-    build_image
-fi
-
-# Initialize database
-if [ "$USE_COMPOSE" = true ]; then
-    log_info "Initializing database (mode: $INIT_MODE)..."
-    export INIT_MODE=$INIT_MODE
-    $COMPOSE_CMD --profile init up omb-init
-else
-    init_database
-fi
-
-# Start the application
-if [ "$USE_COMPOSE" = true ]; then
-    log_info "Starting omb-accounting..."
-    $COMPOSE_CMD up -d
-else
-    start_container
-fi
+log_info "Building container image..."
+build_image
 
 # Initialize database
 log_info "Initializing database (mode: $INIT_MODE)..."
-export INIT_MODE=$INIT_MODE
-$COMPOSE_CMD --profile init up omb-init
+init_database
 
 # Start the application
-log_info "Starting omb-accounting..."
-$COMPOSE_CMD up -d
+log_info "Starting omb-accounting container..."
+start_container
 
 # Wait for health check
 log_info "Waiting for application to be ready..."
