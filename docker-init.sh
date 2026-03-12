@@ -186,6 +186,7 @@ init_database() {
     
     if [ "$CONTAINER_RUNTIME" = "docker" ]; then
         docker run --rm \
+            --workdir /app \
             -v omb-data:/app/data \
             -e DATABASE_PATH=/app/data/omb-accounting.db \
             -e INIT_MODE=$INIT_MODE \
@@ -193,6 +194,7 @@ init_database() {
             node -e "$init_cmd"
     else
         podman run --rm \
+            --workdir /app \
             -v omb-data:/app/data \
             -e DATABASE_PATH=/app/data/omb-accounting.db \
             -e INIT_MODE=$INIT_MODE \
