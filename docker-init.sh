@@ -177,11 +177,10 @@ init_database() {
     fi
     
     # Run initialization using builder image (has source code)
-    local init_cmd=""
     if [ "$INIT_MODE" = "seed" ]; then
-        init_cmd="require('./src/lib/database/migrations').runMigrations(); require('./src/lib/database/seed').seedDatabase();"
+        local init_script="require('./src/lib/database/migrations').runMigrations(); require('./src/lib/database/seed').seedDatabase();"
     else
-        init_cmd="require('./src/lib/database/migrations').runMigrations();"
+        local init_script="require('./src/lib/database/migrations').runMigrations();"
     fi
     
     if [ "$CONTAINER_RUNTIME" = "docker" ]; then
@@ -191,15 +190,42 @@ init_database() {
             -e DATABASE_PATH=/app/data/omb-accounting.db \
             -e INIT_MODE=$INIT_MODE \
             omb-accounting:builder \
-            node -e "$init_cmd"
+            node -e "$init_script"
     else
-        # For podman, use sh -c to explicitly change directory
+        # For podman, create a temporary script file
+        local temp_script="/tmp/db-init-$$.js"
+        cat > "$temp_script" << 'EOF'
+const { runMigrations } = require('./src/lib/database/migrations');
+const { seedDatabase } = require('./src/lib/database/seed');
+
+const mode = process.env.INIT_MODE || 'empty';
+
+console.log('Initializing database (mode: ' + mode + ')...');
+
+runMigrations().then(() => {
+    console.log('Migrations complete');
+    if (mode === 'seed') {
+        return seedDatabase();
+    }
+}).then(() => {
+    console.log('Database initialization complete');
+    process.exit(0);
+}).catch((err) => {
+    console.error('Database initialization failed:', err);
+    process.exit(1);
+});
+EOF
+        
         podman run --rm \
+            --workdir /app \
             -v omb-data:/app/data \
+            -v "$temp_script:/tmp/db-init.js:ro" \
             -e DATABASE_PATH=/app/data/omb-accounting.db \
             -e INIT_MODE=$INIT_MODE \
             localhost/omb-accounting:builder \
-            sh -c "cd /app && node -e \"$init_cmd\""
+            node /tmp/db-init.js
+        
+        rm -f "$temp_script"
     fi
 }
 
