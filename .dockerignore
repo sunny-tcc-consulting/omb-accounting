@@ -1,0 +1,77 @@
+# Git
+.git
+.gitignore
+
+# Node
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Next.js
+.next
+out
+
+# Testing
+coverage
+.nyc_output
+*.log
+test-results
+playwright-report
+
+# Development
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+*.md
+!README.md
+
+# Scripts (not needed in production)
+scripts/*.sh
+deploy-local.sh
+stop-local.sh
+fix-*.js
+fix-*.py
+generate-screenshots.js
+take-*.ts
+take-*.js
+run-gui-tests.js
+qa-*.js
+
+# E2E tests
+e2e/
+playwright.config.ts
+
+# Spec-kit
+.specify/
+
+# QA
+qa-screenshots/
+qa-reports/
+logs/
+
+# Database (will be initialized in container)
+data/*.db
+data/*.db-journal
+
+# Temporary files
+*.tmp
+*.temp
+*.bak

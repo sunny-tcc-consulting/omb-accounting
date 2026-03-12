@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  omb-accounting:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: omb-accounting
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_PATH=/app/data/omb-accounting.db
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      - NEXT_PUBLIC_APP_VERSION=0.1.0
+    volumes:
+      # Persist SQLite database
+      - omb-data:/app/data
+      # Persist logs
+      - omb-logs:/app/logs
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    networks:
+      - omb-network
+
+  # Optional: Initialize database with seed data
+  omb-init:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: omb-accounting-init
+    environment:
+      - NODE_ENV=production
+      - DATABASE_PATH=/app/data/omb-accounting.db
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      - INIT_MODE=${INIT_MODE:-empty}  # empty or seed
+    volumes:
+      - omb-data:/app/data
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "Initializing database with mode: $$INIT_MODE"
+        if [ "$$INIT_MODE" = "seed" ]; then
+          node -e "require('./src/lib/database/migrations').runMigrations()"
+          node -e "require('./src/lib/database/seed').seedDatabase()"
+        else
+          node -e "require('./src/lib/database/migrations').runMigrations()"
+        fi
+        echo "Database initialization complete!"
+    depends_on:
+      - omb-accounting
+    networks:
+      - omb-network
+    profiles:
+      - init
+
+volumes:
+  omb-data:
+    driver: local
+  omb-logs:
+    driver: local
+
+networks:
+  omb-network:
+    driver: bridge
