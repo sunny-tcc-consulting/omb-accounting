@@ -192,39 +192,51 @@ init_database() {
             omb-accounting:builder \
             node -e "$init_script"
     else
-        # For podman, create a temporary script file
-        local temp_script="/tmp/db-init-$$.js"
-        cat > "$temp_script" << 'EOF'
-const { runMigrations } = require('/app/src/lib/database/migrations');
-const { seedDatabase } = require('/app/src/lib/database/seed');
-
-const mode = process.env.INIT_MODE || 'empty';
-
-console.log('Initializing database (mode: ' + mode + ')...');
-
-runMigrations().then(() => {
-    console.log('Migrations complete');
-    if (mode === 'seed') {
-        return seedDatabase();
-    }
-}).then(() => {
-    console.log('Database initialization complete');
-    process.exit(0);
-}).catch((err) => {
-    console.error('Database initialization failed:', err);
-    process.exit(1);
-});
-EOF
-        
-        podman run --rm \
-            -v omb-data:/app/data \
-            -v "$temp_script:/tmp/db-init.js:ro" \
-            -e DATABASE_PATH=/app/data/omb-accounting.db \
-            -e INIT_MODE=$INIT_MODE \
-            localhost/omb-accounting:builder \
-            node /tmp/db-init.js
-        
-        rm -f "$temp_script"
+        # For podman, run migrations using ts-node (since source is TypeScript)
+        if [ "$INIT_MODE" = "seed" ]; then
+            podman run --rm \
+                -v omb-data:/app/data \
+                -e DATABASE_PATH=/app/data/omb-accounting.db \
+                -e INIT_MODE=$INIT_MODE \
+                localhost/omb-accounting:builder \
+                npx ts-node -e "
+                const { runMigrations } = require('/app/src/lib/database/migrations');
+                const { seedDatabase } = require('/app/src/lib/database/seed');
+                
+                console.log('Initializing database (mode: seed)...');
+                
+                runMigrations().then(() => {
+                    console.log('Migrations complete');
+                    return seedDatabase();
+                }).then(() => {
+                    console.log('Database initialization complete');
+                    process.exit(0);
+                }).catch((err) => {
+                    console.error('Database initialization failed:', err);
+                    process.exit(1);
+                });
+                "
+        else
+            podman run --rm \
+                -v omb-data:/app/data \
+                -e DATABASE_PATH=/app/data/omb-accounting.db \
+                -e INIT_MODE=$INIT_MODE \
+                localhost/omb-accounting:builder \
+                npx ts-node -e "
+                const { runMigrations } = require('/app/src/lib/database/migrations');
+                
+                console.log('Initializing database (mode: empty)...');
+                
+                runMigrations().then(() => {
+                    console.log('Migrations complete');
+                    console.log('Database initialization complete');
+                    process.exit(0);
+                }).catch((err) => {
+                    console.error('Database initialization failed:', err);
+                    process.exit(1);
+                });
+                "
+        fi
     fi
 }
 
