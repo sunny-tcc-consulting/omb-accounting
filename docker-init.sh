@@ -195,8 +195,8 @@ init_database() {
         # For podman, create a temporary script file
         local temp_script="/tmp/db-init-$$.js"
         cat > "$temp_script" << 'EOF'
-const { runMigrations } = require('./src/lib/database/migrations');
-const { seedDatabase } = require('./src/lib/database/seed');
+const { runMigrations } = require('/app/src/lib/database/migrations');
+const { seedDatabase } = require('/app/src/lib/database/seed');
 
 const mode = process.env.INIT_MODE || 'empty';
 
@@ -217,7 +217,6 @@ runMigrations().then(() => {
 EOF
         
         podman run --rm \
-            --workdir /app \
             -v omb-data:/app/data \
             -v "$temp_script:/tmp/db-init.js:ro" \
             -e DATABASE_PATH=/app/data/omb-accounting.db \
