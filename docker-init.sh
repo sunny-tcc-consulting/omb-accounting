@@ -197,11 +197,19 @@ init_database() {
         cat > "$temp_script" << 'EOF'
 import { runMigrations } from '/app/src/lib/database/migrations';
 import { seedDatabase } from '/app/src/lib/database/seed';
+import { existsSync, unlinkSync } from 'fs';
 
 const mode = process.env.INIT_MODE || 'empty';
+const dbPath = process.env.DATABASE_PATH || '/app/data/omb-accounting.db';
 
 async function init() {
     console.log('Initializing database (mode: ' + mode + ')...');
+    
+    // Remove existing database file for clean start
+    if (existsSync(dbPath)) {
+        console.log('Removing existing database...');
+        unlinkSync(dbPath);
+    }
     
     await runMigrations();
     console.log('Migrations complete');
