@@ -255,24 +255,31 @@ start_container() {
     fi
     
     # Start container
-    local run_cmd="$CONTAINER_RUNTIME run -d"
-    run_cmd="$run_cmd --name omb-accounting"
-    run_cmd="$run_cmd -p 3000:3000"
-    run_cmd="$run_cmd -e NODE_ENV=production"
-    run_cmd="$run_cmd -e PORT=3000"
-    run_cmd="$run_cmd -e DATABASE_PATH=/app/data/omb-accounting.db"
-    run_cmd="$run_cmd -e JWT_SECRET=${JWT_SECRET:-change-this-secret}"
-    run_cmd="$run_cmd -v omb-data:/app/data"
-    run_cmd="$run_cmd -v omb-logs:/app/logs"
-    run_cmd="$run_cmd --restart unless-stopped"
-    
     if [ "$CONTAINER_RUNTIME" = "docker" ]; then
-        run_cmd="$run_cmd omb-accounting:latest"
+        docker run -d \
+            --name omb-accounting \
+            -p 3000:3000 \
+            -e NODE_ENV=production \
+            -e PORT=3000 \
+            -e DATABASE_PATH=/app/data/omb-accounting.db \
+            -e JWT_SECRET="${JWT_SECRET:-change-this-secret}" \
+            -v omb-data:/app/data \
+            -v omb-logs:/app/logs \
+            --restart unless-stopped \
+            omb-accounting:latest
     else
-        run_cmd="$run_cmd localhost/omb-accounting:latest"
+        podman run -d \
+            --name omb-accounting \
+            -p 3000:3000 \
+            -e NODE_ENV=production \
+            -e PORT=3000 \
+            -e DATABASE_PATH=/app/data/omb-accounting.db \
+            -e JWT_SECRET="${JWT_SECRET:-change-this-secret}" \
+            -v omb-data:/app/data \
+            -v omb-logs:/app/logs \
+            --restart unless-stopped \
+            localhost/omb-accounting:latest
     fi
-    
-    eval $run_cmd
 }
 
 # Build the container image
