@@ -1,9 +1,11 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Quotation, QuotationFilters, Invoice, QuotationItem } from '@/types';
-import { generateQuotations } from '@/lib/mock-data';
-import { convertQuotationToInvoice, validateQuotationForConversion } from '@/lib/quotation-utils';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { Quotation, QuotationFilters, Invoice } from "@/types";
+import {
+  convertQuotationToInvoice,
+  validateQuotationForConversion,
+} from "@/lib/quotation-utils";
 
 interface QuotationContextType {
   quotations: Quotation[];
@@ -12,14 +14,16 @@ interface QuotationContextType {
   updateQuotation: (id: string, updates: Partial<Quotation>) => void;
   deleteQuotation: (id: string) => void;
   getFilteredQuotations: (filters?: QuotationFilters) => Quotation[];
-  getFilteredCustomers: () => any[];
+  getFilteredCustomers: () => unknown[];
   getQuotationById: (id: string) => Quotation | undefined;
   generateQuotationNumber: () => string;
   convertToInvoice: (quotationId: string) => Invoice | undefined;
   refreshQuotations: () => void;
 }
 
-export const QuotationContext = createContext<QuotationContextType | undefined>(undefined);
+export const QuotationContext = createContext<QuotationContextType | undefined>(
+  undefined,
+);
 
 export function QuotationProvider({ children }: { children: React.ReactNode }) {
   const [quotations, setQuotations] = useState<Quotation[]>([]);
@@ -34,37 +38,21 @@ export function QuotationProvider({ children }: { children: React.ReactNode }) {
     }
   }, [initialized]);
 
-  const loadInitialData = () => {
+  const loadInitialData = async () => {
     setLoading(true);
     try {
-      // Load from localStorage first
-      const savedQuotations = typeof window !== 'undefined'
-        ? localStorage.getItem('quotations')
-        : null;
-
-      if (savedQuotations) {
-        const parsed = JSON.parse(savedQuotations);
-        setQuotations(parsed.map((q: any) => ({
-          ...q,
-          issuedDate: new Date(q.issuedDate),
-          validityPeriod: new Date(q.validityPeriod),
-          createdAt: new Date(q.createdAt),
-          updatedAt: new Date(q.updatedAt),
-        })));
+      // Fetch quotations from API
+      const response = await fetch("/api/quotations");
+      if (response.ok) {
+        const data = await response.json();
+        setQuotations(data.quotations || []);
       } else {
-        // Generate mock quotations if none exist
-        const newQuotations = generateQuotations(10);
-        setQuotations(newQuotations);
-        // Save to localStorage
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('quotations', JSON.stringify(newQuotations));
-        }
+        console.warn("Failed to fetch quotations from API, using empty list");
+        setQuotations([]);
       }
     } catch (error) {
-      console.error('Failed to load initial data:', error);
-      // Fallback to mock data on error
-      const newQuotations = generateQuotations(10);
-      setQuotations(newQuotations);
+      console.error("Failed to load quotations:", error);
+      setQuotations([]);
     } finally {
       setLoading(false);
     }
@@ -75,27 +63,27 @@ export function QuotationProvider({ children }: { children: React.ReactNode }) {
     setQuotations(updatedQuotations);
 
     // Save to localStorage
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       try {
-        localStorage.setItem('quotations', JSON.stringify(updatedQuotations));
+        localStorage.setItem("quotations", JSON.stringify(updatedQuotations));
       } catch (error) {
-        console.error('Failed to save to localStorage:', error);
+        console.error("Failed to save to localStorage:", error);
       }
     }
   };
 
   const updateQuotation = (id: string, updates: Partial<Quotation>) => {
     const updatedQuotations = quotations.map((q) =>
-      q.id === id ? { ...q, ...updates, updatedAt: new Date() } : q
+      q.id === id ? { ...q, ...updates, updatedAt: new Date() } : q,
     );
     setQuotations(updatedQuotations);
 
     // Save to localStorage
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       try {
-        localStorage.setItem('quotations', JSON.stringify(updatedQuotations));
+        localStorage.setItem("quotations", JSON.stringify(updatedQuotations));
       } catch (error) {
-        console.error('Failed to save to localStorage:', error);
+        console.error("Failed to save to localStorage:", error);
       }
     }
   };
@@ -105,11 +93,11 @@ export function QuotationProvider({ children }: { children: React.ReactNode }) {
     setQuotations(updatedQuotations);
 
     // Save to localStorage
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       try {
-        localStorage.setItem('quotations', JSON.stringify(updatedQuotations));
+        localStorage.setItem("quotations", JSON.stringify(updatedQuotations));
       } catch (error) {
-        console.error('Failed to save to localStorage:', error);
+        console.error("Failed to save to localStorage:", error);
       }
     }
   };
@@ -130,7 +118,7 @@ export function QuotationProvider({ children }: { children: React.ReactNode }) {
       filtered = filtered.filter(
         (q) =>
           q.customerName.toLowerCase().includes(search) ||
-          q.quotationNumber.toLowerCase().includes(search)
+          q.quotationNumber.toLowerCase().includes(search),
       );
     }
 
@@ -149,7 +137,7 @@ export function QuotationProvider({ children }: { children: React.ReactNode }) {
     let maxNumber = 0;
     quotations.forEach((q) => {
       // Format: QT-2025-00001
-      const parts = q.quotationNumber.split('-');
+      const parts = q.quotationNumber.split("-");
       if (parts.length === 3 && parseInt(parts[1]) === year) {
         const num = parseInt(parts[2]);
         if (num > maxNumber) {
@@ -159,27 +147,27 @@ export function QuotationProvider({ children }: { children: React.ReactNode }) {
     });
 
     const newNumber = maxNumber + 1;
-    return `QT-${year}-${String(newNumber).padStart(5, '0')}`;
+    return `QT-${year}-${String(newNumber).padStart(5, "0")}`;
   };
 
   const convertToInvoice = (quotationId: string): Invoice | undefined => {
     const quotation = quotations.find((q) => q.id === quotationId);
 
     if (!quotation) {
-      console.error('Quotation not found:', quotationId);
+      console.error("Quotation not found:", quotationId);
       return undefined;
     }
 
     // Validate quotation before conversion
     if (!validateQuotationForConversion(quotation)) {
-      console.error('Invalid quotation for conversion');
+      console.error("Invalid quotation for conversion");
       return undefined;
     }
 
     // Convert quotation to invoice
     const invoice = convertQuotationToInvoice(quotation);
 
-    console.log('Converted quotation to invoice:', invoice);
+    console.log("Converted quotation to invoice:", invoice);
     return invoice;
   };
 
@@ -217,7 +205,7 @@ export function QuotationProvider({ children }: { children: React.ReactNode }) {
 export function useQuotations() {
   const context = useContext(QuotationContext);
   if (!context) {
-    throw new Error('useQuotations must be used within a QuotationProvider');
+    throw new Error("useQuotations must be used within a QuotationProvider");
   }
   return context;
 }

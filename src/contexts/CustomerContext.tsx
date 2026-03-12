@@ -1,8 +1,7 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Customer, CustomerFilters } from '@/types';
-import { generateCustomers } from '@/lib/mock-data';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { Customer, CustomerFilters } from "@/types";
 
 interface CustomerContextType {
   customers: Customer[];
@@ -15,25 +14,34 @@ interface CustomerContextType {
   refreshCustomers: () => void;
 }
 
-export const CustomerContext = createContext<CustomerContextType | undefined>(undefined);
+export const CustomerContext = createContext<CustomerContextType | undefined>(
+  undefined,
+);
 
 export function CustomerProvider({ children }: { children: React.ReactNode }) {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Load initial data
+  // Load initial data from API
   useEffect(() => {
     loadInitialData();
   }, []);
 
-  const loadInitialData = () => {
+  const loadInitialData = async () => {
     setLoading(true);
     try {
-      // Generate mock customers
-      const newCustomers = generateCustomers(15);
-      setCustomers(newCustomers);
+      // Fetch customers from API
+      const response = await fetch("/api/customers");
+      if (response.ok) {
+        const data = await response.json();
+        setCustomers(data.customers || []);
+      } else {
+        console.warn("Failed to fetch customers from API, using empty list");
+        setCustomers([]);
+      }
     } catch (error) {
-      console.error('Failed to load initial data:', error);
+      console.error("Failed to load customers:", error);
+      setCustomers([]);
     } finally {
       setLoading(false);
     }
@@ -45,7 +53,7 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
 
   const updateCustomer = (id: string, updates: Partial<Customer>) => {
     setCustomers((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, ...updates } : c))
+      prev.map((c) => (c.id === id ? { ...c, ...updates } : c)),
     );
   };
 
@@ -62,7 +70,7 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
         (c) =>
           c.name.toLowerCase().includes(search) ||
           c.email.toLowerCase().includes(search) ||
-          c.company?.toLowerCase().includes(search)
+          c.company?.toLowerCase().includes(search),
       );
     }
 
@@ -102,7 +110,7 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
 export function useCustomers() {
   const context = useContext(CustomerContext);
   if (!context) {
-    throw new Error('useCustomers must be used within a CustomerProvider');
+    throw new Error("useCustomers must be used within a CustomerProvider");
   }
   return context;
 }
