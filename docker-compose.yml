@@ -1,3 +1,6 @@
+# Compatible with both Docker Compose and Podman Compose
+# Docker: docker compose up
+# Podman: podman-compose up
 version: '3.8'
 
 services:
