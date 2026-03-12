@@ -12,8 +12,8 @@ WORKDIR /app
 # Copy package files
 COPY package.json package-lock.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install production dependencies only (skip prepare scripts)
+RUN npm ci --only=production --ignore-scripts
 
 # ============================================
 # Stage 2: Builder
@@ -26,8 +26,8 @@ WORKDIR /app
 # Copy package files
 COPY package.json package-lock.json ./
 
-# Install all dependencies (including dev)
-RUN npm ci
+# Install all dependencies (skip prepare scripts)
+RUN npm ci --ignore-scripts
 
 # Copy source code
 COPY . .
