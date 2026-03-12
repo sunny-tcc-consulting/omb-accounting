@@ -192,7 +192,7 @@ init_database() {
             omb-accounting:builder \
             node -e "$init_script"
     else
-        # For podman, run migrations using ts-node with ESM support
+        # For podman, run migrations using tsx (TypeScript Execute) which has better ESM support
         local temp_script="/tmp/db-init-$$.ts"
         cat > "$temp_script" << 'EOF'
 import { runMigrations } from '/app/src/lib/database/migrations';
@@ -227,7 +227,7 @@ EOF
             -e DATABASE_PATH=/app/data/omb-accounting.db \
             -e INIT_MODE=$INIT_MODE \
             localhost/omb-accounting:builder \
-            npx ts-node --esm /tmp/db-init.ts
+            npx tsx /tmp/db-init.ts
         
         rm -f "$temp_script"
     fi
