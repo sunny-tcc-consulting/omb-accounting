@@ -10,6 +10,9 @@ The initialization script automatically detects your container runtime (Docker o
 
 # OR initialize with sample data
 ./docker-init.sh seed
+
+# Without compose (pure docker/podman commands)
+./docker-init.sh empty --no-compose
 ```
 
 ## Automatic Runtime Detection
@@ -18,18 +21,25 @@ The script will automatically:
 
 1. ✅ Check if **Docker** is running → use `docker compose`
 2. ✅ Check if **Podman** is running → use `podman-compose`
-3. ❌ Neither found → show installation instructions
+3. ⚠️ Compose not available → use pure `docker` or `podman` commands
+4. ❌ Neither found → show installation instructions
 
 ### Manual Override
 
 If you want to specify the runtime:
 
 ```bash
-# Force Docker
+# Force Docker with compose
 docker compose up
 
-# Force Podman
+# Force Podman with compose
 podman-compose up
+
+# Force pure Docker (no compose)
+./docker-init.sh empty --no-compose
+
+# Force pure Podman (no compose)
+./docker-init.sh seed --no-compose
 ```
 
 ## Access the Application
@@ -45,44 +55,58 @@ podman-compose up
 
 ## Common Commands
 
-### View Logs
+### With Compose (Recommended)
 
 ```bash
-# Docker
+# View logs
 docker compose logs -f
-
-# Podman
+# or
 podman-compose logs -f
-```
 
-### Stop Application
-
-```bash
-# Docker
+# Stop application
 docker compose down
-
-# Podman
+# or
 podman-compose down
-```
 
-### Restart
-
-```bash
-# Docker
+# Restart
 docker compose restart
-
-# Podman
+# or
 podman-compose restart
+
+# Reset everything
+docker compose down -v
+# or
+podman-compose down -v
 ```
 
-### Reset Everything
+### Pure Container Commands (No Compose)
 
 ```bash
-# Docker
-docker compose down -v
+# View logs
+docker logs -f omb-accounting
+# or
+podman logs -f omb-accounting
 
-# Podman
-podman-compose down -v
+# Stop application
+docker stop omb-accounting
+docker rm omb-accounting
+# or
+podman stop omb-accounting
+podman rm omb-accounting
+
+# Restart
+docker restart omb-accounting
+# or
+podman restart omb-accounting
+
+# Reset everything
+docker stop omb-accounting
+docker rm omb-accounting
+docker volume rm omb-data omb-logs
+# or
+podman stop omb-accounting
+podman rm omb-accounting
+podman volume rm omb-data omb-logs
 ```
 
 ## Installation
@@ -151,6 +175,16 @@ newgrp docker
 # Podman runs rootless by default, no special permissions needed
 ```
 
+### Compose Not Available
+
+If `docker compose` or `podman-compose` is not available, use the `--no-compose` flag:
+
+```bash
+./docker-init.sh empty --no-compose
+```
+
+This will use pure container commands instead of compose.
+
 ### Port Already in Use
 
 Edit `docker-compose.yml` and change the port mapping:
@@ -160,13 +194,19 @@ ports:
   - "8080:3000" # Use port 8080 instead of 3000
 ```
 
+Or with pure commands:
+
+```bash
+docker run -d -p 8080:3000 ...
+```
+
 ### Database Initialization Failed
 
 ```bash
 # Check logs
 docker compose logs omb-init
 # or
-podman-compose logs omb-init
+docker logs omb-accounting
 
 # Reinitialize
 ./docker-init.sh empty
@@ -181,7 +221,7 @@ curl http://localhost:3000/api/health
 # View application logs
 docker compose logs omb-accounting
 # or
-podman-compose logs omb-accounting
+docker logs -f omb-accounting
 ```
 
 ## Next Steps

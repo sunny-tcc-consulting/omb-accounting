@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # omb-accounting Docker/Podman Initialization Script
-# Usage: ./docker-init.sh [empty|seed]
+# Usage: ./docker-init.sh [empty|seed] [--no-compose]
 
 set -e
 
@@ -11,8 +11,25 @@ echo "==========================================="
 # Configuration
 COMPOSE_FILE="docker-compose.yml"
 INIT_MODE="${1:-empty}"  # Default to empty initialization
+USE_COMPOSE=true
 CONTAINER_RUNTIME=""
 COMPOSE_CMD=""
+
+# Parse arguments
+for arg in "$@"; do
+    case $arg in
+        --no-compose)
+            USE_COMPOSE=false
+            shift
+            ;;
+        empty|seed)
+            INIT_MODE="$arg"
+            shift
+            ;;
+        *)
+            ;;
+    esac
+done
 
 # Colors
 GREEN='\033[0;32m'
@@ -48,16 +65,18 @@ detect_runtime() {
             log_info "Docker daemon is running"
             CONTAINER_RUNTIME="docker"
             
-            # Check for docker compose (v2) or docker-compose (v1)
-            if docker compose version &> /dev/null 2>&1; then
-                COMPOSE_CMD="docker compose"
-                log_info "Using: docker compose"
-            elif command -v docker-compose &> /dev/null; then
-                COMPOSE_CMD="docker-compose"
-                log_info "Using: docker-compose"
-            else
-                log_error "Docker Compose is not installed. Please install Docker Compose."
-                exit 1
+            if [ "$USE_COMPOSE" = true ]; then
+                # Check for docker compose (v2) or docker-compose (v1)
+                if docker compose version &> /dev/null 2>&1; then
+                    COMPOSE_CMD="docker compose"
+                    log_info "Using: docker compose"
+                elif command -v docker-compose &> /dev/null; then
+                    COMPOSE_CMD="docker-compose"
+                    log_info "Using: docker-compose"
+                else
+                    log_warn "Docker Compose not found, will use pure docker commands"
+                    USE_COMPOSE=false
+                fi
             fi
             return 0
         else
@@ -71,16 +90,15 @@ detect_runtime() {
             log_info "Podman daemon is running"
             CONTAINER_RUNTIME="podman"
             
-            # Check for podman-compose
-            if command -v podman-compose &> /dev/null; then
-                COMPOSE_CMD="podman-compose"
-                log_info "Using: podman-compose"
-            else
-                log_error "podman-compose is not installed. Please install it:"
-                echo "   pip install podman-compose"
-                echo "   or: sudo dnf install podman-compose (Fedora/RHEL)"
-                echo "   or: sudo apt install podman-compose (Debian/Ubuntu)"
-                exit 1
+            if [ "$USE_COMPOSE" = true ]; then
+                # Check for podman-compose
+                if command -v podman-compose &> /dev/null; then
+                    COMPOSE_CMD="podman-compose"
+                    log_info "Using: podman-compose"
+                else
+                    log_warn "podman-compose not found, will use pure podman commands"
+                    USE_COMPOSE=false
+                fi
             fi
             return 0
         else
@@ -123,9 +141,117 @@ if [ -f .env.docker ]; then
     export $(grep -v '^#' .env.docker | xargs)
 fi
 
+# Container management functions for non-compose mode
+build_image() {
+    log_info "Building container image..."
+    if [ "$CONTAINER_RUNTIME" = "docker" ]; then
+        docker build -t omb-accounting:latest .
+    else
+        podman build -t localhost/omb-accounting:latest .
+    fi
+}
+
+init_database() {
+    log_info "Initializing database (mode: $INIT_MODE)..."
+    
+    # Create network if not exists
+    if [ "$CONTAINER_RUNTIME" = "docker" ]; then
+        docker network create omb-network 2>/dev/null || true
+    else
+        podman network create omb-network 2>/dev/null || true
+    fi
+    
+    # Run initialization container
+    local init_cmd=""
+    if [ "$INIT_MODE" = "seed" ]; then
+        init_cmd="require('./src/lib/database/migrations').runMigrations(); require('./src/lib/database/seed').seedDatabase();"
+    else
+        init_cmd="require('./src/lib/database/migrations').runMigrations();"
+    fi
+    
+    if [ "$CONTAINER_RUNTIME" = "docker" ]; then
+        docker run --rm \
+            -v omb-data:/app/data \
+            -e DATABASE_PATH=/app/data/omb-accounting.db \
+            -e INIT_MODE=$INIT_MODE \
+            omb-accounting:latest \
+            node -e "$init_cmd"
+    else
+        podman run --rm \
+            -v omb-data:/app/data \
+            -e DATABASE_PATH=/app/data/omb-accounting.db \
+            -e INIT_MODE=$INIT_MODE \
+            localhost/omb-accounting:latest \
+            node -e "$init_cmd"
+    fi
+}
+
+start_container() {
+    log_info "Starting omb-accounting container..."
+    
+    # Stop existing container if running
+    if [ "$CONTAINER_RUNTIME" = "docker" ]; then
+        docker stop omb-accounting 2>/dev/null || true
+        docker rm omb-accounting 2>/dev/null || true
+    else
+        podman stop omb-accounting 2>/dev/null || true
+        podman rm omb-accounting 2>/dev/null || true
+    fi
+    
+    # Create volumes if not exist
+    if [ "$CONTAINER_RUNTIME" = "docker" ]; then
+        docker volume create omb-data 2>/dev/null || true
+        docker volume create omb-logs 2>/dev/null || true
+    else
+        podman volume create omb-data 2>/dev/null || true
+        podman volume create omb-logs 2>/dev/null || true
+    fi
+    
+    # Start container
+    local run_cmd="$CONTAINER_RUNTIME run -d"
+    run_cmd="$run_cmd --name omb-accounting"
+    run_cmd="$run_cmd -p 3000:3000"
+    run_cmd="$run_cmd -e NODE_ENV=production"
+    run_cmd="$run_cmd -e PORT=3000"
+    run_cmd="$run_cmd -e DATABASE_PATH=/app/data/omb-accounting.db"
+    run_cmd="$run_cmd -e JWT_SECRET=${JWT_SECRET:-change-this-secret}"
+    run_cmd="$run_cmd -v omb-data:/app/data"
+    run_cmd="$run_cmd -v omb-logs:/app/logs"
+    run_cmd="$run_cmd --restart unless-stopped"
+    
+    if [ "$CONTAINER_RUNTIME" = "docker" ]; then
+        run_cmd="$run_cmd omb-accounting:latest"
+    else
+        run_cmd="$run_cmd localhost/omb-accounting:latest"
+    fi
+    
+    eval $run_cmd
+}
+
 # Build the container image
-log_info "Building container image with $CONTAINER_RUNTIME..."
-$COMPOSE_CMD build
+if [ "$USE_COMPOSE" = true ]; then
+    log_info "Building container image with $CONTAINER_RUNTIME compose..."
+    $COMPOSE_CMD build
+else
+    build_image
+fi
+
+# Initialize database
+if [ "$USE_COMPOSE" = true ]; then
+    log_info "Initializing database (mode: $INIT_MODE)..."
+    export INIT_MODE=$INIT_MODE
+    $COMPOSE_CMD --profile init up omb-init
+else
+    init_database
+fi
+
+# Start the application
+if [ "$USE_COMPOSE" = true ]; then
+    log_info "Starting omb-accounting..."
+    $COMPOSE_CMD up -d
+else
+    start_container
+fi
 
 # Initialize database
 log_info "Initializing database (mode: $INIT_MODE)..."
@@ -170,16 +296,37 @@ echo "📍 Access the application at:"
 echo "   http://localhost:3000"
 echo ""
 echo "🔧 Container runtime: $CONTAINER_RUNTIME"
-echo "📊 View logs:"
-echo "   $COMPOSE_CMD logs -f"
-echo ""
-echo "🛑 Stop the application:"
-echo "   $COMPOSE_CMD down"
-echo ""
-echo "🔄 Restart the application:"
-echo "   $COMPOSE_CMD restart"
-echo ""
-echo "🗑️  Reset (remove all data):"
-echo "   $COMPOSE_CMD down -v"
+if [ "$USE_COMPOSE" = true ]; then
+    echo "📊 Mode: Compose"
+    echo ""
+    echo "📊 View logs:"
+    echo "   $COMPOSE_CMD logs -f"
+    echo ""
+    echo "🛑 Stop the application:"
+    echo "   $COMPOSE_CMD down"
+    echo ""
+    echo "🔄 Restart the application:"
+    echo "   $COMPOSE_CMD restart"
+    echo ""
+    echo "🗑️  Reset (remove all data):"
+    echo "   $COMPOSE_CMD down -v"
+else
+    echo "📊 Mode: Pure $CONTAINER_RUNTIME (no compose)"
+    echo ""
+    echo "📊 View logs:"
+    echo "   $CONTAINER_RUNTIME logs -f omb-accounting"
+    echo ""
+    echo "🛑 Stop the application:"
+    echo "   $CONTAINER_RUNTIME stop omb-accounting"
+    echo "   $CONTAINER_RUNTIME rm omb-accounting"
+    echo ""
+    echo "🔄 Restart the application:"
+    echo "   $CONTAINER_RUNTIME restart omb-accounting"
+    echo ""
+    echo "🗑️  Reset (remove all data):"
+    echo "   $CONTAINER_RUNTIME stop omb-accounting"
+    echo "   $CONTAINER_RUNTIME rm omb-accounting"
+    echo "   $CONTAINER_RUNTIME volume rm omb-data omb-logs"
+fi
 echo ""
 echo "======================================="
