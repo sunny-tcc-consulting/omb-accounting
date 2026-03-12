@@ -193,13 +193,13 @@ init_database() {
             omb-accounting:builder \
             node -e "$init_cmd"
     else
+        # For podman, use sh -c to explicitly change directory
         podman run --rm \
-            --workdir /app \
             -v omb-data:/app/data \
             -e DATABASE_PATH=/app/data/omb-accounting.db \
             -e INIT_MODE=$INIT_MODE \
             localhost/omb-accounting:builder \
-            node -e "$init_cmd"
+            sh -c "cd /app && node -e \"$init_cmd\""
     fi
 }
 
