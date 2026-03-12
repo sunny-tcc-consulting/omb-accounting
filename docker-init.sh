@@ -211,7 +211,7 @@ init_database() {
                 }).then(() => {
                     console.log('Database initialization complete');
                     process.exit(0);
-                }).catch((err) => {
+                }).catch((err: any) => {
                     console.error('Database initialization failed:', err);
                     process.exit(1);
                 });
@@ -231,7 +231,7 @@ init_database() {
                     console.log('Migrations complete');
                     console.log('Database initialization complete');
                     process.exit(0);
-                }).catch((err) => {
+                }).catch((err: any) => {
                     console.error('Database initialization failed:', err);
                     process.exit(1);
                 });
