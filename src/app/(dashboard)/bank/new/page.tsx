@@ -31,7 +31,8 @@ export default function NewBankAccountPage() {
         router.push("/bank");
       } else {
         const error = await response.json();
-        alert("Failed to create account: " + error.error);
+        const errorMsg = error.error || error.details?.[0]?.message || "Unknown error";
+        alert("Failed to create account: " + errorMsg);
       }
     } catch (error) {
       console.error("Error creating account:", error);
@@ -58,7 +59,7 @@ export default function NewBankAccountPage() {
             onClick={() => router.back()}
             className="text-indigo-600 hover:text-indigo-800 mb-4"
           >
-            ← Back to Bank Accounts
+            {t("bank.backToBankAccounts")}
           </button>
           <h1 className="text-3xl font-bold text-gray-900">
             {t("bank.addAccount")}
@@ -72,7 +73,7 @@ export default function NewBankAccountPage() {
         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-6 space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Account Name *
+              {t("bank.accountNameLabel")} *
             </label>
             <input
               type="text"
@@ -81,13 +82,13 @@ export default function NewBankAccountPage() {
               onChange={handleChange}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="e.g., Business Checking"
+              placeholder={t("bank.accountNamePlaceholder")}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Account Number *
+              {t("bank.accountNumberLabel")} *
             </label>
             <input
               type="text"
@@ -96,13 +97,13 @@ export default function NewBankAccountPage() {
               onChange={handleChange}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="e.g., 123456789"
+              placeholder={t("bank.accountNumberPlaceholder")}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Bank Name
+              {t("bank.bankNameLabel")}
             </label>
             <input
               type="text"
@@ -110,14 +111,14 @@ export default function NewBankAccountPage() {
               value={formData.bank_name}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="e.g., HSBC"
+              placeholder={t("bank.bankNamePlaceholder")}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Opening Balance
+                {t("bank.openingBalanceLabel")}
               </label>
               <input
                 type="number"
@@ -131,7 +132,7 @@ export default function NewBankAccountPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Currency
+                {t("bank.currencyLabel")}
               </label>
               <select
                 name="currency"
@@ -152,14 +153,14 @@ export default function NewBankAccountPage() {
               disabled={loading}
               className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
             >
-              {loading ? "Creating..." : "Create Account"}
+              {loading ? t("bank.creating") : t("bank.createAccountLabel")}
             </button>
             <button
               type="button"
               onClick={() => router.back()}
               className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
             >
-              Cancel
+              {t("bank.cancelLabel")}
             </button>
           </div>
         </form>
