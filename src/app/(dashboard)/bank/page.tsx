@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslation } from "@/contexts/I18nContext";
 
 /**
@@ -9,6 +10,7 @@ import { useTranslation } from "@/contexts/I18nContext";
  */
 
 export default function BankPage() {
+  const router = useRouter();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<
     "accounts" | "statements" | "transactions" | "reconciliation"
@@ -93,7 +95,9 @@ export default function BankPage() {
 
       {/* Tab Content */}
       <div className="mt-6">
-        {activeTab === "accounts" && <AccountsTab accounts={accounts} />}
+        {activeTab === "accounts" && (
+          <AccountsTab accounts={accounts} onAddAccount={() => router.push("/bank/new")} />
+        )}
         {activeTab === "statements" && (
           <div className="p-8 bg-white rounded-lg border border-gray-200 text-center">
             <p className="text-gray-600">
@@ -125,6 +129,7 @@ export default function BankPage() {
 // Accounts Tab Component
 function AccountsTab({
   accounts,
+  onAddAccount,
 }: {
   accounts: {
     id: string;
@@ -133,12 +138,16 @@ function AccountsTab({
     balance: number;
     currency: string;
   }[];
+  onAddAccount: () => void;
 }) {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold text-gray-900">Bank Accounts</h2>
-        <button className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">
+        <button
+          onClick={onAddAccount}
+          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+        >
           + Add Bank Account
         </button>
       </div>
