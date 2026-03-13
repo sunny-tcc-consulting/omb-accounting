@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useMemo } from "react";
+import React, { createContext, useContext, useState } from "react";
 import {
   Account,
   JournalEntry,
@@ -12,15 +12,12 @@ import {
   ReportFilters,
 } from "@/types/report";
 import {
-  DEFAULT_CHART_OF_ACCOUNTS,
-  generateJournalEntries,
   generateTrialBalance,
   generateBalanceSheet,
   generateProfitAndLoss,
   generateAllGeneralLedgers,
   generateCashFlowStatement,
 } from "@/lib/report-generator";
-import { generateTransactions } from "@/lib/mock-data";
 import { Transaction } from "@/types";
 
 interface ReportContextType {
@@ -54,32 +51,55 @@ export const ReportContext = createContext<ReportContextType | undefined>(
 export function ReportProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<ReportFilters>({});
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
 
-  // Initialize accounts from default chart
-  const accounts: Account[] = useMemo(() => {
-    return DEFAULT_CHART_OF_ACCOUNTS.map((acc, index) => ({
-      code: acc.code,
-      name: acc.name,
-      type: acc.type,
-      category: acc.category,
-      isSubAccount: acc.isSubAccount,
-      parentAccountId: acc.parentAccountId,
-      id: `acc-${acc.code}`,
-      balance: Math.abs(Math.random() * 100000), // Mock balance
-      currency: "CNY",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }));
+  // Load data from API on mount
+  React.useEffect(() => {
+    loadData();
   }, []);
 
-  // Initialize transactions and generate journal entries
-  const transactions = useMemo(() => {
-    return generateTransactions(100);
-  }, []);
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      // Fetch accounts from API
+      const accountsRes = await fetch("/api/bank/accounts");
+      if (accountsRes.ok) {
+        const accountsData = await accountsRes.json();
+        // Convert API accounts to Report Accounts format
+        const reportAccounts: Account[] = (accountsData.accounts || []).map(
+          (acc: unknown) => ({
+            id: acc.id,
+            code: acc.account_number || `ACC-${acc.id}`,
+            name: acc.name,
+            type: "asset",
+            category: "bank",
+            isSubAccount: false,
+            balance: acc.balance || 0,
+            currency: acc.currency || "CNY",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          }),
+        );
+        setAccounts(reportAccounts);
+      } else {
+        setAccounts([]);
+      }
 
-  const journalEntries = useMemo(() => {
-    return generateJournalEntries(transactions);
-  }, [transactions]);
+      // Fetch journal entries from API (if available)
+      // For now, initialize as empty array
+      setJournalEntries([]);
+      setTransactions([]);
+    } catch (error) {
+      console.error("Failed to load report data:", error);
+      setAccounts([]);
+      setJournalEntries([]);
+      setTransactions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Report generation functions
   const generateTrialBalanceFn = (): TrialBalance => {
