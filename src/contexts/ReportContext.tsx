@@ -69,7 +69,7 @@ export function ReportProvider({ children }: { children: React.ReactNode }) {
         const accountsData = await accountsRes.json();
         // Convert API accounts to Report Accounts format
         const reportAccounts: Account[] = (accountsData.accounts || []).map(
-          (acc: unknown) => ({
+          (acc: any) => ({
             id: acc.id,
             code: acc.account_number || `ACC-${acc.id}`,
             name: acc.name,
