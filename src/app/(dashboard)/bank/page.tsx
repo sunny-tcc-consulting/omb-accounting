@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "@/contexts/I18nContext";
 
 /**
@@ -13,56 +13,37 @@ export default function BankPage() {
   const [activeTab, setActiveTab] = useState<
     "accounts" | "statements" | "transactions" | "reconciliation"
   >("accounts");
-  const [accounts] = useState([
-    {
-      id: "1",
-      name: "Business Account",
-      type: "Checking",
-      balance: 125000,
-      currency: "HKD",
-    },
-    {
-      id: "2",
-      name: "Savings Account",
-      type: "Savings",
-      balance: 50000,
-      currency: "HKD",
-    },
-  ]);
-  const [transactions] = useState([
-    {
-      id: "1",
-      date: "2026-02-20",
-      description: "Payment from Customer ABC",
-      amount: 15000,
-      type: "credit" as const,
-      is_reconciled: 1,
-    },
-    {
-      id: "2",
-      date: "2026-02-19",
-      description: "Office Supplies",
-      amount: -2500,
-      type: "debit" as const,
-      is_reconciled: 1,
-    },
-    {
-      id: "3",
-      date: "2026-02-18",
-      description: "Consulting Service",
-      amount: 35000,
-      type: "credit" as const,
-      is_reconciled: 0,
-    },
-    {
-      id: "4",
-      date: "2026-02-17",
-      description: "Software Subscription",
-      amount: -1200,
-      type: "debit" as const,
-      is_reconciled: 1,
-    },
-  ]);
+  const [accounts, setAccounts] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load data from API on mount
+  React.useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      // Fetch bank accounts from API
+      const accountsRes = await fetch('/api/bank/accounts');
+      if (accountsRes.ok) {
+        const data = await accountsRes.json();
+        setAccounts(data.data || []);
+      } else {
+        setAccounts([]);
+      }
+      
+      // For now, transactions will be empty (can be fetched from API later)
+      setTransactions([]);
+    } catch (error) {
+      console.error('Failed to load bank data:', error);
+      setAccounts([]);
+      setTransactions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const tabs = [
     {
