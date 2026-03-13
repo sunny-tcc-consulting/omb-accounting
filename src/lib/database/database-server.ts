@@ -37,6 +37,15 @@ export class DatabaseManagerImpl implements DatabaseInterface {
   public getDatabase(): DatabaseType {
     if (!this.db) {
       const dbPath = process.env.DATABASE_PATH || "data/omb-accounting.db";
+      
+      // Ensure directory exists
+      const path = require('path');
+      const fs = require('fs');
+      const dir = path.dirname(dbPath);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      
       this.db = new Database(dbPath);
     }
     return this.db;

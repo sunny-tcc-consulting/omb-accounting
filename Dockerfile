@@ -68,11 +68,11 @@ COPY --from=builder /app/package.json ./
 # Rebuild better-sqlite3 native bindings
 RUN npm rebuild better-sqlite3
 
-# Create data directory for SQLite
-RUN mkdir -p /app/data && chown -R nextjs:nodejs /app/data
+# Create data directory for SQLite (before switching to nextjs user)
+RUN mkdir -p /app/data && chmod 777 /app/data
 
 # Create logs directory
-RUN mkdir -p /app/logs && chown -R nextjs:nodejs /app/logs
+RUN mkdir -p /app/logs && chmod 777 /app/logs
 
 # Switch to non-root user
 USER nextjs
