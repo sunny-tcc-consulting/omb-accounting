@@ -36,7 +36,8 @@ export class DatabaseManagerImpl implements DatabaseInterface {
    */
   public getDatabase(): DatabaseType {
     if (!this.db) {
-      this.db = new Database("data/omb-accounting.db");
+      const dbPath = process.env.DATABASE_PATH || "data/omb-accounting.db";
+      this.db = new Database(dbPath);
     }
     return this.db;
   }
