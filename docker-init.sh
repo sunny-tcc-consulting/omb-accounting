@@ -169,6 +169,18 @@ build_image() {
 init_database() {
     log_info "Initializing database (mode: $INIT_MODE)..."
     
+    # For empty mode, remove existing volumes to ensure clean start
+    if [ "$INIT_MODE" = "empty" ]; then
+        log_info "Removing existing volumes for clean start..."
+        if [ "$CONTAINER_RUNTIME" = "docker" ]; then
+            docker volume rm omb-data 2>/dev/null || true
+            docker volume rm omb-logs 2>/dev/null || true
+        else
+            podman volume rm omb-data 2>/dev/null || true
+            podman volume rm omb-logs 2>/dev/null || true
+        fi
+    fi
+    
     # Create network if not exists
     if [ "$CONTAINER_RUNTIME" = "docker" ]; then
         docker network create omb-network 2>/dev/null || true
@@ -253,7 +265,7 @@ start_container() {
         podman rm omb-accounting 2>/dev/null || true
     fi
     
-    # Create volumes if not exist
+    # Create fresh volumes (already removed in empty mode, create for seed mode)
     if [ "$CONTAINER_RUNTIME" = "docker" ]; then
         docker volume create omb-data 2>/dev/null || true
         docker volume create omb-logs 2>/dev/null || true
