@@ -43,7 +43,7 @@ export class DatabaseManagerImpl implements DatabaseInterface {
       console.log('[DATABASE] Using dbPath:', dbPath);
       console.log('[DATABASE] Current working directory:', process.cwd());
       
-      // Ensure directory exists
+      // Ensure directory exists using Node.js path module
       const path = require('path');
       const fs = require('fs');
       const dir = path.dirname(dbPath);
@@ -54,7 +54,7 @@ export class DatabaseManagerImpl implements DatabaseInterface {
       if (!fs.existsSync(dir)) {
         console.log('[DATABASE] Creating directory:', dir);
         try {
-          fs.mkdirSync(dir, { recursive: true });
+          fs.mkdirSync(dir, { recursive: true, mode: 0o755 });
           console.log('[DATABASE] Directory created successfully');
         } catch (err) {
           console.error('[DATABASE] Failed to create directory:', err);
@@ -71,15 +71,25 @@ export class DatabaseManagerImpl implements DatabaseInterface {
       }
       
       console.log('[DATABASE] Opening database connection...');
+      console.log('[DATABASE] Database constructor:', typeof Database);
+      console.log('[DATABASE] Database constructor name:', Database.name);
+      
       try {
         this.db = new Database(dbPath);
         console.log('[DATABASE] Database opened successfully!');
+        console.log('[DATABASE] Database object:', this.db);
+        console.log('[DATABASE] Database type:', typeof this.db);
+        console.log('[DATABASE] Database has run method:', typeof (this.db as any).run);
+        console.log('[DATABASE] Database has get method:', typeof (this.db as any).get);
         console.log('[DATABASE] Database file exists:', fs.existsSync(dbPath));
       } catch (err) {
         console.error('[DATABASE] Failed to open database:', err);
+        console.error('[DATABASE] Error stack:', (err as Error).stack);
         throw err;
       }
     }
+    console.log('[DATABASE] Returning database instance');
+    console.log('[DATABASE] Database has run:', typeof (this.db as any).run);
     return this.db;
   }
 

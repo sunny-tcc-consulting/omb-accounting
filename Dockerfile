@@ -68,6 +68,10 @@ COPY --from=builder /app/package.json ./
 # Rebuild better-sqlite3 native bindings
 RUN npm rebuild better-sqlite3
 
+# Copy startup script
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
+
 # Create data and logs directories with correct ownership
 # Must be done BEFORE switching to nextjs user
 RUN mkdir -p /app/data /app/logs && \
@@ -87,5 +91,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-# Start the application
-CMD ["node", "server.js"]
+# Start the application using startup script
+CMD ["/app/start.sh"]
