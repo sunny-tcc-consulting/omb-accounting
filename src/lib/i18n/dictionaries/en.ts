@@ -215,6 +215,8 @@ const en: Dictionary = {
     accountNamePlaceholder: "e.g., Business Checking",
     accountNumberPlaceholder: "e.g., 123456789",
     bankNamePlaceholder: "e.g., HSBC",
+    statementsFeature: "Statements feature - Upload and view bank statements",
+    reconciliationFeature: "Reconciliation feature - Match bank transactions with your records",
     matched: "Matched",
     unmatched: "Unmatched",
     pending: "Pending",

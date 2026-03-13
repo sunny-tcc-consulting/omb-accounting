@@ -211,6 +211,8 @@ const zhHant: Dictionary = {
     accountNamePlaceholder: "例如：商業往來賬戶",
     accountNumberPlaceholder: "例如：123456789",
     bankNamePlaceholder: "例如：匯豐銀行",
+    statementsFeature: "對賬單功能 - 上傳和查看銀行對賬單",
+    reconciliationFeature: "對帳功能 - 匹配銀行交易與您的記錄",
     matched: "已匹配",
     unmatched: "未匹配",
     pending: "待處理",

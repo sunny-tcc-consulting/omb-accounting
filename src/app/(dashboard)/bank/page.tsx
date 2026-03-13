@@ -96,12 +96,17 @@ export default function BankPage() {
       {/* Tab Content */}
       <div className="mt-6">
         {activeTab === "accounts" && (
-          <AccountsTab accounts={accounts} onAddAccount={() => router.push("/bank/new")} />
+          <AccountsTab
+            accounts={accounts}
+            onAddAccount={() => router.push("/bank/new")}
+            title={t("bank.bankAccounts")}
+            addButtonLabel={t("bank.addAccount")}
+          />
         )}
         {activeTab === "statements" && (
           <div className="p-8 bg-white rounded-lg border border-gray-200 text-center">
             <p className="text-gray-600">
-              Statements feature - Upload and view bank statements
+              {t("bank.statementsFeature")}
             </p>
             <button className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
               Upload Statement
@@ -114,7 +119,7 @@ export default function BankPage() {
         {activeTab === "reconciliation" && (
           <div className="p-8 bg-white rounded-lg border border-gray-200 text-center">
             <p className="text-gray-600">
-              Reconciliation feature - Match bank transactions with your records
+              {t("bank.reconciliationFeature")}
             </p>
             <button className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
               Start Reconciliation
@@ -130,6 +135,8 @@ export default function BankPage() {
 function AccountsTab({
   accounts,
   onAddAccount,
+  title,
+  addButtonLabel,
 }: {
   accounts: {
     id: string;
@@ -139,16 +146,18 @@ function AccountsTab({
     currency: string;
   }[];
   onAddAccount: () => void;
+  title: string;
+  addButtonLabel: string;
 }) {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-gray-900">Bank Accounts</h2>
+        <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
         <button
           onClick={onAddAccount}
           className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
         >
-          + Add Bank Account
+          + {addButtonLabel}
         </button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

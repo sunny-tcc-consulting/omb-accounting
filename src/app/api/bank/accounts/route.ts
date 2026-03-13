@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to create bank account",
+        error: error instanceof Error ? error.message : "Failed to create bank account",
       },
       { status: 500 },
     );
