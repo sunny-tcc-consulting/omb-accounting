@@ -41,7 +41,7 @@ RUN npm run build
 FROM node:20-alpine AS production
 
 # Install runtime dependencies for better-sqlite3
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat python3 make g++
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs
@@ -64,6 +64,9 @@ COPY --from=deps /app/node_modules ./node_modules
 
 # Copy package.json for version info
 COPY --from=builder /app/package.json ./
+
+# Rebuild better-sqlite3 native bindings
+RUN npm rebuild better-sqlite3
 
 # Create data directory for SQLite
 RUN mkdir -p /app/data && chown -R nextjs:nodejs /app/data
