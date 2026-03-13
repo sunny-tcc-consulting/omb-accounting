@@ -38,15 +38,47 @@ export class DatabaseManagerImpl implements DatabaseInterface {
     if (!this.db) {
       const dbPath = process.env.DATABASE_PATH || "data/omb-accounting.db";
       
+      console.log('[DATABASE] Initializing database...');
+      console.log('[DATABASE] DATABASE_PATH env:', process.env.DATABASE_PATH);
+      console.log('[DATABASE] Using dbPath:', dbPath);
+      console.log('[DATABASE] Current working directory:', process.cwd());
+      
       // Ensure directory exists
       const path = require('path');
       const fs = require('fs');
       const dir = path.dirname(dbPath);
+      
+      console.log('[DATABASE] Checking directory:', dir);
+      console.log('[DATABASE] Directory exists:', fs.existsSync(dir));
+      
       if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
+        console.log('[DATABASE] Creating directory:', dir);
+        try {
+          fs.mkdirSync(dir, { recursive: true });
+          console.log('[DATABASE] Directory created successfully');
+        } catch (err) {
+          console.error('[DATABASE] Failed to create directory:', err);
+          throw new Error(`Failed to create database directory: ${dir}`);
+        }
       }
       
-      this.db = new Database(dbPath);
+      // Check permissions
+      try {
+        fs.accessSync(dir, fs.constants.R_OK | fs.constants.W_OK);
+        console.log('[DATABASE] Directory permissions OK');
+      } catch (err) {
+        console.error('[DATABASE] No read/write permissions:', err);
+      }
+      
+      console.log('[DATABASE] Opening database connection...');
+      try {
+        this.db = new Database(dbPath);
+        console.log('[DATABASE] Database opened successfully!');
+        console.log('[DATABASE] Database file exists:', fs.existsSync(dbPath));
+      } catch (err) {
+        console.error('[DATABASE] Failed to open database:', err);
+        throw err;
+      }
     }
     return this.db;
   }
